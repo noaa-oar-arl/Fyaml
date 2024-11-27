@@ -1,0 +1,257 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="A modern lightweight Fortran YAML parser">
+    <meta name="author" content="Barry Baker" >
+    <link rel="icon" href="./favicon.png">
+
+    <title> Fyaml </title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link href="./css/pygments.css" rel="stylesheet">
+    <link href="./css/font-awesome.min.css" rel="stylesheet">
+    <link href="./css/local.css" rel="stylesheet">
+      <link  href="./tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="./js/svg-pan-zoom.min.js"></script>
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+          <a class="navbar-brand" href="./index.html">Fyaml <small>0.1.0</small></a>
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="page/index.html">Fyaml</a></li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="./lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="./lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="./lists/procedures.html">Procedures</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="./lists/types.html">Derived Types</a>
+                </li>
+            </ul>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="./search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+    </div>
+
+    <div class="container">
+  <!-- Main component for a primary marketing message or call to action -->
+    <div class="p-5 mb-4 bg-light border rounded-3" id="jumbotron">
+      <p>A modern lightweight Fortran YAML parser</p>
+        <p> Find us on&hellip;</p>
+      <p>
+        <a class="btn btn-lg btn-primary" href="https://github.com/bbakernoaa/Fyaml" role="button">GitHub</a>
+        
+        
+        
+        <a class="btn btn-lg btn-primary" href="https://github.com" role="button">The Web</a>
+      </p>
+    </div>
+
+      <div class="row" id='text'>
+        <div class=col-md-8>
+          <h1>Fyaml</h1>
+          <h1>Fyaml - A Modern Fortran YAML Parser</h1>
+<p>A lightweight YAML parser written in modern Fortran that supports nested structures, sequences, and various data types. Designed for scientific computing applications needing configuration file support.</p>
+<h2>Features</h2>
+<ul>
+<li>Parse YAML files into native Fortran data structures</li>
+<li>Support for strings, integers, floats, booleans, and null values</li>
+<li>Handle nested mappings and sequences</li>
+<li>Comment parsing</li>
+<li>Debug logging with configurable levels</li>
+<li>Dot notation access for nested values</li>
+<li>Memory safe with pointer management</li>
+</ul>
+<h2>Requirements</h2>
+<ul>
+<li>Fortran 2008 compliant compiler (gfortran 8.0+ or ifort 19.0+)</li>
+<li>CMake 3.12+</li>
+</ul>
+<h2>Installation</h2>
+<div class="codehilite"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/yourusername/fyaml.git
+<span class="nb">cd</span><span class="w"> </span>fyaml
+mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>..
+make
+make<span class="w"> </span>install
+</code></pre></div>
+
+<h2>Usage</h2>
+<p>1) Create a YAML configuration file:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">database</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">localhost</span>
+<span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5432</span>
+<span class="w">  </span><span class="nt">credentials</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admin</span>
+<span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secret</span>
+</code></pre></div>
+
+<p>2) Parse it in your Fortran code:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">program </span><span class="n">example</span>
+<span class="w">    </span><span class="k">use </span><span class="n">fyaml</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">fyaml_doc</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">doc</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">yaml_value</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">val</span>
+
+<span class="w">    </span><span class="k">call </span><span class="n">doc</span><span class="p">%</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">doc</span><span class="p">%</span><span class="n">root</span><span class="p">%</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;database.host&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="k">print</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Host:&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">val</span><span class="p">%</span><span class="n">str_val</span>
+<span class="k">end program</span>
+</code></pre></div>
+
+<h2>Project Structure</h2>
+<div class="codehilite"><pre><span></span><code><span class="p">.</span>
+<span class="err">├──</span><span class="w"> </span><span class="nx">CMakeLists</span><span class="p">.</span><span class="nx">txt</span>
+<span class="err">├──</span><span class="w"> </span><span class="nx">src</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">yaml_types</span><span class="p">.</span><span class="nx">f90</span><span class="w">    </span><span class="p">!</span><span class="w"> </span><span class="nx">Core</span><span class="w"> </span><span class="k">type</span><span class="w"> </span><span class="nx">definitions</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">yaml_parser</span><span class="p">.</span><span class="nx">f90</span><span class="w">   </span><span class="p">!</span><span class="w"> </span><span class="nx">YAML</span><span class="w"> </span><span class="nx">parsing</span><span class="w"> </span><span class="nx">implementation</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="nx">fyaml</span><span class="p">.</span><span class="nx">f90</span><span class="w">         </span><span class="p">!</span><span class="w"> </span><span class="nx">High</span><span class="o">-</span><span class="nx">level</span><span class="w"> </span><span class="kd">interface</span>
+<span class="err">├──</span><span class="w"> </span><span class="nx">tests</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="nx">test_example</span><span class="p">.</span><span class="nx">yaml</span>
+<span class="err">└──</span><span class="w"> </span><span class="nx">example</span><span class="o">/</span>
+<span class="w">    </span><span class="err">├──</span><span class="w"> </span><span class="nx">example</span><span class="p">.</span><span class="nx">yaml</span>
+<span class="w">    </span><span class="err">└──</span><span class="w"> </span><span class="nx">yaml_example</span><span class="p">.</span><span class="nx">f90</span>
+</code></pre></div>
+
+<h2>Testing</h2>
+<div class="codehilite"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>build
+ctest<span class="w"> </span>--output-on-failure
+</code></pre></div>
+
+<h2>Documentation</h2>
+<p>Documentation is generated using FORD. To build:</p>
+<div class="codehilite"><pre><span></span><code>ford<span class="w"> </span>.ford
+</code></pre></div>
+
+<h2>License</h2>
+<p>GNU General Public License v3.0</p>
+<h2>Contributing</h2>
+<p>Contributions welcome! Please read CONTRIBUTING.md for guidelines.</p>
+        </div>
+          <div class="col-md-4">
+            <div class="card card-body bg-light">
+              <h2 class="card-title">Developer Info</h2>
+              <h4 class="card-text">Barry Baker</h4>
+              <p class="card-text"></p>
+            </div>
+          </div>
+      </div>
+        <div class="row">
+          <hr>
+          <div class="col-xs-6 col-sm-3">
+            <div>
+              <h3>Source Files</h3>
+              <ul><li><a href='sourcefile/fyaml.f90.html'>fyaml.F90</a></li><li><a href='sourcefile/yaml_parser.f90.html'>yaml_parser.F90</a></li><li><a href='sourcefile/yaml_types.f90.html'>yaml_types.F90</a></li></ul>
+            </div>
+            <div>
+              <ul>
+                <li><a href="./lists/files.html"><em>All source files&hellip;</em></a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-xs-6 col-sm-3">
+            <div>
+              <h3>Modules</h3>
+              <ul><li><a href='module/fyaml.html'>fyaml</a></li><li><a href='module/yaml_parser.html'>yaml_parser</a></li><li><a href='module/yaml_types.html'>yaml_types</a></li></ul>
+            </div>
+            <div>
+              <ul>
+                <li><a href="./lists/modules.html"><em>All modules&hellip;</em></a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-xs-6 col-sm-3">
+            <div>
+              <h3>Procedures</h3>
+              <ul><li><a href='proc/count_leading_spaces.html'>count_leading_spaces</a></li><li><a href='proc/debug_print.html'>debug_print</a></li><li><a href='proc/determine_value_type.html'>determine_value_type</a></li><li><a href='proc/initialize_document.html'>initialize_document</a></li><li><a href='proc/initialize_node.html'>initialize_node</a></li></ul>
+            </div>
+            <div>
+              <ul>
+                <li><a href="./lists/procedures.html"><em>All procedures&hellip;</em></a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-xs-6 col-sm-3">
+            <div>
+              <h3>Derived Types</h3>
+              <ul><li><a href='type/fyaml_doc.html'>fyaml_doc</a></li><li><a href='type/yaml_dict.html'>yaml_dict</a></li><li><a href='type/yaml_document.html'>yaml_document</a></li><li><a href='type/yaml_error.html'>yaml_error</a></li><li><a href='type/yaml_node.html'>yaml_node</a></li></ul>
+            </div>
+            <div>
+              <ul>
+                <li><a href="./lists/types.html"><em>All derived types&hellip;</em></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      <hr>
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+        <div class="row justify-content-between">
+          <div class="col">
+            <p>
+              Fyaml
+ was developed by Barry Baker<br>              &copy; 2024 gdfl
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2024-11-27 16:08 +0000             </p>
+          </div>
+        </div>
+        <br>
+      </div> <!-- /container -->
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
+
+    <!-- MathJax JavaScript
+             ================================================== -->
+             <!-- Placed at the end of the document so the pages load faster -->
+        <script type="text/x-mathjax-config">
+          MathJax.Hub.Config({
+          TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+          jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+          extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+          });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+          <script src="./tipuesearch/tipuesearch_content.js"></script>
+          <script src="./tipuesearch/tipuesearch_set.js"></script>
+          <script src="./tipuesearch/tipuesearch.js"></script>
+
+  </body>
+</html>

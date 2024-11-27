@@ -1,0 +1,574 @@
+<!-- -*- mode: jinja2 -*- -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="A modern lightweight Fortran YAML parser">
+    <meta name="author" content="Barry Baker" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>fyaml_doc &ndash; Fyaml </title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+      <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+          <a class="navbar-brand" href="../index.html">Fyaml <small>0.1.0</small></a>
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="../page/index.html">Fyaml</a></li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/types.html">Derived Types</a>
+                </li>
+            </ul>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+    </div>
+
+    <div class="container">
+  <div class="row">
+    <h1>fyaml_doc
+      <small>Derived Type</small>
+      
+    </h1>
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
+        <ul class="list-inline" style="margin-bottom:0px;display:inline">
+            <li class="list-inline-item" id="meta-license"><i class="fa fa-legal"></i> gdfl</li>
+
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                 title="<p> 8.6% of total for derived types.</p>Including implementation: 30 statements, 17.8% of total for derived types.">5 statements</a>
+            </li>
+
+            <li class="list-inline-item" id="source-file">
+              <i class="fa fa-code"></i>
+              <a href="../src/fyaml.F90"> Source File</a>
+            </li>
+        </ul>
+      </div>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='../sourcefile/fyaml.f90.html'>fyaml.F90</a></li>
+                <li class="breadcrumb-item"><a href='../module/fyaml.html'>fyaml</a></li>
+            <li class="breadcrumb-item active" aria-current="page">fyaml_doc</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <script>
+    $(function () {
+    $('[data-bs-toggle="tooltip"]').tooltip()
+    })
+  </script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+      <div id="sidebar">
+      <h3>Contents</h3>
+  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#vars-0"
+         aria-expanded="false" aria-controls="vars-0">
+         <h4 class="card-header bg-primary text-white">Variables</h4>
+      </a>
+      <div id="vars-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../type/fyaml_doc.html#variable-root~2">root</a>
+        </div>
+      </div>
+    </div>
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#boundprocs-0"
+         aria-expanded="false" aria-controls="boundprocs-0">
+         <h4 class="card-header bg-primary text-white">Type-Bound Procedures</h4>
+      </a>
+      <div id="boundprocs-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../type/fyaml_doc.html#boundprocedure-load">load</a>
+        </div>
+      </div>
+    </div>
+
+  
+  
+
+
+  </div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+      <h2 id="type-def-statement">
+        type, public :: fyaml_doc</h2>
+    <p>YAML document container</p>
+<br>      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Inherits</h3>
+        </div>
+        <div class="card-body">
+          <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~fyaml_doc~~InheritsGraph Pages: 1 -->
+<svg id="typefyaml_docInheritsGraph" width="466pt" height="84pt"
+ viewBox="0.00 0.00 466.00 84.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~fyaml_doc~~InheritsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 80)">
+<title>type~~fyaml_doc~~InheritsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-80 462,-80 462,4 -4,4"/>
+<!-- type~fyaml_doc -->
+<g id="type~~fyaml_doc~~InheritsGraph_node1" class="node">
+<title>type~fyaml_doc</title>
+<polygon fill="none" stroke="black" points="458,-41 391,-41 391,-17 458,-17 458,-41"/>
+<text text-anchor="middle" x="424.5" y="-26.6" font-family="Helvetica,sans-Serif" font-size="10.50">fyaml_doc</text>
+</g>
+<!-- type~yaml_dict -->
+<g id="type~~fyaml_doc~~InheritsGraph_node2" class="node">
+<title>type~yaml_dict</title>
+<g id="a_type~~fyaml_doc~~InheritsGraph_node2"><a xlink:href="../type/yaml_dict.html" xlink:title="yaml_dict">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="335,-41 271,-41 271,-17 335,-17 335,-41"/>
+<text text-anchor="middle" x="303" y="-26.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">yaml_dict</text>
+</a>
+</g>
+</g>
+<!-- type~fyaml_doc&#45;&gt;type~yaml_dict -->
+<g id="type~~fyaml_doc~~InheritsGraph_edge1" class="edge">
+<title>type~fyaml_doc&#45;&gt;type~yaml_dict</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M390.85,-29C376.94,-29 360.56,-29 345.79,-29"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="345.38,-25.5 335.38,-29 345.38,-32.5 345.38,-25.5"/>
+<text text-anchor="middle" x="363" y="-31.4" font-family="Helvetica,sans-Serif" font-size="9.50">root</text>
+</g>
+<!-- type~yaml_pair -->
+<g id="type~~fyaml_doc~~InheritsGraph_node3" class="node">
+<title>type~yaml_pair</title>
+<g id="a_type~~fyaml_doc~~InheritsGraph_node3"><a xlink:href="../type/yaml_pair.html" xlink:title="yaml_pair">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="201,-48 136,-48 136,-24 201,-24 201,-48"/>
+<text text-anchor="middle" x="168.5" y="-33.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">yaml_pair</text>
+</a>
+</g>
+</g>
+<!-- type~yaml_dict&#45;&gt;type~yaml_pair -->
+<g id="type~~fyaml_doc~~InheritsGraph_edge2" class="edge">
+<title>type~yaml_dict&#45;&gt;type~yaml_pair</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M270.81,-37.08C264.93,-38.3 258.81,-39.36 253,-40 239.57,-41.49 224.86,-41.37 211.58,-40.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="211.52,-37.09 201.29,-39.88 211.02,-44.08 211.52,-37.09"/>
+<text text-anchor="middle" x="236" y="-43.4" font-family="Helvetica,sans-Serif" font-size="9.50">first</text>
+</g>
+<!-- type~yaml_pair&#45;&gt;type~yaml_dict -->
+<g id="type~~fyaml_doc~~InheritsGraph_edge4" class="edge">
+<title>type~yaml_pair&#45;&gt;type~yaml_dict</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M201.12,-30.85C207.04,-30.08 213.2,-29.41 219,-29 232.5,-28.05 247.26,-27.8 260.54,-27.86"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="260.79,-31.36 270.83,-27.97 260.86,-24.36 260.79,-31.36"/>
+<text text-anchor="middle" x="236" y="-31.4" font-family="Helvetica,sans-Serif" font-size="9.50">nested</text>
+</g>
+<!-- type~yaml_pair&#45;&gt;type~yaml_pair -->
+<g id="type~~fyaml_doc~~InheritsGraph_edge5" class="edge">
+<title>type~yaml_pair&#45;&gt;type~yaml_pair</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M179.08,-48.01C182.78,-56.97 179.25,-66 168.5,-66 161.95,-66 158.08,-62.65 156.89,-58"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="160.38,-58.32 157.92,-48.01 153.42,-57.6 160.38,-58.32"/>
+<text text-anchor="middle" x="168.5" y="-68.4" font-family="Helvetica,sans-Serif" font-size="9.50">next</text>
+</g>
+<!-- type~yaml_value -->
+<g id="type~~fyaml_doc~~InheritsGraph_node4" class="node">
+<title>type~yaml_value</title>
+<g id="a_type~~fyaml_doc~~InheritsGraph_node4"><a xlink:href="../type/yaml_value.html" xlink:title="yaml_value">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="73,-24 0,-24 0,0 73,0 73,-24"/>
+<text text-anchor="middle" x="36.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">yaml_value</text>
+</a>
+</g>
+</g>
+<!-- type~yaml_pair&#45;&gt;type~yaml_value -->
+<g id="type~~fyaml_doc~~InheritsGraph_edge3" class="edge">
+<title>type~yaml_pair&#45;&gt;type~yaml_value</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M135.7,-30.13C119.86,-27.21 100.44,-23.62 83.05,-20.41"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="83.56,-16.95 73.1,-18.57 82.29,-23.83 83.56,-16.95"/>
+<text text-anchor="middle" x="104.5" y="-28.4" font-family="Helvetica,sans-Serif" font-size="9.50">value</text>
+</g>
+<!-- type~yaml_value&#45;&gt;type~yaml_dict -->
+<g id="type~~fyaml_doc~~InheritsGraph_edge6" class="edge">
+<title>type~yaml_value&#45;&gt;type~yaml_dict</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M73.02,-7.23C106.22,-3.55 157.12,0.14 201,-5 221.09,-7.35 242.97,-12.26 261.22,-17.02"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="260.38,-20.42 270.95,-19.63 262.2,-13.66 260.38,-20.42"/>
+<text text-anchor="middle" x="168.5" y="-7.4" font-family="Helvetica,sans-Serif" font-size="9.50">dict_val</text>
+</g>
+</g>
+</svg>
+</div>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#InheritsGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="InheritsGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+<p>Solid arrows point from a derived type to the parent type which it
+extends. Dashed arrows point from a derived type to the other
+types it contains as a components, with a label listing the name(s) of
+said component(s).
+</p>
+ Where possible, edges connecting nodes are
+given different colours to make them easier to distinguish in
+large graphs.</div>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Inherited by</h3>
+        </div>
+        <div class="card-body">
+          <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: type~~fyaml_doc~~InheritedByGraph Pages: 1 -->
+<svg id="typefyaml_docInheritedByGraph" width="217pt" height="32pt"
+ viewBox="0.00 0.00 217.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~fyaml_doc~~InheritedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>type~~fyaml_doc~~InheritedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 213,-28 213,4 -4,4"/>
+<!-- type~fyaml_doc -->
+<g id="type~~fyaml_doc~~InheritedByGraph_node1" class="node">
+<title>type~fyaml_doc</title>
+<polygon fill="none" stroke="black" points="67,-24 0,-24 0,0 67,0 67,-24"/>
+<text text-anchor="middle" x="33.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">fyaml_doc</text>
+</g>
+<!-- type~yaml_wrapper -->
+<g id="type~~fyaml_doc~~InheritedByGraph_node2" class="node">
+<title>type~yaml_wrapper</title>
+<g id="a_type~~fyaml_doc~~InheritedByGraph_node2"><a xlink:href="../type/yaml_wrapper.html" xlink:title="yaml_wrapper">
+<polygon fill="#5cb85c" stroke="#5cb85c" points="209,-24 121,-24 121,0 209,0 209,-24"/>
+<text text-anchor="middle" x="165" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">yaml_wrapper</text>
+</a>
+</g>
+</g>
+<!-- type~yaml_wrapper&#45;&gt;type~fyaml_doc -->
+<g id="type~~fyaml_doc~~InheritedByGraph_edge1" class="edge">
+<title>type~yaml_wrapper&#45;&gt;type~fyaml_doc</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M120.88,-12C106.92,-12 91.46,-12 77.51,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="77.19,-8.5 67.19,-12 77.19,-15.5 77.19,-8.5"/>
+<text text-anchor="middle" x="94" y="-14.4" font-family="Helvetica,sans-Serif" font-size="9.50">doc</text>
+</g>
+</g>
+</svg>
+</div>          <div>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#InheritedByGraph-help-text">Help</a>
+          </div>
+          <div class="modal fade" id="InheritedByGraph-help-text" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title" id="-graph-help-label">Graph Key</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+<p>Nodes of different colours represent the following: </p>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="186pt" height="32pt"
+ viewBox="0.00 0.00 185.50 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 181.5,-28 181.5,4 -4,4"/>
+<!-- Type -->
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="177.5,-24 72.5,-24 72.5,0 177.5,0 177.5,-24"/>
+<text text-anchor="middle" x="125" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+<p>Solid arrows point from a derived type to the parent type which it
+extends. Dashed arrows point from a derived type to the other
+types it contains as a components, with a label listing the name(s) of
+said component(s).
+</p>
+ Where possible, edges connecting nodes are
+given different colours to make them easier to distinguish in
+large graphs.</div>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+    <br>
+
+    <section>
+    <h2>Components</h2>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Visibility</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+<th></th><th scope="col">Initial</th>        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-root~2"></span>
+              type(<a href='yaml_dict.html'>yaml_dict</a>),
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>root</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    </section>
+    <br>
+    
+
+
+      <section>
+        <h2>Type-Bound Procedures</h2>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-load"></span>
+      <h3>
+          procedure, public ::
+  <strong>load</strong> => load_yaml_doc
+        
+      </h3>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
+    private  subroutine load_yaml_doc(this, filename, success)  
+</h3>
+
+  <p>Load YAML document from file</p>
+<p>@param[in,out] this     The document instance
+@param[in]     filename Path to YAML file
+@param[out]    success  Optional success indicator</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='fyaml_doc.html'>fyaml_doc</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              character(len=*),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>filename</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              logical,
+            </td>
+<td>intent(out),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>success</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+        </li>
+    </ul>
+  </div>
+
+          </div>
+      </section>
+
+    
+    </div>
+  </div>
+
+      <hr>
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+        <div class="row justify-content-between">
+          <div class="col">
+            <p>
+              Fyaml
+ was developed by Barry Baker<br>              &copy; 2024 gdfl
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+ on 2024-11-27 16:08 +0000             </p>
+          </div>
+        </div>
+        <br>
+      </div> <!-- /container -->
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
+
+    <!-- MathJax JavaScript
+             ================================================== -->
+             <!-- Placed at the end of the document so the pages load faster -->
+        <script type="text/x-mathjax-config">
+          MathJax.Hub.Config({
+          TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+          jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+          extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+          });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+          <script src="../tipuesearch/tipuesearch_content.js"></script>
+          <script src="../tipuesearch/tipuesearch_set.js"></script>
+          <script src="../tipuesearch/tipuesearch.js"></script>
+
+  </body>
+</html>
