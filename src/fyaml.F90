@@ -87,7 +87,7 @@ contains
         logical, intent(out), optional :: success
         type(yaml_document), allocatable :: parsed_docs(:)
         logical :: ok
-        integer :: unit, iostat
+        integer :: unit, iostat, rc
 
         ok = .false.
 
@@ -101,7 +101,7 @@ contains
         close(unit)
 
         ! Parse YAML
-        call parse_yaml(filename, parsed_docs)
+        call parse_yaml(filename, parsed_docs, rc)
         if (allocated(parsed_docs)) then
             if (associated(parsed_docs(1)%root)) then
                 call convert_node_to_dict(parsed_docs(1)%root, this%root)
@@ -155,11 +155,16 @@ contains
         type(yaml_dict), intent(inout) :: dict
         type(yaml_pair), pointer :: new_pair
         type(yaml_node), pointer :: current
+        character(len=256) :: msg
 
         current => node
         do while (associated(current))
             allocate(new_pair)
-            new_pair%key = current%key
+            new_pair%key = adjustl(current%key)
+
+            write(msg, "('key=', a, '|', 'value=', a, '|', 'has-children=', l1)") &
+                current%key, current%value, associated(current%children)
+            call debug_print(DEBUG_INFO, msg)
 
             if (associated(current%children)) then
                 allocate(new_pair%nested)
@@ -176,7 +181,7 @@ contains
                     new_pair%value%is_null = .true.
                 else if (is_boolean(current%value)) then
                     new_pair%value%value_type = TYPE_BOOLEAN
-                    new_pair%value%bool_val = current%value == 'true'  ! Direct comparison instead of parse_sequence
+                    new_pair%value%bool_val = trim(adjustl(current%value)) == 'true'  ! Direct comparison instead of parse_sequence
                 else if (is_number(current%value)) then
                     if (index(current%value, '.') > 0) then
                         new_pair%value%value_type = TYPE_REAL
@@ -187,8 +192,10 @@ contains
                     endif
                 else
                     new_pair%value%value_type = TYPE_STRING
-                    new_pair%value%str_val = current%value
+                    new_pair%value%str_val = adjustl(current%value)
                 endif
+                write(msg, "('got type:', x, i0)") new_pair%value%value_type
+                call debug_print(DEBUG_INFO, msg)
             endif
 
             if (.not. associated(dict%first)) then
@@ -253,7 +260,7 @@ contains
     function is_null(str) result(res)
         character(len=*), intent(in) :: str
         logical :: res
-        res = trim(str) == 'null'
+        res = trim(adjustl(str)) == 'null' .or. trim(adjustl(str)) == '~'
     end function is_null
 
     !> Check if string represents boolean
@@ -263,7 +270,7 @@ contains
     function is_boolean(str) result(res)
         character(len=*), intent(in) :: str
         logical :: res
-        res = trim(str) == 'true' .or. trim(str) == 'false'
+        res = trim(adjustl(str)) == 'true' .or. trim(adjustl(str)) == 'false'
     end function is_boolean
 
     !> Check if string represents a number
@@ -273,7 +280,7 @@ contains
     function is_number(str) result(res)
         character(len=*), intent(in) :: str
         logical :: res
-        res = verify(trim(str), '0123456789.-') == 0
+        res = verify(trim(adjustl(str)), '0123456789.-') == 0
     end function is_number
 
     !> Get value associated with key from dictionary
@@ -308,6 +315,7 @@ contains
         integer :: i
 
         allocate(character(len=32) :: keys(this%count))
+        keys = ""
         current => this%first
         i = 1
         do while (associated(current))

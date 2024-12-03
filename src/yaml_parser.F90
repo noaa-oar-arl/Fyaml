@@ -279,12 +279,13 @@ contains
     current_indent = count_leading_spaces(local_line)
     is_sequence_item = (index(trim(local_line), '-') == 1)
 
-    ! Memory allocation and validation checks
-    if (.not. associated(new_node)) then
-        call debug_print(DEBUG_ERROR, "Node pointer not associated", ERR_MEMORY)
-        status = ERR_MEMORY
-        return
-    endif
+    ! ! Memory allocation and validation checks
+    ! if (.not. associated(new_node)) then
+    !     call debug_print(DEBUG_ERROR, "Node pointer not associated", ERR_MEMORY)
+    !     status = ERR_MEMORY
+    !     return
+    ! endif
+    new_node => null()
 
     ! Create new node
     allocate(new_node, stat=io_stat)
