@@ -252,7 +252,7 @@ end subroutine parse_yaml
   type(yaml_document), intent(inout) :: doc
   integer, intent(out) :: status
   type(yaml_node), pointer :: new_node, current_node, parent_node
-  integer :: pos, current_indent, parent_indent, io_stat
+  integer :: pos, current_indent, parent_indent, io_stat, unit
   character(len=:), allocatable :: local_line
   logical :: is_sequence_item, is_block_style
   character(len=256) :: debug_msg
