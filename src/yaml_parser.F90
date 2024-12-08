@@ -225,7 +225,7 @@ subroutine parse_yaml(filename, docs, status)
   endif
 
   status = ERR_SUCCESS
-end subroutine parse_yaml 
+end subroutine parse_yaml
 
   !> Initialize a new YAML document
   !!
