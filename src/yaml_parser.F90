@@ -88,13 +88,14 @@ contains
   !!
   !! @param[in]  filename Path to YAML file
   !! @param[out] docs     Array of parsed YAML documents
-  !! @param[out] status   Status code (ERR_SUCCESS on success)
-  subroutine parse_yaml(filename, docs, status)
+  !! @param[out] status   Status code (ERR_SUCCESS on 
+subroutine parse_yaml(filename, docs, status)
   character(len=*), intent(in) :: filename
   type(yaml_document), allocatable, intent(out) :: docs(:)
   integer, intent(out) :: status
   integer :: unit, io_stat, line_count, doc_count
   character(len=1024) :: line
+  character(len=1024) :: local_line
   logical :: in_document, doc_started
   integer :: i
   character(len=256) :: error_msg
@@ -172,7 +173,7 @@ contains
   doc_started = .false.
 
   do
-      read(unit, '(a)', iostat=io_stat) line
+      read(unit, '(a)', iostat=io_stat) local_line
       if (io_stat < 0) exit  ! EOF
       if (io_stat > 0) then
           write(error_unit,*) "Error reading file:", io_stat
@@ -180,30 +181,30 @@ contains
       endif
 
       ! Skip empty lines and comments
-      if (len_trim(line) == 0 .or. line(1:1) == '#') cycle
+      if (len_trim(local_line) == 0 .or. local_line(1:1) == '#') cycle
 
       ! Handle document markers
-      if (trim(line) == '---') then
+      if (trim(local_line) == '---') then
           in_document = .true.
           if (doc_started) doc_count = doc_count + 1
           doc_started = .true.
           cycle
       endif
 
-      if (trim(line) == '...') then
+      if (trim(local_line) == '...') then
           in_document = .false.
           cycle
       endif
 
       ! Set document started on first content
-      if (.not. doc_started .and. len_trim(line) > 0) then
+      if (.not. doc_started .and. len_trim(local_line) > 0) then
           doc_started = .true.
       endif
 
       ! Parse line into current document if it has content
-      if (len_trim(line) > 0) then
+      if (len_trim(local_line) > 0) then
           if (doc_count <= size(docs)) then  ! Bounds check
-              call parse_line(trim(line), docs(doc_count), status)
+              call parse_line(trim(local_line), docs(doc_count), status)
               if (status /= ERR_SUCCESS) then
                   call debug_print(DEBUG_ERROR, "Error parsing line", status)
                   close(unit)
@@ -224,7 +225,7 @@ contains
   endif
 
   status = ERR_SUCCESS
-end subroutine parse_yaml
+end subroutine parse_yaml 
 
   !> Initialize a new YAML document
   !!
