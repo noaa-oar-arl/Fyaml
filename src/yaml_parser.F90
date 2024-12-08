@@ -96,6 +96,7 @@ subroutine parse_yaml(filename, docs, status)
   integer :: unit, io_stat, line_count, doc_count
   character(len=1024) :: line
   character(len=1024) :: local_line
+  character(len=1024) :: trimmed_line
   logical :: in_document, doc_started
   integer :: i
   character(len=256) :: error_msg
@@ -201,10 +202,13 @@ subroutine parse_yaml(filename, docs, status)
           doc_started = .true.
       endif
 
+      ! Trim the local_line before passing it to parse_line
+      trimmed_line = trim(local_line)
+
       ! Parse line into current document if it has content
-      if (len_trim(local_line) > 0) then
+      if (len_trim(trimmed_line) > 0) then
           if (doc_count <= size(docs)) then  ! Bounds check
-              call parse_line(trim(local_line), docs(doc_count), status)
+              call parse_line(trimmed_line, docs(doc_count), status)
               if (status /= ERR_SUCCESS) then
                   call debug_print(DEBUG_ERROR, "Error parsing line", status)
                   close(unit)
