@@ -67,9 +67,9 @@ company:
   founded: 2001
   employees: 150
   flow_sequence: [10, 20, 30]
-  # departments:
-  #   - HR
-  #   - Engineering
+  departments:
+    - HR
+    - Engineering
   #   - Marketing
   ceo: John Smith
   pi: 3.14159
