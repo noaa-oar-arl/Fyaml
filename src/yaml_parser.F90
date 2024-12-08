@@ -418,42 +418,48 @@ contains
   !! @param[in,out] content Sequence content string
   !! @param[in,out] node Node to store sequence
   subroutine parse_sequence(content, node)
-      ! Modified parameter declarations
-      character(len=:), allocatable, intent(inout) :: content
-      type(yaml_node), pointer, intent(inout) :: node
+    character(len=:), allocatable, intent(inout) :: content
+    type(yaml_node), pointer, intent(inout) :: node
+    type(yaml_node), pointer :: new_child, last_child
+    character(len=:), allocatable :: item
+    integer :: pos
 
-      ! Local variables
-      character(len=:), allocatable :: item
-      character(len=:), allocatable :: local_content
-      integer :: pos
+    ! Initialize pointers
+    last_child => null()
 
-      ! Copy input content to local variable for manipulation
-      local_content = content
-
-      ! Split the content by commas to get individual items
-      do
-        pos = index(local_content, ',')
+    ! Split the content by commas to get individual items
+    do
+        pos = index(content, ',')
         if (pos > 0) then
-          item = trim(local_content(1:pos-1))
-          local_content = trim(local_content(pos+1:))
+            item = trim(content(1:pos-1))
+            content = trim(content(pos+1:))
         else
-          item = trim(local_content)
-          local_content = ''
+            item = trim(content)
+            content = ''
         end if
 
-        ! Create a new node for each item
-        allocate(node%children)
-        call initialize_node(node%children)
-        node%children%value = item
-        node => node%children
+        ! Create a new child node for each item
+        allocate(new_child)
+        call initialize_node(new_child)
+        new_child%value = item
 
-        if (len(local_content) == 0) exit
-      end do
+        ! Link the new child node
+        if (.not. associated(node%children)) then
+            node%children => new_child
+        else
+            last_child => node%children
+            do while (associated(last_child%next))
+                last_child => last_child%next
+            end do
+            last_child%next => new_child
+        end if
 
-      ! Update the original content
-      content = local_content
+        ! Update last_child to the newly added child
+        last_child => new_child
 
-  end subroutine parse_sequence
+        if (len(content) == 0) exit
+    end do
+end subroutine parse_sequence
 
   !> Parse mapping elements from flow style
   !!
