@@ -296,17 +296,14 @@ end subroutine parse_yaml
 
   ! Handle block style YAML
   if (is_block_style) then
-    new_node%value = local_line
+    new_node%value = ''
     do
       read(unit, '(a)', iostat=io_stat) line
-      if (io_stat < 0) then
-        call debug_print(DEBUG_ERROR, "Unexpected EOF in block style")
-        status = ERR_PARSE_ERROR
-        return
-      endif
-      if (len_trim(line) == 0) exit
-      new_node%value = new_node%value // trim(line)
+      if (io_stat < 0) exit
+      if (len_trim(line) == 0 .or. count_leading_spaces(line) <= current_indent) exit
+      new_node%value = new_node%value // trim(line) // '\n'
     end do
+    new_node%value = trim(new_node%value)
   else if (is_sequence_item) then
     new_node%is_sequence = .true.
     pos = index(local_line, '-') + 1
