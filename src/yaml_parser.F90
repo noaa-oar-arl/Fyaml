@@ -248,7 +248,7 @@ end subroutine parse_yaml
   !! @param[out] docs     Array of parsed YAML documents
   !! @param[out] status   Status code (ERR_SUCCESS on success)
   subroutine parse_line(line, doc, status)
-  character(len=*), intent(in) :: line
+  character(len=*), intent(inout) :: line
   type(yaml_document), intent(inout) :: doc
   integer, intent(out) :: status
   type(yaml_node), pointer :: new_node, current_node, parent_node
