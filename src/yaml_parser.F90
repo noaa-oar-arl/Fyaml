@@ -90,141 +90,152 @@ contains
   !! @param[out] docs     Array of parsed YAML documents
   !! @param[out] status   Status code (ERR_SUCCESS on success)
   subroutine parse_yaml(filename, docs, status)
+    use yaml_types
+    use iso_fortran_env, only: error_unit
+    implicit none
+
     character(len=*), intent(in) :: filename
     type(yaml_document), allocatable, intent(out) :: docs(:)
     integer, intent(out) :: status
-    integer :: unit, io_stat, line_count, doc_count
+
+    integer :: unit_num, io_stat, line_count, doc_count
     character(len=1024) :: line
     logical :: in_document, doc_started
     integer :: i
     character(len=256) :: error_msg
+    character(len=32) :: cnt_str
+
+    ! Initialize status
+    status = ERR_SUCCESS
 
     call debug_print(DEBUG_INFO, "Starting YAML parse for: "//trim(filename))
 
-    status = ERR_SUCCESS
-
-    ! First pass - count documents
-    open(newunit=unit, file=filename, status='old', action='read', iostat=io_stat)
+    ! Open the YAML file for reading
+    open(newunit=unit_num, file=filename, status='old', action='read', iostat=io_stat)
     if (io_stat /= 0) then
         write(error_msg, '(A,I0)') "Failed to open file. IO Status: ", io_stat
-        call debug_print(DEBUG_ERROR, error_msg, ERR_FILE_NOT_FOUND)
+        call debug_print(DEBUG_ERROR, trim(error_msg))
         status = ERR_FILE_NOT_FOUND
         return
     endif
 
     call debug_print(DEBUG_VERBOSE, "Counting documents in file")
 
-    doc_count = 1
+    ! First Pass: Count the number of YAML documents (separated by '---')
+    doc_count = 0
     line_count = 0
-    doc_started = .false.
+    in_document = .false.
 
     do
-        read(unit, '(a)', iostat=io_stat) line
-        if (io_stat < 0) then
-            call debug_print(DEBUG_VERBOSE, "Reached end of file")
-            exit
-        endif
-        if (io_stat > 0) then
-            write(error_msg, '(A,I0)') "Error reading file at line ", line_count+1
-            call debug_print(DEBUG_ERROR, error_msg, ERR_READ_ERROR)
-            close(unit)
+        read(unit_num, '(A)', IOSTAT=io_stat) line
+        if (io_stat == -1) exit  ! EOF reached
+        if (io_stat /= 0) then
+            write(error_msg, '(A,I0)') "Error reading file during document count. IO Status: ", io_stat
+            call debug_print(DEBUG_ERROR, trim(error_msg))
             status = ERR_READ_ERROR
+            close(unit_num)
             return
         endif
 
         line_count = line_count + 1
+        line = adjustl(line)
 
-        if (debug_level >= DEBUG_VERBOSE) then
-            call debug_print(DEBUG_VERBOSE, "Processing line "//trim(line))
+        if (starts_with_trimmed(line, '---')) then
+            doc_count = doc_count + 1
+            in_document = .true.
         endif
+    end do
 
-        ! Skip empty lines and comments at start
-        if (.not. doc_started) then
-            if (len_trim(line) == 0 .or. line(1:1) == '#') cycle
-            doc_started = .true.
-        endif
+    if (doc_count == 0 .and. line_count > 0) then
+        ! At least one document exists even without '---' separator
+        doc_count = 1
+    endif
 
-        if (trim(line) == '---') then
-            if (doc_started) doc_count = doc_count + 1
-        endif
-    enddo
+    write(cnt_str, '(I0)') doc_count
+    call debug_print(DEBUG_INFO, "Number of YAML documents found: "//trim(adjustl(cnt_str)))
 
-    if (line_count == 0) then
-        call debug_print(DEBUG_ERROR, "Error: Empty file", ERR_PARSE_ERROR)
-        close(unit)
+    rewind(unit_num)
+
+    ! Allocate the documents array
+    if (doc_count > 0) then
+        allocate(docs(doc_count))
+        do i = 1, doc_count
+            call initialize_document(docs(i))
+        end do
+    else
+        ! No documents found
+        write(error_msg, '(A)') "No YAML documents found in the file."
+        call debug_print(DEBUG_WARN, trim(error_msg))
         status = ERR_PARSE_ERROR
+        close(unit_num)
         return
     endif
 
-    rewind(unit)
-
-    ! Allocate documents array
-    allocate(docs(doc_count))
-
-    ! Initialize all documents
-    do i = 1, doc_count
-        call initialize_document(docs(i))
-    enddo
-
-    ! Second pass - parse documents
+    ! Second Pass: Parse each YAML document
     doc_count = 1
     in_document = .false.
     doc_started = .false.
 
+    call debug_print(DEBUG_VERBOSE, "Parsing documents")
+
     do
-        read(unit, '(a)', iostat=io_stat) line
-        if (io_stat < 0) exit  ! EOF
-        if (io_stat > 0) then
-            write(error_unit,*) "Error reading file:", io_stat
+        read(unit_num, '(A)', IOSTAT=io_stat) line
+        if (io_stat == -1) exit  ! EOF reached
+        if (io_stat /= 0) then
+            write(error_msg, '(A,I0)') "Error reading file during parsing. IO Status: ", io_stat
+            call debug_print(DEBUG_ERROR, trim(error_msg))
+            status = ERR_READ_ERROR
             exit
         endif
 
-        ! Skip empty lines and comments
-        if (len_trim(line) == 0 .or. line(1:1) == '#') cycle
+        line = adjustl(line)
 
-        ! Handle document markers
-        if (trim(line) == '---') then
-            in_document = .true.
-            if (doc_started) doc_count = doc_count + 1
-            doc_started = .true.
-            cycle
-        endif
-
-        if (trim(line) == '...') then
-            in_document = .false.
-            cycle
-        endif
-
-        ! Set document started on first content
-        if (.not. doc_started .and. len_trim(line) > 0) then
-            doc_started = .true.
-        endif
-
-        ! Parse line into current document if it has content
-        if (len_trim(line) > 0) then
-            if (doc_count <= size(docs)) then  ! Bounds check
-                call parse_line(line, docs(doc_count), status)
-                if (status /= ERR_SUCCESS) then
-                    call debug_print(DEBUG_ERROR, "Error parsing line", status)
-                    close(unit)
-                    return
+        if (starts_with_trimmed(line, '---')) then
+            ! New document starts
+            if (doc_count > size(docs)) then
+                write(error_msg, '(A)') "Document count exceeded allocation."
+                call debug_print(DEBUG_ERROR, trim(error_msg))
+                status = ERR_PARSE_ERROR
+                exit
+            endif
+            if (in_document) then
+                ! Finalize the previous document if needed
+                doc_count = doc_count + 1
+                if (doc_count > size(docs)) then
+                    call debug_print(DEBUG_ERROR, "Exceeded allocated document count.")
+                    status = ERR_PARSE_ERROR
+                    exit
                 endif
+            else
+                in_document = .true.
+                doc_started = .true.
+            endif
+            cycle  ! Skip the '---' line
+        endif
+
+        if (in_document) then
+            ! Parse the line into the current document
+            call parse_line(line, docs(doc_count), status)
+            if (status /= ERR_SUCCESS) then
+                call debug_print(DEBUG_ERROR, "Error parsing line: "//trim(line))
+                exit
             endif
         endif
-    enddo
+    end do
 
-    close(unit)
+    close(unit_num)
 
-    ! Handle case where no valid documents were found
-    if (.not. doc_started) then
-        deallocate(docs)
-        call debug_print(DEBUG_ERROR, "Error: No valid YAML documents found", ERR_PARSE_ERROR)
+    ! Final checks after parsing
+    if (.not. doc_started .and. line_count > 0) then
+        write(error_msg, '(A)') "No valid YAML documents were parsed."
+        call debug_print(DEBUG_WARN, trim(error_msg))
         status = ERR_PARSE_ERROR
-        return
+    else
+        call debug_print(DEBUG_INFO, "YAML parsing completed successfully.")
+        status = ERR_SUCCESS
     endif
 
-    status = ERR_SUCCESS
-  end subroutine parse_yaml
+end subroutine parse_yaml
 
   !> Initialize a new YAML document
   !!
@@ -701,5 +712,24 @@ end subroutine parse_mapping
 
     status = ERR_SUCCESS
   end subroutine validate_node
+
+  !> Check if a trimmed line starts with a specific string
+  !!
+  !! @param[in] line   Input line
+  !! @param[in] prefix Prefix string to check
+  !! @return     True if the trimmed line starts with the prefix
+  logical function starts_with_trimmed(line, prefix)
+    implicit none
+    character(len=*), intent(in) :: line
+    character(len=*), intent(in) :: prefix
+    character(len=:), allocatable :: trimmed_line
+
+    trimmed_line = trim(adjustl(line))
+    if (len(trimmed_line) < len(prefix)) then
+        starts_with_trimmed = .false.
+    else
+        starts_with_trimmed = (trimmed_line(1:len(prefix)) == trim(prefix))
+    endif
+  end function starts_with_trimmed
 
 end module yaml_parser

@@ -74,7 +74,7 @@
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                 title="61.9% of total for modules and submodules.">446 statements</a>
+                 title="57.8% of total for modules and submodules.">469 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -147,6 +147,7 @@
             <a class="list-group-item" href="../module/yaml_parser.html#proc-count_leading_spaces">count_leading_spaces</a>
             <a class="list-group-item" href="../module/yaml_parser.html#proc-is_int_string">is_int_string</a>
             <a class="list-group-item" href="../module/yaml_parser.html#proc-is_real_string">is_real_string</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-starts_with_trimmed">starts_with_trimmed</a>
             <a class="list-group-item" href="../module/yaml_parser.html#proc-to_lower">to_lower</a>
         </div>
       </div>
@@ -205,8 +206,8 @@ It handles document structure, value types, indentation, sequences, and mapping 
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
-                  <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_fortran_env'>iso_fortran_env</a></li>
                   <li class="list-inline-item"><a href='yaml_types.html'>yaml_types</a></li>
+                  <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_fortran_env'>iso_fortran_env</a></li>
               </ul>
             </li>
             <li class="list-group-item">
@@ -731,7 +732,7 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-str~2"></span>
+              <span class="anchor" id="variable-str~7"></span>
               character(len=*),
             </td>
 <td>intent(in)</td>
@@ -776,7 +777,7 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-str"></span>
+              <span class="anchor" id="variable-str~6"></span>
               character(len=*),
             </td>
 <td>intent(in)</td>
@@ -785,6 +786,66 @@ parameter
             </td>
             <td>::</td>
             <td><strong>str</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>logical</small>
+    </h4>
+    
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-starts_with_trimmed"></span> <h3>public  function <a href='../proc/starts_with_trimmed.html'>starts_with_trimmed</a>(line, prefix)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Check if a trimmed line starts with a specific string</p><a href="../proc/starts_with_trimmed.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-line~5"></span>
+              character(len=*),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>line</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-prefix"></span>
+              character(len=*),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>prefix</strong></td>
             <td>
 
             </td>
@@ -821,7 +882,7 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-str~3"></span>
+              <span class="anchor" id="variable-str~8"></span>
               character(len=*),
             </td>
 <td>intent(in)</td>
@@ -886,7 +947,7 @@ parameter
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-message"></span>
+              <span class="anchor" id="variable-message~2"></span>
               character(len=*),
             </td>
 <td>intent(in)</td>
@@ -941,7 +1002,7 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-node~5"></span>
+              <span class="anchor" id="variable-node~6"></span>
               type(<a href='../type/yaml_node.html'>yaml_node</a>),
             </td>
 <td>intent(inout)</td>
@@ -981,7 +1042,7 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-doc"></span>
+              <span class="anchor" id="variable-doc~2"></span>
               type(<a href='../type/yaml_document.html'>yaml_document</a>),
             </td>
 <td>intent(inout)</td>
@@ -1021,7 +1082,7 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-node~4"></span>
+              <span class="anchor" id="variable-node~5"></span>
               type(<a href='../type/yaml_node.html'>yaml_node</a>),
             </td>
 <td>intent(inout),</td>
@@ -1076,7 +1137,7 @@ parameter
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-node"></span>
+              <span class="anchor" id="variable-node~2"></span>
               type(<a href='../type/yaml_node.html'>yaml_node</a>),
             </td>
 <td>intent(inout),</td>
@@ -1131,7 +1192,7 @@ parameter
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-doc~2"></span>
+              <span class="anchor" id="variable-doc~3"></span>
               type(<a href='../type/yaml_document.html'>yaml_document</a>),
             </td>
 <td>intent(inout)</td>
@@ -1201,7 +1262,7 @@ parameter
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-node~3"></span>
+              <span class="anchor" id="variable-node~4"></span>
               type(<a href='../type/yaml_node.html'>yaml_node</a>),
             </td>
 <td>intent(inout),</td>
@@ -1256,7 +1317,7 @@ parameter
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-node~2"></span>
+              <span class="anchor" id="variable-node~3"></span>
               type(<a href='../type/yaml_node.html'>yaml_node</a>),
             </td>
 <td>intent(inout),</td>
@@ -1296,7 +1357,7 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-filename"></span>
+              <span class="anchor" id="variable-filename~3"></span>
               character(len=*),
             </td>
 <td>intent(in)</td>
@@ -1406,7 +1467,7 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-node~6"></span>
+              <span class="anchor" id="variable-node~7"></span>
               type(<a href='../type/yaml_node.html'>yaml_node</a>),
             </td>
 <td>intent(in),</td>
@@ -1464,7 +1525,7 @@ parameter
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on "2024-12-03 03:45 +0000" <br>&copy; <a rel="license" href="http://www.gnu.org/licenses/old-licenses/fdl-1.2.en.html">GNU Free Documentation License</a>             </p>
+ on "2024-12-10 20:17 +0000" <br>&copy; <a rel="license" href="http://www.gnu.org/licenses/old-licenses/fdl-1.2.en.html">GNU Free Documentation License</a>             </p>
           </div>
         </div>
         <br>

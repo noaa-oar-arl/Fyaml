@@ -87,28 +87,35 @@ contains
         logical, intent(out), optional :: success
         type(yaml_document), allocatable :: parsed_docs(:)
         logical :: ok
-        integer :: unit, iostat, rc
+        integer :: rc, ios
+        integer :: unit_num
 
         ok = .false.
 
-        ! Check if file exists and is readable
-        open(newunit=unit, file=filename, status='old', action='read', iostat=iostat)
-        if (iostat /= 0) then
-            write(error_unit,*) 'Error opening file:', trim(filename)
+        ! Open the file with a new unit number
+        open(newunit=unit_num, file=filename, status='old', action='read', iostat=ios)
+        if (ios /= 0) then
+            write(error_unit,*) 'Error opening YAML file:', trim(filename)
             if (present(success)) success = .false.
             return
-        end if
-        close(unit)
+        endif
 
         ! Parse YAML
         call parse_yaml(filename, parsed_docs, rc)
-        if (allocated(parsed_docs)) then
-            if (associated(parsed_docs(1)%root)) then
-                call convert_node_to_dict(parsed_docs(1)%root, this%root)
-                ok = .true.
-            end if
-            deallocate(parsed_docs)
-        end if
+        if (rc /= 0 .or. .not. allocated(parsed_docs)) then
+            write(error_unit,*) 'Error parsing YAML file:', trim(filename)
+            if (present(success)) success = .false.
+            close(unit_num)
+            return
+        endif
+
+        ! Convert parsed YAML to dictionary
+        if (associated(parsed_docs(1)%root)) then
+            call convert_node_to_dict(parsed_docs(1)%root, this%root)
+            ok = .true.
+        endif
+        deallocate(parsed_docs)
+        close(unit_num)
 
         if (present(success)) success = ok
     end subroutine load_yaml_doc
@@ -125,25 +132,107 @@ contains
         call this%convert()
     end subroutine load_yaml_wrapper
 
-    !> Parse a YAML sequence string into array
+    !> Parse a YAML sequence string into an array (handles both flow and block styles)
     !!
-    !! @param[in]  str Input sequence string in format '[item1,item2,...]'
+    !! @param[in]  str Input sequence string in flow or block style
     !! @return     Array of sequence items
     function fyaml_parse_sequence(str) result(seq)
+        implicit none
         character(len=*), intent(in) :: str
-        character(len=:), allocatable, dimension(:) :: seq
-        integer :: n, i, start, end
+        character(len=256), allocatable, dimension(:) :: seq
+        integer :: n_commas, i, pos
+        character(len=256) :: item
+        character(len=1024) :: local_str
+        integer :: len_str
+        character(len=256), allocatable, dimension(:) :: temp_seq
 
-        n = count(transfer(str, 'a', len(str)) == ',') + 1
-        allocate(character(len=32) :: seq(n))
+        ! Initialize
+        local_str = trim(str)
+        len_str = len_trim(local_str)
 
-        start = 2  ! Skip '['
-        do i = 1, n
-            end = index(str(start:), ',') - 1
-            if (end < 0) end = len_trim(str) - 1  ! Last item
-            seq(i) = trim(adjustl(str(start:start+end-1)))
-            start = start + end + 2
-        end do
+        ! Check if the sequence is flow-style
+        if (len_str >= 2 .and. local_str(1:1) == '[' .and. local_str(len_str:len_str) == ']') then
+            ! Flow-style sequence: [item1, item2, item3]
+            ! Remove the surrounding brackets
+            local_str = local_str(2:len_str-1)
+            len_str = len_trim(local_str)
+
+            if (len_str == 0) then
+                ! Empty sequence
+                allocate(seq(0))
+                return
+            endif
+
+            ! Count the number of commas to determine the number of items
+            n_commas = 0
+            do i = 1, len_str
+                if (local_str(i:i) == ',') then
+                    n_commas = n_commas + 1
+                endif
+            end do
+            n_commas = n_commas + 1 ! Number of items is commas + 1
+
+            ! Allocate the sequence array
+            allocate(seq(n_commas))
+
+            ! Extract items separated by commas
+            do i = 1, n_commas
+                pos = index(local_str, ',')
+                if (pos > 0) then
+                    item = trim(adjustl(local_str(1:pos-1)))
+                    seq(i) = item
+                    local_str = trim(adjustl(local_str(pos+1:)))
+                else
+                    ! Last item
+                    seq(i) = trim(adjustl(local_str))
+                    local_str = ''
+                endif
+            end do
+
+        else
+            ! Block-style sequence:
+            ! - item1
+            ! - item2
+            ! - item3
+            ! Split the string into lines and extract items starting with '- '
+            n_commas = 0
+            allocate(temp_seq(len_str)) ! Temporary allocation
+
+            i = 1
+            do while (i <= len_str)
+                if (i < len_str) then
+                    if (local_str(i:i) == '-' .and. local_str(i+1:i+1) == ' ') then
+                        n_commas = n_commas + 1
+                        pos = index(local_str(i+2:), char(10)) ! Find newline
+                        if (pos > 0) then
+                            temp_seq(n_commas) = trim(adjustl(local_str(i+2:i+1+pos-1)))
+                            i = i + pos + 1
+                        else
+                            ! Last item without newline
+                            temp_seq(n_commas) = trim(adjustl(local_str(i+2:)))
+                            exit
+                        endif
+                    else
+                        i = i + 1
+                    endif
+                else
+                    i = i + 1
+                endif
+            end do
+
+            if (n_commas > 0) then
+                ! Allocate the sequence array to the actual number of items
+                allocate(seq(n_commas))
+                do i = 1, n_commas
+                    seq(i) = temp_seq(i)
+                end do
+            else
+                ! No items found
+                allocate(seq(0))
+            endif
+            deallocate(temp_seq)
+        endif
+
     end function fyaml_parse_sequence
 
     !> Recursively convert YAML node structure to dictionary
@@ -164,7 +253,7 @@ contains
 
             write(msg, "('key=', a, '|', 'value=', a, '|', 'has-children=', l1)") &
                 current%key, current%value, associated(current%children)
-            call debug_print(DEBUG_INFO, msg)
+            call debug_print(DEBUG_INFO, trim(msg))
 
             if (associated(current%children)) then
                 allocate(new_pair%nested)
@@ -181,7 +270,7 @@ contains
                     new_pair%value%is_null = .true.
                 else if (is_boolean(current%value)) then
                     new_pair%value%value_type = TYPE_BOOLEAN
-                    new_pair%value%bool_val = trim(adjustl(current%value)) == 'true'  ! Direct comparison instead of parse_sequence
+                    new_pair%value%bool_val = trim(adjustl(current%value)) == 'true'
                 else if (is_number(current%value)) then
                     if (index(current%value, '.') > 0) then
                         new_pair%value%value_type = TYPE_REAL
@@ -194,8 +283,8 @@ contains
                     new_pair%value%value_type = TYPE_STRING
                     new_pair%value%str_val = adjustl(current%value)
                 endif
-                write(msg, "('got type:', x, i0)") new_pair%value%value_type
-                call debug_print(DEBUG_INFO, msg)
+                write(msg, "('got type:', I0)") new_pair%value%value_type
+                call debug_print(DEBUG_INFO, trim(msg))
             endif
 
             if (.not. associated(dict%first)) then
@@ -207,6 +296,9 @@ contains
             dict%count = dict%count + 1
 
             current => current%next
+
+            ! Exit loop if end of sequence is reached
+            if (.not. associated(current)) exit
         end do
     end subroutine convert_node_to_dict
 
@@ -246,17 +338,17 @@ contains
     !> Check if string represents a sequence
     !!
     !! @param[in]  str String to check
-    !! @return     True if string starts with '['
+    !! @return     True if string starts with '[' (flow-style) or contains '- ' (block-style)
     function is_sequence(str) result(res)
         character(len=*), intent(in) :: str
         logical :: res
-        res = str(1:1) == '['
+        res = (len_trim(str) > 0) .and. (str(1:1) == '[' .or. index(str, '- ') > 0)
     end function is_sequence
 
     !> Check if string represents null
     !!
     !! @param[in]  str String to check
-    !! @return     True if string equals 'null'
+    !! @return     True if string equals 'null' or '~'
     function is_null(str) result(res)
         character(len=*), intent(in) :: str
         logical :: res
@@ -276,10 +368,11 @@ contains
     !> Check if string represents a number
     !!
     !! @param[in]  str String to check
-    !! @return     True if string contains only digits, dot or minus
+    !! @return     True if string contains only digits, dot, or minus
     function is_number(str) result(res)
         character(len=*), intent(in) :: str
         logical :: res
+        ! Verify that all characters are digits, dot, or minus
         res = verify(trim(adjustl(str)), '0123456789.-') == 0
     end function is_number
 
@@ -302,6 +395,8 @@ contains
             endif
             current => current%next
         end do
+        ! If key not found, return null value
+        val%is_null = .true.
     end function get_value
 
     !> Get all keys in dictionary
@@ -314,15 +409,19 @@ contains
         type(yaml_pair), pointer :: current
         integer :: i
 
-        allocate(character(len=32) :: keys(this%count))
-        keys = ""
-        current => this%first
-        i = 1
-        do while (associated(current))
-            keys(i) = current%key
-            i = i + 1
-            current => current%next
-        end do
+        if (this%count > 0) then
+            allocate(character(len=32) :: keys(this%count))
+            keys = ""
+            current = this%first
+            i = 1
+            do while (associated(current))
+                keys(i) = current%key
+                i = i + 1
+                current => current%next
+            end do
+        else
+            allocate(character(len=0) :: keys(0))
+        endif
     end function get_keys
 
     !> Convert raw YAML document to dictionary structure
@@ -357,7 +456,7 @@ contains
 
             if (associated(self%dict_val)) then
                 val = self%dict_val%get(first_key)
-                if (.not. val%is_null .and. allocated(rest_path)) then
+                if (.not. val%is_null .and. len_trim(rest_path) > 0) then
                     val = val%get(rest_path)
                 endif
             else
