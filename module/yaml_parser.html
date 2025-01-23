@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
       <meta name="description" content="A modern lightweight Fortran YAML parser">
-    <meta name="author" content="Barry Baker" >
+    <meta name="author" content="Barry Baker and Zach Moon" >
     <link rel="icon" href="../favicon.png">
 
     <title>yaml_parser &ndash; Fyaml</title>
@@ -74,7 +74,7 @@
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                 title="61.9% of total for modules and submodules.">446 statements</a>
+                 title="59.0% of total for modules and submodules.">1298 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -113,17 +113,25 @@
       </a>
       <div id="vars-0" class="collapse">
         <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/yaml_parser.html#variable-dbg_child">DBG_CHILD</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#variable-dbg_fmt_indent">DBG_FMT_INDENT</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#variable-dbg_fmt_key">DBG_FMT_KEY</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#variable-dbg_fmt_level">DBG_FMT_LEVEL</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#variable-dbg_fmt_node">DBG_FMT_NODE</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#variable-dbg_indent">DBG_INDENT</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#variable-dbg_level">DBG_LEVEL</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#variable-dbg_new_node">DBG_NEW_NODE</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#variable-dbg_parent">DBG_PARENT</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#variable-dbg_sibling">DBG_SIBLING</a>
             <a class="list-group-item" href="../module/yaml_parser.html#variable-debug_error">DEBUG_ERROR</a>
             <a class="list-group-item" href="../module/yaml_parser.html#variable-debug_info">DEBUG_INFO</a>
-            <a class="list-group-item" href="../module/yaml_parser.html#variable-debug_none">DEBUG_NONE</a>
-            <a class="list-group-item" href="../module/yaml_parser.html#variable-debug_verbose">DEBUG_VERBOSE</a>
-            <a class="list-group-item" href="../module/yaml_parser.html#variable-debug_warn">DEBUG_WARN</a>
-            <a class="list-group-item" href="../module/yaml_parser.html#variable-err_file_not_found">ERR_FILE_NOT_FOUND</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#variable-err_file">ERR_FILE</a>
             <a class="list-group-item" href="../module/yaml_parser.html#variable-err_memory">ERR_MEMORY</a>
-            <a class="list-group-item" href="../module/yaml_parser.html#variable-err_parse_error">ERR_PARSE_ERROR</a>
-            <a class="list-group-item" href="../module/yaml_parser.html#variable-err_read_error">ERR_READ_ERROR</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#variable-err_parse">ERR_PARSE</a>
             <a class="list-group-item" href="../module/yaml_parser.html#variable-err_success">ERR_SUCCESS</a>
             <a class="list-group-item" href="../module/yaml_parser.html#variable-debug_level">debug_level</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#variable-indent_history">indent_history</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#variable-indent_width">indent_width</a>
         </div>
       </div>
     </div>
@@ -134,9 +142,33 @@
   
   
   
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#inters-0"
+         aria-expanded="false" aria-controls="inters-0">
+         <h4 class="card-header bg-primary text-white">Interfaces</h4>
+      </a>
+      <div id="inters-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/yaml_parser.html#interface-check_sequence">check_sequence</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#interface-parse_yaml">parse_yaml</a>
+        </div>
+      </div>
+    </div>
+
   
-  
-  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#types-0"
+         aria-expanded="false" aria-controls="types-0">
+         <h4 class="card-header bg-primary text-white">Derived Types</h4>
+      </a>
+      <div id="types-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/yaml_parser.html#type-indent_tracker">indent_tracker</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#type-stack_entry">stack_entry</a>
+        </div>
+      </div>
+    </div>
+
       <div class="card mb-4">
       <a data-bs-toggle="collapse" href="#funcs-0"
          aria-expanded="false" aria-controls="funcs-0">
@@ -144,9 +176,18 @@
       </a>
       <div id="funcs-0" class="collapse">
         <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-check_key_hierarchy">check_key_hierarchy</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-check_sequence_node">check_sequence_node</a>
             <a class="list-group-item" href="../module/yaml_parser.html#proc-count_leading_spaces">count_leading_spaces</a>
-            <a class="list-group-item" href="../module/yaml_parser.html#proc-is_int_string">is_int_string</a>
-            <a class="list-group-item" href="../module/yaml_parser.html#proc-is_real_string">is_real_string</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-find_block_sequence_parent">find_block_sequence_parent</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-find_nested_node">find_nested_node</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-find_or_create_intermediate_nodes">find_or_create_intermediate_nodes</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-find_parent_by_indent">find_parent_by_indent</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-find_sequence_parent_node">find_sequence_parent_node</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-get_sequence_as_strings">get_sequence_as_strings</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-has_sequence_parent">has_sequence_parent</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-integer_to_string">integer_to_string</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-starts_with_trimmed">starts_with_trimmed</a>
             <a class="list-group-item" href="../module/yaml_parser.html#proc-to_lower">to_lower</a>
         </div>
       </div>
@@ -159,15 +200,21 @@
       </a>
       <div id="subs-0" class="collapse">
         <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-add_sequence_item">add_sequence_item</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-cleanup_indent_history">cleanup_indent_history</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-count_documents">count_documents</a>
             <a class="list-group-item" href="../module/yaml_parser.html#proc-debug_print">debug_print</a>
-            <a class="list-group-item" href="../module/yaml_parser.html#proc-determine_value_type">determine_value_type</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-debug_print_node_structure">debug_print_node_structure</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-determine_value_type~2">determine_value_type</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-find_sequence_parent">find_sequence_parent</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-handle_block_sequence">handle_block_sequence</a>
             <a class="list-group-item" href="../module/yaml_parser.html#proc-initialize_document">initialize_document</a>
             <a class="list-group-item" href="../module/yaml_parser.html#proc-initialize_node">initialize_node</a>
             <a class="list-group-item" href="../module/yaml_parser.html#proc-parse_flow_form">parse_flow_form</a>
             <a class="list-group-item" href="../module/yaml_parser.html#proc-parse_line">parse_line</a>
             <a class="list-group-item" href="../module/yaml_parser.html#proc-parse_mapping">parse_mapping</a>
-            <a class="list-group-item" href="../module/yaml_parser.html#proc-parse_sequence">parse_sequence</a>
-            <a class="list-group-item" href="../module/yaml_parser.html#proc-parse_yaml">parse_yaml</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-parse_yaml_wrapper">parse_yaml_wrapper</a>
+            <a class="list-group-item" href="../module/yaml_parser.html#proc-record_indent_level">record_indent_level</a>
             <a class="list-group-item" href="../module/yaml_parser.html#proc-set_debug_level">set_debug_level</a>
             <a class="list-group-item" href="../module/yaml_parser.html#proc-validate_node">validate_node</a>
         </div>
@@ -205,8 +252,8 @@ It handles document structure, value types, indentation, sequences, and mapping 
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
-                  <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_fortran_env'>iso_fortran_env</a></li>
                   <li class="list-inline-item"><a href='yaml_types.html'>yaml_types</a></li>
+                  <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_fortran_env'>iso_fortran_env</a></li>
               </ul>
             </li>
             <li class="list-group-item">
@@ -469,6 +516,176 @@ large graphs.</div>
     <tbody>
         <tr>
             <td>
+              <span class="anchor" id="variable-dbg_child"></span>
+              character(len=*),
+            </td>
+              <td>public,</td>
+            <td>
+parameter               
+            </td>
+            <td>::</td>
+            <td><strong>DBG_CHILD</strong></td>
+<td> =</td>
+                <td>&#34;  |- CHILD: &#34;</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dbg_fmt_indent"></span>
+              character(len=*),
+            </td>
+              <td>public,</td>
+            <td>
+parameter               
+            </td>
+            <td>::</td>
+            <td><strong>DBG_FMT_INDENT</strong></td>
+<td> =</td>
+                <td>&#34;(2A)&#34;</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dbg_fmt_key"></span>
+              character(len=*),
+            </td>
+              <td>public,</td>
+            <td>
+parameter               
+            </td>
+            <td>::</td>
+            <td><strong>DBG_FMT_KEY</strong></td>
+<td> =</td>
+                <td>&#34;(2A)&#34;</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dbg_fmt_level"></span>
+              character(len=*),
+            </td>
+              <td>public,</td>
+            <td>
+parameter               
+            </td>
+            <td>::</td>
+            <td><strong>DBG_FMT_LEVEL</strong></td>
+<td> =</td>
+                <td>&#34;(A,I0,2A,I0)&#34;</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dbg_fmt_node"></span>
+              character(len=*),
+            </td>
+              <td>public,</td>
+            <td>
+parameter               
+            </td>
+            <td>::</td>
+            <td><strong>DBG_FMT_NODE</strong></td>
+<td> =</td>
+                <td>&#34;(3A,I0)&#34;</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dbg_indent"></span>
+              character(len=*),
+            </td>
+              <td>public,</td>
+            <td>
+parameter               
+            </td>
+            <td>::</td>
+            <td><strong>DBG_INDENT</strong></td>
+<td> =</td>
+                <td>&#34;    &#34;</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dbg_level"></span>
+              character(len=*),
+            </td>
+              <td>public,</td>
+            <td>
+parameter               
+            </td>
+            <td>::</td>
+            <td><strong>DBG_LEVEL</strong></td>
+<td> =</td>
+                <td>&#34;LEVEL &#34;</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dbg_new_node"></span>
+              character(len=*),
+            </td>
+              <td>public,</td>
+            <td>
+parameter               
+            </td>
+            <td>::</td>
+            <td><strong>DBG_NEW_NODE</strong></td>
+<td> =</td>
+                <td>&#34;--- NEW NODE: &#34;</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dbg_parent"></span>
+              character(len=*),
+            </td>
+              <td>public,</td>
+            <td>
+parameter               
+            </td>
+            <td>::</td>
+            <td><strong>DBG_PARENT</strong></td>
+<td> =</td>
+                <td>&#34;=== PARENT: &#34;</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dbg_sibling"></span>
+              character(len=*),
+            </td>
+              <td>public,</td>
+            <td>
+parameter               
+            </td>
+            <td>::</td>
+            <td><strong>DBG_SIBLING</strong></td>
+<td> =</td>
+                <td>&#34;  |+ SIBLING: &#34;</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
               <span class="anchor" id="variable-debug_error"></span>
               integer,
             </td>
@@ -496,14 +713,14 @@ parameter
             <td>::</td>
             <td><strong>DEBUG_INFO</strong></td>
 <td> =</td>
-                <td>3</td>
+                <td>2</td>
             <td>
                 <p>Show general info messages</p>
             </td>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-debug_none"></span>
+              <span class="anchor" id="variable-err_file"></span>
               integer,
             </td>
               <td>public,</td>
@@ -511,62 +728,11 @@ parameter
 parameter               
             </td>
             <td>::</td>
-            <td><strong>DEBUG_NONE</strong></td>
-<td> =</td>
-                <td>0</td>
-            <td>
-                <p>Disable all debug output</p>
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-debug_verbose"></span>
-              integer,
-            </td>
-              <td>public,</td>
-            <td>
-parameter               
-            </td>
-            <td>::</td>
-            <td><strong>DEBUG_VERBOSE</strong></td>
-<td> =</td>
-                <td>4</td>
-            <td>
-                <p>Show verbose debug output</p>
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-debug_warn"></span>
-              integer,
-            </td>
-              <td>public,</td>
-            <td>
-parameter               
-            </td>
-            <td>::</td>
-            <td><strong>DEBUG_WARN</strong></td>
-<td> =</td>
-                <td>2</td>
-            <td>
-                <p>Show warnings and errors</p>
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-err_file_not_found"></span>
-              integer,
-            </td>
-              <td>public,</td>
-            <td>
-parameter               
-            </td>
-            <td>::</td>
-            <td><strong>ERR_FILE_NOT_FOUND</strong></td>
+            <td><strong>ERR_FILE</strong></td>
 <td> =</td>
                 <td>1</td>
             <td>
-                <p>YAML file not found or inaccessible</p>
+                <p>File access error</p>
             </td>
         </tr>
         <tr>
@@ -581,14 +747,14 @@ parameter
             <td>::</td>
             <td><strong>ERR_MEMORY</strong></td>
 <td> =</td>
-                <td>4</td>
+                <td>3</td>
             <td>
                 <p>Memory allocation error</p>
             </td>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-err_parse_error"></span>
+              <span class="anchor" id="variable-err_parse"></span>
               integer,
             </td>
               <td>public,</td>
@@ -596,28 +762,11 @@ parameter
 parameter               
             </td>
             <td>::</td>
-            <td><strong>ERR_PARSE_ERROR</strong></td>
-<td> =</td>
-                <td>3</td>
-            <td>
-                <p>Error parsing YAML content</p>
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-err_read_error"></span>
-              integer,
-            </td>
-              <td>public,</td>
-            <td>
-parameter               
-            </td>
-            <td>::</td>
-            <td><strong>ERR_READ_ERROR</strong></td>
+            <td><strong>ERR_PARSE</strong></td>
 <td> =</td>
                 <td>2</td>
             <td>
-                <p>Error reading from file</p>
+                <p>Parse error</p>
             </td>
         </tr>
         <tr>
@@ -649,7 +798,41 @@ parameter
             <td>::</td>
             <td><strong>debug_level</strong></td>
 <td> =</td>
-                <td>DEBUG_ERROR</td>
+                <td>DEBUG_INFO</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-indent_history"></span>
+              type(<a href='../type/indent_tracker.html'>indent_tracker</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              pointer, save
+            </td>
+            <td>::</td>
+            <td><strong>indent_history</strong></td>
+<td>=&gt; </td>
+                <td>null()</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-indent_width"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>indent_width</strong></td>
+<td> =</td>
+                <td>2</td>
             <td>
                 
             </td>
@@ -661,11 +844,426 @@ parameter
         <br>
 
 
+        <section>
+          <h2>Interfaces</h2>
+              <div class="card">
+    <div class="card-header bg-light codesum">
+      <span class="anchor" id="interface-check_sequence"></span>
+      <h3>public        interface <a href='../interface/check_sequence.html'>check_sequence</a> 
+      </h3>
+    </div>
+    <ul class="list-group">
+          <li class="list-group-item">
+                <h3>
+    public  function <a href='../proc/check_sequence_node.html'>check_sequence_node</a>(node) result(is_seq)  
 
+    </h3>
+    
+  <p>Check if value is a sequence</p>
+<p>@param[in] node Node to check
+@return True if the node represents a sequence</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-node~18"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>node</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>logical</small>
+    </h4>
+    
+
+          </li>
+    </ul>
+  </div>
+
+              <div class="card">
+    <div class="card-header bg-light codesum">
+      <span class="anchor" id="interface-parse_yaml"></span>
+      <h3>public        interface <a href='../interface/parse_yaml.html'>parse_yaml</a> 
+      </h3>
+    </div>
+    <ul class="list-group">
+          <li class="list-group-item">
+                <h3>
+    public  subroutine <a href='../proc/parse_yaml_wrapper.html'>parse_yaml_wrapper</a>(filename, docs, status)  
+
+    </h3>
+    
+  <p>Wrapper subroutine for parsing YAML files</p>
+<p>@param[in] filename Name of the YAML file to parse
+@param[out] docs Array of parsed YAML documents
+@param[out] status Status code indicating success or error</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-filename~2"></span>
+              character(len=*),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>filename</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-docs~2"></span>
+              type(<a href='../type/yaml_document.html'>yaml_document</a>),
+            </td>
+<td>intent(out),</td>
+              <td></td>            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>docs</strong>(:)</td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-status~2"></span>
+              integer,
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>status</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+          </li>
+    </ul>
+  </div>
+
+        </section>
+        <br>
 
 
         <section>
+          <h2>Derived Types</h2>
+              <div class="card">
+    <div class="card-header codesum">
+      <span class="anchor" id="type-indent_tracker"></span>
+      <h3>
+        type, public&nbsp;::&nbsp;
+        <a href='../type/indent_tracker.html'>indent_tracker</a>
+        
+      </h3>
+    </div>
+    <div class="card-body">
+      
+
+        <h4>Components</h4>
+          <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Visibility</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+<th></th><th scope="col">Initial</th>        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-indent~3"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>indent</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-last_key"></span>
+              character(len=:),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>last_key</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-line_num~2"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>line_num</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-next~3"></span>
+              type(<a href='../type/indent_tracker.html'>indent_tracker</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>next</strong></td>
+<td>=&gt; </td>
+                <td>null()</td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum">
+      <span class="anchor" id="type-stack_entry"></span>
+      <h3>
+        type, public&nbsp;::&nbsp;
+        <a href='../type/stack_entry.html'>stack_entry</a>
+        
+      </h3>
+    </div>
+    <div class="card-body">
+      
+
+        <h4>Components</h4>
+          <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Visibility</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+<th></th><th scope="col">Initial</th>        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-node~9"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>node</strong></td>
+<td>=&gt; </td>
+                <td>null()</td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+
+    </div>
+  </div>
+
+        </section>
+        <br>
+
+        <section>
           <h2>Functions</h2>
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-check_key_hierarchy"></span> <h3>public  function <a href='../proc/check_key_hierarchy.html'>check_key_hierarchy</a>(current, previous, target_indent) result(is_valid)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Check key hierarchy for validity</p><a href="../proc/check_key_hierarchy.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-current~29"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>current</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-previous"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>previous</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-target_indent~2"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>target_indent</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>logical</small>
+    </h4>
+    
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-check_sequence_node"></span> <h3>public  function <a href='../proc/check_sequence_node.html'>check_sequence_node</a>(node) result(is_seq)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Check if value is a sequence</p><a href="../proc/check_sequence_node.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-node~18"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>node</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>logical</small>
+    </h4>
+    
+
+    </div>
+  </div>
+
               <div class="card">
     <div class="card-header codesum"><span class="anchor" id="proc-count_leading_spaces"></span> <h3>public  function <a href='../proc/count_leading_spaces.html'>count_leading_spaces</a>(line)  
 </h3></div>
@@ -686,7 +1284,7 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-line~4"></span>
+              <span class="anchor" id="variable-line~6"></span>
               character(len=*),
             </td>
 <td>intent(in)</td>
@@ -712,11 +1310,11 @@ parameter
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-is_int_string"></span> <h3>public  function <a href='../proc/is_int_string.html'>is_int_string</a>(str) result(is_int)  
+    <div class="card-header codesum"><span class="anchor" id="proc-find_block_sequence_parent"></span> <h3>public  function <a href='../proc/find_block_sequence_parent.html'>find_block_sequence_parent</a>(root, item_node) result(parent)  
 </h3></div>
     <div class="card-body">
           
-  <p>Check if string represents an integer</p><a href="../proc/is_int_string.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+  <p>Find parent node for block sequence item</p><a href="../proc/find_block_sequence_parent.html" class="pull-right"><emph>Read more&hellip;</emph></a>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -731,7 +1329,82 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-str~2"></span>
+              <span class="anchor" id="variable-root~6"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td></td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>root</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-item_node"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td></td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>item_node</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>type(<a href='../type/yaml_node.html'>yaml_node</a>), pointer</small>
+    </h4>
+    
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-find_nested_node"></span> <h3>public recursive function <a href='../proc/find_nested_node.html'>find_nested_node</a>(node, key_path) result(found_node)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Find a nested node by key path</p><a href="../proc/find_nested_node.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-node~17"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td></td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>node</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-key_path"></span>
               character(len=*),
             </td>
 <td>intent(in)</td>
@@ -739,7 +1412,322 @@ parameter
               
             </td>
             <td>::</td>
-            <td><strong>str</strong></td>
+            <td><strong>key_path</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>type(<a href='../type/yaml_node.html'>yaml_node</a>), pointer</small>
+    </h4>
+    
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-find_or_create_intermediate_nodes"></span> <h3>public  function <a href='../proc/find_or_create_intermediate_nodes.html'>find_or_create_intermediate_nodes</a>(parent, target_indent, new_node) result(last_node)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Find or create intermediate nodes to match target indentation</p><a href="../proc/find_or_create_intermediate_nodes.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-parent~2"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>parent</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-target_indent"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>target_indent</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-new_node~2"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>new_node</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>type(<a href='../type/yaml_node.html'>yaml_node</a>), pointer</small>
+    </h4>
+    
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-find_parent_by_indent"></span> <h3>public  function <a href='../proc/find_parent_by_indent.html'>find_parent_by_indent</a>(root, child_indent, line_num) result(parent)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Find parent node by indentation level</p><a href="../proc/find_parent_by_indent.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-root~9"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td></td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>root</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-child_indent"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>child_indent</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-line_num~4"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>line_num</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>type(<a href='../type/yaml_node.html'>yaml_node</a>), pointer</small>
+    </h4>
+    
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-find_sequence_parent_node"></span> <h3>public  function <a href='../proc/find_sequence_parent_node.html'>find_sequence_parent_node</a>(root, current) result(parent)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Find parent node containing key for sequence</p><a href="../proc/find_sequence_parent_node.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-root~8"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>root</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-current~23"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>current</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>type(<a href='../type/yaml_node.html'>yaml_node</a>), pointer</small>
+    </h4>
+    
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-get_sequence_as_strings"></span> <h3>public  function <a href='../proc/get_sequence_as_strings.html'>get_sequence_as_strings</a>(node) result(items)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Get sequence items as string array</p><a href="../proc/get_sequence_as_strings.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-node~19"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>node</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>character(len=:), allocatable, dimension(:)</small>
+    </h4>
+    
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-has_sequence_parent"></span> <h3>public  function <a href='../proc/has_sequence_parent.html'>has_sequence_parent</a>(root, indent) result(has_parent)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Check if node has a sequence parent at given indent</p><a href="../proc/has_sequence_parent.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-root~3"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td></td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>root</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-indent~5"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>indent</strong></td>
             <td>
 
             </td>
@@ -757,11 +1745,11 @@ parameter
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-is_real_string"></span> <h3>public  function <a href='../proc/is_real_string.html'>is_real_string</a>(str) result(is_real)  
+    <div class="card-header codesum"><span class="anchor" id="proc-integer_to_string"></span> <h3>public  function <a href='../proc/integer_to_string.html'>integer_to_string</a>(num) result(str)  
 </h3></div>
     <div class="card-body">
           
-  <p>Check if string can be parsed as real number</p><a href="../proc/is_real_string.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+  <p>Convert integer to string</p><a href="../proc/integer_to_string.html" class="pull-right"><emph>Read more&hellip;</emph></a>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -776,7 +1764,52 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-str"></span>
+              <span class="anchor" id="variable-num"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>num</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>character(len=32)</small>
+    </h4>
+    
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-starts_with_trimmed"></span> <h3>public  function <a href='../proc/starts_with_trimmed.html'>starts_with_trimmed</a>(line, prefix)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Check if a trimmed line starts with a specific string</p><a href="../proc/starts_with_trimmed.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-line~7"></span>
               character(len=*),
             </td>
 <td>intent(in)</td>
@@ -784,7 +1817,22 @@ parameter
               
             </td>
             <td>::</td>
-            <td><strong>str</strong></td>
+            <td><strong>line</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-prefix~3"></span>
+              character(len=*),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>prefix</strong></td>
             <td>
 
             </td>
@@ -821,7 +1869,7 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-str~3"></span>
+              <span class="anchor" id="variable-str~4"></span>
               character(len=*),
             </td>
 <td>intent(in)</td>
@@ -852,11 +1900,164 @@ parameter
         <section>
           <h2>Subroutines</h2>
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-debug_print"></span> <h3>public  subroutine <a href='../proc/debug_print.html'>debug_print</a>(level, message, error_code)  
+    <div class="card-header codesum"><span class="anchor" id="proc-add_sequence_item"></span> <h3>public  subroutine <a href='../proc/add_sequence_item.html'>add_sequence_item</a>(parent, value)  
 </h3></div>
     <div class="card-body">
           
-  <p>Debug message printer</p><a href="../proc/debug_print.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+  <p>Add a new item to a sequence node</p><a href="../proc/add_sequence_item.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-parent~4"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>parent</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-value~4"></span>
+              character(len=*),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>value</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-cleanup_indent_history"></span> <h3>public  subroutine <a href='../proc/cleanup_indent_history.html'>cleanup_indent_history</a>()  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Clean up indent history when done parsing</p>
+
+  <h4>Arguments</h4>
+    <em>None</em>
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-count_documents"></span> <h3>public  subroutine <a href='../proc/count_documents.html'>count_documents</a>(filename, size_out, found_marker, stat)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Helper subroutine to count the number of YAML documents in a file</p><a href="../proc/count_documents.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-filename~3"></span>
+              character(len=*),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>filename</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-size_out"></span>
+              integer,
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>size_out</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-found_marker"></span>
+              logical,
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>found_marker</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-stat"></span>
+              integer,
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>stat</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-debug_print"></span> <h3>public  subroutine <a href='../proc/debug_print.html'>debug_print</a>(level, message, error_code, msg_type)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Print debug messages with appropriate formatting and prefixes</p><a href="../proc/debug_print.html" class="pull-right"><emph>Read more&hellip;</emph></a>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -914,6 +2115,21 @@ parameter
 
             </td>
         </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-msg_type"></span>
+              character(len=*),
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>msg_type</strong></td>
+            <td>
+
+            </td>
+        </tr>
     </tbody>
   </table>
 
@@ -922,11 +2138,11 @@ parameter
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-determine_value_type"></span> <h3>public  subroutine <a href='../proc/determine_value_type.html'>determine_value_type</a>(node)  
+    <div class="card-header codesum"><span class="anchor" id="proc-debug_print_node_structure"></span> <h3>public recursive subroutine <a href='../proc/debug_print_node_structure.html'>debug_print_node_structure</a>(node, prefix, max_depth)  
 </h3></div>
     <div class="card-body">
           
-  <p>Determine value type of node</p><a href="../proc/determine_value_type.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+  <p>Print the structure of a YAML node and its children for debugging</p><a href="../proc/debug_print_node_structure.html" class="pull-right"><emph>Read more&hellip;</emph></a>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -941,7 +2157,77 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-node~5"></span>
+              <span class="anchor" id="variable-node~16"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>node</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-prefix~4"></span>
+              character(len=*),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>prefix</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-max_depth"></span>
+              integer,
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>max_depth</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-determine_value_type~2"></span> <h3>public  subroutine <a href='../proc/determine_value_type~2.html'>determine_value_type</a>(node)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Determine value type of node</p><a href="../proc/determine_value_type~2.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-node~14"></span>
               type(<a href='../type/yaml_node.html'>yaml_node</a>),
             </td>
 <td>intent(inout)</td>
@@ -950,6 +2236,161 @@ parameter
             </td>
             <td>::</td>
             <td><strong>node</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-find_sequence_parent"></span> <h3>public  subroutine <a href='../proc/find_sequence_parent.html'>find_sequence_parent</a>(root, indent, parent_key)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Find the parent key for a sequence</p><a href="../proc/find_sequence_parent.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-root~4"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td></td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>root</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-indent~6"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>indent</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-parent_key~2"></span>
+              character(len=:),
+            </td>
+<td>intent(out),</td>
+              <td></td>            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>parent_key</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-handle_block_sequence"></span> <h3>public  subroutine <a href='../proc/handle_block_sequence.html'>handle_block_sequence</a>(line, doc, node, status)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Handle block sequence items, ensuring they're properly linked and labeled</p><a href="../proc/handle_block_sequence.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-line~4"></span>
+              character(len=*),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>line</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-doc~3"></span>
+              type(<a href='../type/yaml_document.html'>yaml_document</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>doc</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-node~10"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>node</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-status~5"></span>
+              integer,
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>status</strong></td>
             <td>
 
             </td>
@@ -1021,7 +2462,7 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-node~4"></span>
+              <span class="anchor" id="variable-node~13"></span>
               type(<a href='../type/yaml_node.html'>yaml_node</a>),
             </td>
 <td>intent(inout),</td>
@@ -1061,7 +2502,7 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-line~3"></span>
+              <span class="anchor" id="variable-line~5"></span>
               character(len=*),
             </td>
 <td>intent(in)</td>
@@ -1076,7 +2517,7 @@ parameter
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-node"></span>
+              <span class="anchor" id="variable-node~11"></span>
               type(<a href='../type/yaml_node.html'>yaml_node</a>),
             </td>
 <td>intent(inout),</td>
@@ -1097,7 +2538,7 @@ parameter
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-parse_line"></span> <h3>public  subroutine <a href='../proc/parse_line.html'>parse_line</a>(line, doc, status)  
+    <div class="card-header codesum"><span class="anchor" id="proc-parse_line"></span> <h3>public  subroutine <a href='../proc/parse_line.html'>parse_line</a>(line, doc, status, line_num)  
 </h3></div>
     <div class="card-body">
           
@@ -1116,7 +2557,7 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-line~2"></span>
+              <span class="anchor" id="variable-line~3"></span>
               character(len=*),
             </td>
 <td>intent(in)</td>
@@ -1146,7 +2587,7 @@ parameter
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-status~2"></span>
+              <span class="anchor" id="variable-status~4"></span>
               integer,
             </td>
 <td>intent(out)</td>
@@ -1155,6 +2596,21 @@ parameter
             </td>
             <td>::</td>
             <td><strong>status</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-line_num~3"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>line_num</strong></td>
             <td>
 
             </td>
@@ -1186,7 +2642,7 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-content~3"></span>
+              <span class="anchor" id="variable-content~2"></span>
               character(len=*),
             </td>
 <td>intent(inout)</td>
@@ -1201,7 +2657,7 @@ parameter
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-node~3"></span>
+              <span class="anchor" id="variable-node~12"></span>
               type(<a href='../type/yaml_node.html'>yaml_node</a>),
             </td>
 <td>intent(inout),</td>
@@ -1222,11 +2678,11 @@ parameter
   </div>
 
               <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-parse_sequence"></span> <h3>public  subroutine <a href='../proc/parse_sequence.html'>parse_sequence</a>(content, node)  
+    <div class="card-header codesum"><span class="anchor" id="proc-parse_yaml_wrapper"></span> <h3>public  subroutine <a href='../proc/parse_yaml_wrapper.html'>parse_yaml_wrapper</a>(filename, docs, status)  
 </h3></div>
     <div class="card-body">
           
-  <p>Parse sequence elements from flow style</p><a href="../proc/parse_sequence.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+  <p>Wrapper subroutine for parsing YAML files</p><a href="../proc/parse_yaml_wrapper.html" class="pull-right"><emph>Read more&hellip;</emph></a>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -1241,62 +2697,7 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-content~2"></span>
-              character(len=:),
-            </td>
-<td>intent(inout),</td>
-              <td></td>            <td>
-              allocatable
-            </td>
-            <td>::</td>
-            <td><strong>content</strong></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-node~2"></span>
-              type(<a href='../type/yaml_node.html'>yaml_node</a>),
-            </td>
-<td>intent(inout),</td>
-              <td></td>            <td>
-              pointer
-            </td>
-            <td>::</td>
-            <td><strong>node</strong></td>
-            <td>
-
-            </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-    </div>
-  </div>
-
-              <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-parse_yaml"></span> <h3>public  subroutine <a href='../proc/parse_yaml.html'>parse_yaml</a>(filename, docs, status)  
-</h3></div>
-    <div class="card-body">
-          
-  <p>Parse a YAML file into document structure</p><a href="../proc/parse_yaml.html" class="pull-right"><emph>Read more&hellip;</emph></a>
-
-  <h4>Arguments</h4>
-      <table class="table table-striped varlist">
-    <thead>
-      <tr>
-        <th scope="col">Type</th>
-<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
-        <th scope="col"></th>
-        <th scope="col">Name</th>
-        <th scope="col"></th>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-filename"></span>
+              <span class="anchor" id="variable-filename~2"></span>
               character(len=*),
             </td>
 <td>intent(in)</td>
@@ -1311,7 +2712,7 @@ parameter
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-docs"></span>
+              <span class="anchor" id="variable-docs~2"></span>
               type(<a href='../type/yaml_document.html'>yaml_document</a>),
             </td>
 <td>intent(out),</td>
@@ -1326,7 +2727,7 @@ parameter
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-status"></span>
+              <span class="anchor" id="variable-status~2"></span>
               integer,
             </td>
 <td>intent(out)</td>
@@ -1347,11 +2748,81 @@ parameter
   </div>
 
               <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-record_indent_level"></span> <h3>public  subroutine <a href='../proc/record_indent_level.html'>record_indent_level</a>(indent, key, line_num)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Record the last key at a given indentation level</p><a href="../proc/record_indent_level.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-indent~7"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>indent</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-key~7"></span>
+              character(len=*),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>key</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-line_num~5"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>line_num</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
     <div class="card-header codesum"><span class="anchor" id="proc-set_debug_level"></span> <h3>public  subroutine <a href='../proc/set_debug_level.html'>set_debug_level</a>(level)  
 </h3></div>
     <div class="card-body">
           
-  <p>Set the debug output level</p><a href="../proc/set_debug_level.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+  <p>Set the debug output level for the YAML parser</p><a href="../proc/set_debug_level.html" class="pull-right"><emph>Read more&hellip;</emph></a>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -1406,7 +2877,7 @@ parameter
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-node~6"></span>
+              <span class="anchor" id="variable-node~15"></span>
               type(<a href='../type/yaml_node.html'>yaml_node</a>),
             </td>
 <td>intent(in),</td>
@@ -1421,7 +2892,7 @@ parameter
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-status~3"></span>
+              <span class="anchor" id="variable-status~6"></span>
               integer,
             </td>
 <td>intent(out)</td>
@@ -1457,14 +2928,14 @@ parameter
           <div class="col">
             <p>
               Fyaml
- was developed by Barry Baker<br>              &copy; 2024 
+ was developed by Barry Baker and Zach Moon<br>              &copy; 2024 
 </p>
           </div>
           <div class="col">
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on "2024-12-11 01:53 +0000" <br>&copy; <a rel="license" href="http://www.gnu.org/licenses/old-licenses/fdl-1.2.en.html">GNU Free Documentation License</a>             </p>
+ on "2025-01-23 13:47 +0000" <br>&copy; <a rel="license" href="http://www.gnu.org/licenses/old-licenses/fdl-1.2.en.html">GNU Free Documentation License</a>             </p>
           </div>
         </div>
         <br>

@@ -1,44 +1,37 @@
-!> YAML data type definitions module
+!> Core YAML type definitions
 !!
-!! Provides derived type definitions for YAML parsing and representation.
-!! Includes node types for building document trees and error handling.
+!! Defines the fundamental types needed for YAML parsing.
+!! These types form the backbone of the document structure.
 !!
-!! @author Barry Baker
-!! @version 0.1.0
+!! @private
 module yaml_types
-  implicit none
+    implicit none
+    private
+    public :: yaml_node, yaml_document
 
-  !> Node type representing a single YAML element
-  !!
-  !! Core type for building YAML document trees. Can represent scalars,
-  !! sequences, and mappings with type information and linking.
-  type :: yaml_node
-    character(len=:), allocatable :: key    !< Node key name
-    character(len=:), allocatable :: value  !< Node value content
-    type(yaml_node), pointer :: children => null() !< Child nodes for nested structures
-    type(yaml_node), pointer :: next => null()     !< Next sibling node in sequence
-    logical :: is_sequence = .false.  !< True if node is part of sequence
-    logical :: is_null = .false.      !< True if node represents null value
-    logical :: is_boolean = .false.   !< True if node contains boolean value
-    logical :: is_integer = .false.   !< True if node contains integer value
-    logical :: is_float = .false.     !< True if node contains float value
-    logical :: is_string = .true.     !< True if node contains string value
-  end type yaml_node
+    !> Core node type for YAML elements
+    type :: yaml_node
+        character(len=:), allocatable :: key    !< Node key name
+        character(len=:), allocatable :: value  !< Node value content
+        type(yaml_node), pointer :: children => null() !< Child nodes
+        type(yaml_node), pointer :: next => null()    !< Next sibling
+        type(yaml_node), pointer :: parent => null()  !< Parent node
+        integer :: indent = 0  !< Indentation level
+        integer :: line_num = 0 !< Line number in source file where node appeared
+        integer :: last_child_line = 0 !< Line number of last processed child
+        logical :: is_sequence = .false.  !< Sequence flag
+        logical :: is_null = .false.      !< Null value flag
+        logical :: is_boolean = .false.   !< Boolean flag
+        logical :: is_integer = .false.   !< Integer flag
+        logical :: is_float = .false.     !< Float flag
+        logical :: is_string = .true.     !< String flag (default)
+        logical :: is_root = .false.      !< Root node flag (replaces is_root_key)
+    end type yaml_node
 
-  !> Document type containing full YAML structure
-  !!
-  !! Root container for a YAML document tree. Holds reference to
-  !! top-level node and document-wide settings.
-  type :: yaml_document
-    type(yaml_node), pointer :: root => null() !< Root node of document tree
-  end type yaml_document
+    !> Document container type
+    type :: yaml_document
+        type(yaml_node), pointer :: root => null() !< Root node
+    end type yaml_document
 
-  !> Error handling type for YAML operations
-  !!
-  !! Used to track and report errors during YAML processing.
-  type :: yaml_error
-    logical :: has_error = .false.           !< True if error occurred
-    character(len=256) :: message = ''       !< Error message text
-  end type yaml_error
-
+    ! Remove yaml_error type - handle errors through status codes
 end module yaml_types

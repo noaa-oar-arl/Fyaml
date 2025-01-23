@@ -7,10 +7,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
       <meta name="description" content="A modern lightweight Fortran YAML parser">
-    <meta name="author" content="Barry Baker" >
+    <meta name="author" content="Barry Baker and Zach Moon" >
     <link rel="icon" href="../favicon.png">
 
-    <title>determine_value_type &ndash; Fyaml</title>
+    <title>record_indent_level &ndash; Fyaml</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
@@ -63,7 +63,7 @@
 
     <div class="container">
   <div class="row">
-    <h1>determine_value_type
+    <h1>record_indent_level
       <small>Subroutine</small>
       
     </h1>
@@ -74,7 +74,7 @@
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                 title="10.3% of total for procedures.">44 statements</a>
+                 title=" 1.8% of total for procedures.">20 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -88,7 +88,7 @@
           <ol class="breadcrumb justify-content-end mb-0">
                 <li class="breadcrumb-item"><a href='../sourcefile/yaml_parser.f90.html'>yaml_parser.F90</a></li>
                 <li class="breadcrumb-item"><a href='../module/yaml_parser.html'>yaml_parser</a></li>
-            <li class="breadcrumb-item active" aria-current="page">determine_value_type</li>
+            <li class="breadcrumb-item active" aria-current="page">record_indent_level</li>
           </ol>
         </nav>
       </div>
@@ -114,13 +114,8 @@
       </a>
       <div id="vars-0" class="collapse">
         <div class="list-group list-group-flush">
-            <a class="list-group-item" href="../proc/determine_value_type.html#variable-i_value">i_value</a>
-            <a class="list-group-item" href="../proc/determine_value_type.html#variable-is_int">is_int</a>
-            <a class="list-group-item" href="../proc/determine_value_type.html#variable-is_real">is_real</a>
-            <a class="list-group-item" href="../proc/determine_value_type.html#variable-l_value">l_value</a>
-            <a class="list-group-item" href="../proc/determine_value_type.html#variable-r_value">r_value</a>
-            <a class="list-group-item" href="../proc/determine_value_type.html#variable-rc">rc</a>
-            <a class="list-group-item" href="../proc/determine_value_type.html#variable-temp_str">temp_str</a>
+            <a class="list-group-item" href="../proc/record_indent_level.html#variable-current~30">current</a>
+            <a class="list-group-item" href="../proc/record_indent_level.html#variable-new_entry">new_entry</a>
         </div>
       </div>
     </div>
@@ -150,13 +145,14 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <h2>public  subroutine determine_value_type(node)  
+    <h2>public  subroutine record_indent_level(indent, key, line_num)  
 </h2>
     
 
-    <p>Determine value type of node</p>
-<p>Checks content and sets appropriate type flags</p>
-<p>@param[in,out] node Node to analyze</p>
+    <p>Record the last key at a given indentation level</p>
+<p>@param[in] indent Indentation level
+@param[in] key Key to record
+@param[in] line_num Line number of the key</p>
 
 
     <h3>Arguments</h3>
@@ -172,15 +168,45 @@
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-node~5"></span>
-              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+              <span class="anchor" id="variable-indent~7"></span>
+              integer,
             </td>
-<td>intent(inout)</td>
+<td>intent(in)</td>
               <td></td>            <td>
               
             </td>
             <td>::</td>
-            <td><strong>node</strong></td>
+            <td><strong>indent</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-key~7"></span>
+              character(len=*),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>key</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-line_num~5"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>line_num</strong></td>
             <td>
                 
             </td>
@@ -191,7 +217,7 @@
     <br>
     <div class="card">
       <div class="card-header">
-  <h3 class="card-title">Calls</h3>
+  <h3 class="card-title">Called by</h3>
       </div>
       <div class="card-body">
   <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -199,69 +225,69 @@
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <!-- Generated by graphviz version 2.43.0 (0)
  -->
-<!-- Title: proc~~determine_value_type~~CallsGraph Pages: 1 -->
-<svg id="procdetermine_value_typeCallsGraph" width="257pt" height="116pt"
- viewBox="0.00 0.00 257.00 116.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="proc~~determine_value_type~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 112)">
-<title>proc~~determine_value_type~~CallsGraph</title>
-<polygon fill="white" stroke="transparent" points="-4,4 -4,-112 253,-112 253,4 -4,4"/>
-<!-- proc~determine_value_type -->
-<g id="proc~~determine_value_type~~CallsGraph_node1" class="node">
-<title>proc~determine_value_type</title>
-<polygon fill="none" stroke="black" points="131,-66 0,-66 0,-42 131,-42 131,-66"/>
-<text text-anchor="middle" x="65.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50">determine_value_type</text>
+<!-- Title: proc~~record_indent_level~~CalledByGraph Pages: 1 -->
+<svg id="procrecord_indent_levelCalledByGraph" width="498pt" height="32pt"
+ viewBox="0.00 0.00 498.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~record_indent_level~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>proc~~record_indent_level~~CalledByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 494,-28 494,4 -4,4"/>
+<!-- proc~record_indent_level -->
+<g id="proc~~record_indent_level~~CalledByGraph_node1" class="node">
+<title>proc~record_indent_level</title>
+<polygon fill="none" stroke="black" points="490,-24 373,-24 373,0 490,0 490,-24"/>
+<text text-anchor="middle" x="431.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">record_indent_level</text>
 </g>
-<!-- proc~is_int_string -->
-<g id="proc~~determine_value_type~~CallsGraph_node2" class="node">
-<title>proc~is_int_string</title>
-<g id="a_proc~~determine_value_type~~CallsGraph_node2"><a xlink:href="../proc/is_int_string.html" xlink:title="is_int_string">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="245.5,-108 170.5,-108 170.5,-84 245.5,-84 245.5,-108"/>
-<text text-anchor="middle" x="208" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">is_int_string</text>
+<!-- proc~parse_line -->
+<g id="proc~~record_indent_level~~CalledByGraph_node2" class="node">
+<title>proc~parse_line</title>
+<g id="a_proc~~record_indent_level~~CalledByGraph_node2"><a xlink:href="../proc/parse_line.html" xlink:title="parse_line">
+<polygon fill="#d9534f" stroke="#d9534f" points="337,-24 270,-24 270,0 337,0 337,-24"/>
+<text text-anchor="middle" x="303.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">parse_line</text>
 </a>
 </g>
 </g>
-<!-- proc~determine_value_type&#45;&gt;proc~is_int_string -->
-<g id="proc~~determine_value_type~~CallsGraph_edge1" class="edge">
-<title>proc~determine_value_type&#45;&gt;proc~is_int_string</title>
-<path fill="none" stroke="#ff0000" d="M106.76,-66.04C123.44,-71.02 142.89,-76.83 160.19,-82.01"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="159.51,-85.46 170.1,-84.97 161.52,-78.75 159.51,-85.46"/>
+<!-- proc~parse_line&#45;&gt;proc~record_indent_level -->
+<g id="proc~~record_indent_level~~CalledByGraph_edge1" class="edge">
+<title>proc~parse_line&#45;&gt;proc~record_indent_level</title>
+<path fill="none" stroke="#ff0000" d="M337.28,-12C345.22,-12 354.01,-12 362.92,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="362.99,-15.5 372.99,-12 362.99,-8.5 362.99,-15.5"/>
 </g>
-<!-- proc~is_real_string -->
-<g id="proc~~determine_value_type~~CallsGraph_node3" class="node">
-<title>proc~is_real_string</title>
-<g id="a_proc~~determine_value_type~~CallsGraph_node3"><a xlink:href="../proc/is_real_string.html" xlink:title="is_real_string">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="249,-66 167,-66 167,-42 249,-42 249,-66"/>
-<text text-anchor="middle" x="208" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">is_real_string</text>
+<!-- proc~parse_yaml_wrapper -->
+<g id="proc~~record_indent_level~~CalledByGraph_node3" class="node">
+<title>proc~parse_yaml_wrapper</title>
+<g id="a_proc~~record_indent_level~~CalledByGraph_node3"><a xlink:href="../proc/parse_yaml_wrapper.html" xlink:title="parse_yaml_wrapper">
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 110,-24 110,0 234,0 234,-24"/>
+<text text-anchor="middle" x="172" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">parse_yaml_wrapper</text>
 </a>
 </g>
 </g>
-<!-- proc~determine_value_type&#45;&gt;proc~is_real_string -->
-<g id="proc~~determine_value_type~~CallsGraph_edge2" class="edge">
-<title>proc~determine_value_type&#45;&gt;proc~is_real_string</title>
-<path fill="none" stroke="#ff0000" d="M131.4,-54C139.9,-54 148.5,-54 156.7,-54"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="156.84,-57.5 166.84,-54 156.84,-50.5 156.84,-57.5"/>
+<!-- proc~parse_yaml_wrapper&#45;&gt;proc~parse_line -->
+<g id="proc~~record_indent_level~~CalledByGraph_edge2" class="edge">
+<title>proc~parse_yaml_wrapper&#45;&gt;proc~parse_line</title>
+<path fill="none" stroke="#ff0000" d="M234.34,-12C242.98,-12 251.7,-12 259.89,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="259.92,-15.5 269.92,-12 259.92,-8.5 259.92,-15.5"/>
 </g>
-<!-- proc~to_lower -->
-<g id="proc~~determine_value_type~~CallsGraph_node4" class="node">
-<title>proc~to_lower</title>
-<g id="a_proc~~determine_value_type~~CallsGraph_node4"><a xlink:href="../proc/to_lower.html" xlink:title="to_lower">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="237,-24 179,-24 179,0 237,0 237,-24"/>
-<text text-anchor="middle" x="208" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">to_lower</text>
+<!-- interface~parse_yaml -->
+<g id="proc~~record_indent_level~~CalledByGraph_node4" class="node">
+<title>interface~parse_yaml</title>
+<g id="a_proc~~record_indent_level~~CalledByGraph_node4"><a xlink:href="../interface/parse_yaml.html" xlink:title="parse_yaml">
+<polygon fill="#a7506f" stroke="#a7506f" points="74,-24 0,-24 0,0 74,0 74,-24"/>
+<text text-anchor="middle" x="37" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">parse_yaml</text>
 </a>
 </g>
 </g>
-<!-- proc~determine_value_type&#45;&gt;proc~to_lower -->
-<g id="proc~~determine_value_type~~CallsGraph_edge3" class="edge">
-<title>proc~determine_value_type&#45;&gt;proc~to_lower</title>
-<path fill="none" stroke="#ff0000" d="M106.76,-41.96C126.37,-36.1 149.82,-29.09 169.11,-23.33"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="170.19,-26.66 178.77,-20.44 168.19,-19.95 170.19,-26.66"/>
+<!-- interface~parse_yaml&#45;&gt;proc~parse_yaml_wrapper -->
+<g id="proc~~record_indent_level~~CalledByGraph_edge3" class="edge">
+<title>interface~parse_yaml&#45;&gt;proc~parse_yaml_wrapper</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M74.34,-12C82.25,-12 90.87,-12 99.61,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="99.89,-15.5 109.89,-12 99.89,-8.5 99.89,-15.5"/>
 </g>
 </g>
 </svg>
 </div>          <div>
-            <a type="button" class="graph-help" data-bs-toggle="modal" href="#CallsGraph-help-text">Help</a>
+            <a type="button" class="graph-help" data-bs-toggle="modal" href="#CalledByGraph-help-text">Help</a>
           </div>
-          <div class="modal fade" id="CallsGraph-help-text" tabindex="-1" role="dialog">
+          <div class="modal fade" id="CalledByGraph-help-text" tabindex="-1" role="dialog">
             <div class="modal-dialog modal-lg" role="document">
               <div class="modal-content">
                 <div class="modal-header">
@@ -356,15 +382,15 @@ large graphs.</div>
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-i_value"></span>
-              integer,
+              <span class="anchor" id="variable-current~30"></span>
+              type(<a href='../type/indent_tracker.html'>indent_tracker</a>),
             </td>
-              <td>public</td>
+              <td>public,</td>
             <td>
-              
+              pointer
             </td>
             <td>::</td>
-            <td><strong>i_value</strong></td>
+            <td><strong>current</strong></td>
                 <td></td>
                 <td></td>
             <td>
@@ -373,100 +399,15 @@ large graphs.</div>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-is_int"></span>
-              logical,
+              <span class="anchor" id="variable-new_entry"></span>
+              type(<a href='../type/indent_tracker.html'>indent_tracker</a>),
             </td>
-              <td>public</td>
+              <td>public,</td>
             <td>
-              
+              pointer
             </td>
             <td>::</td>
-            <td><strong>is_int</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-is_real"></span>
-              logical,
-            </td>
-              <td>public</td>
-            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>is_real</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-l_value"></span>
-              logical,
-            </td>
-              <td>public</td>
-            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>l_value</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-r_value"></span>
-              real,
-            </td>
-              <td>public</td>
-            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>r_value</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-rc"></span>
-              integer,
-            </td>
-              <td>public</td>
-            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>rc</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-temp_str"></span>
-              character(len=32),
-            </td>
-              <td>public</td>
-            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>temp_str</strong></td>
+            <td><strong>new_entry</strong></td>
                 <td></td>
                 <td></td>
             <td>
@@ -499,14 +440,14 @@ large graphs.</div>
           <div class="col">
             <p>
               Fyaml
- was developed by Barry Baker<br>              &copy; 2024 
+ was developed by Barry Baker and Zach Moon<br>              &copy; 2024 
 </p>
           </div>
           <div class="col">
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on "2024-12-11 01:53 +0000" <br>&copy; <a rel="license" href="http://www.gnu.org/licenses/old-licenses/fdl-1.2.en.html">GNU Free Documentation License</a>             </p>
+ on "2025-01-23 13:47 +0000" <br>&copy; <a rel="license" href="http://www.gnu.org/licenses/old-licenses/fdl-1.2.en.html">GNU Free Documentation License</a>             </p>
           </div>
         </div>
         <br>

@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
       <meta name="description" content="A modern lightweight Fortran YAML parser">
-    <meta name="author" content="Barry Baker" >
+    <meta name="author" content="Barry Baker and Zach Moon" >
     <link rel="icon" href="../favicon.png">
 
     <title>fyaml &ndash; Fyaml</title>
@@ -74,7 +74,7 @@
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                 title="35.1% of total for modules and submodules.">253 statements</a>
+                 title="39.9% of total for modules and submodules.">877 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -113,7 +113,19 @@
   
   
   
-  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#inters-0"
+         aria-expanded="false" aria-controls="inters-0">
+         <h4 class="card-header bg-primary text-white">Interfaces</h4>
+      </a>
+      <div id="inters-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/fyaml.html#interface-count_children">count_children</a>
+            <a class="list-group-item" href="../module/fyaml.html#interface-get_child_keys">get_child_keys</a>
+        </div>
+      </div>
+    </div>
+
   
       <div class="card mb-4">
       <a data-bs-toggle="collapse" href="#types-0"
@@ -126,12 +138,23 @@
             <a class="list-group-item" href="../module/fyaml.html#type-yaml_dict">yaml_dict</a>
             <a class="list-group-item" href="../module/fyaml.html#type-yaml_pair">yaml_pair</a>
             <a class="list-group-item" href="../module/fyaml.html#type-yaml_value">yaml_value</a>
-            <a class="list-group-item" href="../module/fyaml.html#type-yaml_wrapper">yaml_wrapper</a>
         </div>
       </div>
     </div>
 
-  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#funcs-0"
+         aria-expanded="false" aria-controls="funcs-0">
+         <h4 class="card-header bg-primary text-white">Functions</h4>
+      </a>
+      <div id="funcs-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/fyaml.html#proc-get_root_keys">get_root_keys</a>
+            <a class="list-group-item" href="../module/fyaml.html#proc-split_key">split_key</a>
+        </div>
+      </div>
+    </div>
+
   
   
   
@@ -150,13 +173,18 @@
       <p>A modern Fortran module for parsing YAML files</p>
 <p>This module provides functionality to read and parse YAML files into Fortran
 data structures. It supports nested dictionaries, sequences, and various data types.</p>
+<p>Example:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">type</span><span class="p">(</span><span class="n">fyaml_doc</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">doc</span>
+<span class="k">call </span><span class="n">doc</span><span class="p">%</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">)</span>
+<span class="k">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">doc</span><span class="p">%</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;config%nested%key&quot;</span><span class="p">)</span>
+</code></pre></div>
+
 <div class="alert alert-info">
 <p class="alert-title h4">Note</p>
-<p>Currently supports strings, integers, reals, booleans, nulls, sequences and nested structures
-@author Barry Baker
-@date 2024
-@version 0.1.0
-@copyright GNU GENERAL PUBLIC LICENSE v3.0</p>
+<p>Supports strings, integers, reals, booleans, nulls, and sequences
+@version 1.0.0
+@see yaml_parser
+@see yaml_types</p>
 </div>
 <br>          <div class="card mb-4">
       <h3 class="card-header card-title bg-light">Uses</h3>
@@ -164,9 +192,9 @@ data structures. It supports nested dictionaries, sequences, and various data ty
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
-                  <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_fortran_env'>iso_fortran_env</a></li>
-                  <li class="list-inline-item"><a href='yaml_parser.html'>yaml_parser</a></li>
                   <li class="list-inline-item"><a href='yaml_types.html'>yaml_types</a></li>
+                  <li class="list-inline-item"><a href='yaml_parser.html'>yaml_parser</a></li>
+                  <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_fortran_env'>iso_fortran_env</a></li>
               </ul>
             </li>
             <li class="list-group-item">
@@ -329,6 +357,210 @@ large graphs.</div>
 
 
 
+        <section>
+          <h2>Interfaces</h2>
+              <div class="card">
+    <div class="card-header bg-light codesum">
+      <span class="anchor" id="interface-count_children"></span>
+      <h3>public        interface <a href='../interface/count_children.html'>count_children</a> 
+      </h3>
+    </div>
+    <ul class="list-group">
+          <li class="list-group-item">
+                <h3>
+    private  function count_node_children(node) result(count)  
+
+    </h3>
+  <p>Count direct children of a yaml_node</p>
+<p>@param[in] node Node to count children for
+@return Number of direct children</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-node~7"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>node</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>integer</small>
+    </h4>
+    
+
+          </li>
+          <li class="list-group-item">
+                <h3>
+    private  function count_value_children(val) result(count)  
+
+    </h3>
+  <p>Count direct children of a yaml_value</p>
+<p>@param[in] val Value to count children for
+@return Number of direct children</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-val~11"></span>
+              type(<a href='../type/yaml_value.html'>yaml_value</a>),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>val</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>integer</small>
+    </h4>
+    
+
+          </li>
+    </ul>
+  </div>
+
+              <div class="card">
+    <div class="card-header bg-light codesum">
+      <span class="anchor" id="interface-get_child_keys"></span>
+      <h3>public        interface <a href='../interface/get_child_keys.html'>get_child_keys</a> 
+      </h3>
+    </div>
+    <ul class="list-group">
+          <li class="list-group-item">
+                <h3>
+    private  function get_node_child_keys(node) result(keys)  
+
+    </h3>
+  <p>Get all child keys of a yaml_node</p>
+<p>@param[in] node Node to get children from
+@return Array of child key names</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-node~8"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>node</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>character(len=:), allocatable, dimension(:)</small>
+    </h4>
+    
+
+          </li>
+          <li class="list-group-item">
+                <h3>
+    private  function get_value_child_keys(val) result(keys)  
+
+    </h3>
+  <p>Get all child keys of a yaml_value</p>
+<p>@param[in] val Value to get children from
+@return Array of child key names</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-val~12"></span>
+              class(<a href='../type/yaml_value.html'>yaml_value</a>),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>val</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>character(len=:), allocatable, dimension(:)</small>
+    </h4>
+    
+
+          </li>
+    </ul>
+  </div>
+
+        </section>
+        <br>
 
 
         <section>
@@ -343,7 +575,7 @@ large graphs.</div>
       </h3>
     </div>
     <div class="card-body">
-      <p>YAML document container</p>
+      <p>Main document type for YAML parsing</p><a href="../type/fyaml_doc.html" class="pull-right"><emph>Read more&hellip;</emph></a>
 
         <h4>Components</h4>
           <table class="table table-striped varlist">
@@ -358,17 +590,34 @@ large graphs.</div>
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-root"></span>
+              <span class="anchor" id="variable-docs"></span>
               type(<a href='../type/yaml_dict.html'>yaml_dict</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>docs</strong>(:)</td>
+                <td></td>
+                <td></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-n_docs"></span>
+              integer,
             </td>
               <td>public</td>
             <td>
               
             </td>
             <td>::</td>
-            <td><strong>root</strong></td>
-                <td></td>
-                <td></td>
+            <td><strong>n_docs</strong></td>
+<td> =</td>
+                <td>0</td>
             <td>
 
             </td>
@@ -384,7 +633,47 @@ large graphs.</div>
           <tbody>
               <tr>
                 <td>  procedure, public ::
+  <strong><a href='../type/fyaml_doc.html#boundprocedure-get~3'>get</a></strong> => get_doc_nested</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/fyaml_doc.html#boundprocedure-get_bool~2'>get_bool</a></strong> => get_nested_bool</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/fyaml_doc.html#boundprocedure-get_default_doc'>get_default_doc</a></strong></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/fyaml_doc.html#boundprocedure-get_doc'>get_doc</a></strong> => get_document</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/fyaml_doc.html#boundprocedure-get_int~2'>get_int</a></strong> => get_nested_int</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/fyaml_doc.html#boundprocedure-get_real~2'>get_real</a></strong> => get_nested_real</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/fyaml_doc.html#boundprocedure-get_str~2'>get_str</a></strong> => get_nested_str</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
   <strong><a href='../type/fyaml_doc.html#boundprocedure-load'>load</a></strong> => load_yaml_doc</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/fyaml_doc.html#boundprocedure-root_keys'>root_keys</a></strong> => <a href='/home/runner/work/Fyaml/Fyaml/doc/proc/get_root_keys.html'>get_root_keys</a></td>
                 <td></td>
               </tr>
           </tbody>
@@ -402,7 +691,7 @@ large graphs.</div>
       </h3>
     </div>
     <div class="card-body">
-      <p>Dictionary container type</p>
+      <p>Dictionary container type</p><a href="../type/yaml_dict.html" class="pull-right"><emph>Read more&hellip;</emph></a>
 
         <h4>Components</h4>
           <table class="table table-striped varlist">
@@ -488,7 +777,7 @@ large graphs.</div>
       </h3>
     </div>
     <div class="card-body">
-      <p>Dictionary key-value pair type</p>
+      <p>Dictionary key-value pair type</p><a href="../type/yaml_pair.html" class="pull-right"><emph>Read more&hellip;</emph></a>
 
         <h4>Components</h4>
           <table class="table table-striped varlist">
@@ -501,6 +790,23 @@ large graphs.</div>
 <th></th><th scope="col">Initial</th>        <th scope="col"></th>
     </thead>
     <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-indent_level"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>indent_level</strong></td>
+<td> =</td>
+                <td>0</td>
+            <td>
+
+            </td>
+        </tr>
         <tr>
             <td>
               <span class="anchor" id="variable-key~2"></span>
@@ -537,7 +843,7 @@ large graphs.</div>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-next"></span>
+              <span class="anchor" id="variable-next~2"></span>
               type(<a href='../type/yaml_pair.html'>yaml_pair</a>),
             </td>
               <td>public,</td>
@@ -588,7 +894,7 @@ large graphs.</div>
       </h3>
     </div>
     <div class="card-body">
-      <p>Value container type supporting multiple YAML data types</p>
+      <p>Value container type supporting multiple YAML data types</p><a href="../type/yaml_value.html" class="pull-right"><emph>Read more&hellip;</emph></a>
 
         <h4>Components</h4>
           <table class="table table-striped varlist">
@@ -603,140 +909,21 @@ large graphs.</div>
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-bool_val"></span>
-              logical,
-            </td>
-              <td>public</td>
-            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>bool_val</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-dict_val"></span>
-              type(<a href='../type/yaml_dict.html'>yaml_dict</a>),
+              <span class="anchor" id="variable-node"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
             </td>
               <td>public,</td>
             <td>
               pointer
             </td>
             <td>::</td>
-            <td><strong>dict_val</strong></td>
+            <td><strong>node</strong></td>
 <td>=&gt; </td>
                 <td>null()</td>
             <td>
 
             </td>
         </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-int_val"></span>
-              integer,
-            </td>
-              <td>public</td>
-            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>int_val</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-is_null"></span>
-              logical,
-            </td>
-              <td>public</td>
-            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>is_null</strong></td>
-<td> =</td>
-                <td>.false.</td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-real_val"></span>
-              real,
-            </td>
-              <td>public</td>
-            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>real_val</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-sequence"></span>
-              character(len=:),
-            </td>
-              <td>public,</td>
-            <td>
-              allocatable, dimension(:)
-            </td>
-            <td>::</td>
-            <td><strong>sequence</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-str_val"></span>
-              character(len=:),
-            </td>
-              <td>public,</td>
-            <td>
-              allocatable
-            </td>
-            <td>::</td>
-            <td><strong>str_val</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-value_type"></span>
-              integer,
-            </td>
-              <td>public</td>
-            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>value_type</strong></td>
-<td> =</td>
-                <td>0</td>
-            <td>
-
-            </td>
-        </tr>
     </tbody>
   </table>
 
@@ -748,105 +935,72 @@ large graphs.</div>
           <tbody>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/yaml_value.html#boundprocedure-get'>get</a></strong> => get_nested_value</td>
-                <td></td>
-              </tr>
-          </tbody>
-        </table>
-    </div>
-  </div>
-
-              <div class="card">
-    <div class="card-header codesum">
-      <span class="anchor" id="type-yaml_wrapper"></span>
-      <h3>
-        type, public&nbsp;::&nbsp;
-        <a href='../type/yaml_wrapper.html'>yaml_wrapper</a>
-        
-      </h3>
-    </div>
-    <div class="card-body">
-      <p>YAML document wrapper with raw and processed forms</p>
-
-        <h4>Components</h4>
-          <table class="table table-striped varlist">
-    <thead>
-      <tr>
-        <th scope="col">Type</th>
-<th scope="col">Visibility</th>        <th scope="col">Attributes</th>
-        <th scope="col"></th>
-        <th scope="col">Name</th>
-<th></th><th scope="col">Initial</th>        <th scope="col"></th>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-dict"></span>
-              type(<a href='../type/yaml_dict.html'>yaml_dict</a>),
-            </td>
-              <td>public</td>
-            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>dict</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-doc~3"></span>
-              type(<a href='../type/fyaml_doc.html'>fyaml_doc</a>),
-            </td>
-              <td>public</td>
-            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>doc</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-raw_doc"></span>
-              type(<a href='../type/yaml_document.html'>yaml_document</a>),
-            </td>
-              <td>public</td>
-            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>raw_doc</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-
-            </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-
-
-        <h4>Type-Bound Procedures</h4>
-        <table class="table table-striped varlist">
-          <tbody>
-              <tr>
-                <td>  procedure, public ::
-  <strong><a href='../type/yaml_wrapper.html#boundprocedure-convert'>convert</a></strong> => convert_to_dict</td>
+  <strong><a href='../type/yaml_value.html#boundprocedure-child_at'>child_at</a></strong> => get_child_at_index</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='../type/yaml_wrapper.html#boundprocedure-load~2'>load</a></strong> => load_yaml_wrapper</td>
+  <strong><a href='../type/yaml_value.html#boundprocedure-child_keys'>child_keys</a></strong> => get_value_child_keys</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/yaml_value.html#boundprocedure-get'>get</a></strong> => get_value_nested</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/yaml_value.html#boundprocedure-get_bool'>get_bool</a></strong> => get_boolean_value</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/yaml_value.html#boundprocedure-get_int'>get_int</a></strong> => get_integer_value</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/yaml_value.html#boundprocedure-get_real'>get_real</a></strong> => get_real_value</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/yaml_value.html#boundprocedure-get_sequence'>get_sequence</a></strong> => get_sequence_values</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/yaml_value.html#boundprocedure-get_sequence_bool'>get_sequence_bool</a></strong> => get_sequence_bools</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/yaml_value.html#boundprocedure-get_sequence_int'>get_sequence_int</a></strong> => get_sequence_integers</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/yaml_value.html#boundprocedure-get_sequence_real'>get_sequence_real</a></strong> => get_sequence_reals</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/yaml_value.html#boundprocedure-get_str'>get_str</a></strong> => get_string_value</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/yaml_value.html#boundprocedure-is_null~2'>is_null</a></strong> => check_null</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/yaml_value.html#boundprocedure-is_sequence~2'>is_sequence</a></strong> => check_sequence_impl</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>  procedure, public ::
+  <strong><a href='../type/yaml_value.html#boundprocedure-size'>size</a></strong> => get_sequence_size</td>
                 <td></td>
               </tr>
           </tbody>
@@ -857,6 +1011,100 @@ large graphs.</div>
         </section>
         <br>
 
+        <section>
+          <h2>Functions</h2>
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-get_root_keys"></span> <h3>public  function <a href='../proc/get_root_keys.html'>get_root_keys</a>(this) result(keys)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Get all root keys from the document</p><a href="../proc/get_root_keys.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-this~7"></span>
+              class(<a href='../type/fyaml_doc.html'>fyaml_doc</a>),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>character(len=:), allocatable, dimension(:)</small>
+    </h4>
+    
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-split_key"></span> <h3>public  function <a href='../proc/split_key.html'>split_key</a>(path) result(parts)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Split a path by % delimiter</p><a href="../proc/split_key.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-path~6"></span>
+              character(len=*),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>path</strong></td>
+            <td>
+
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>character(len=:), allocatable, dimension(:)</small>
+    </h4>
+    
+
+    </div>
+  </div>
+
+        </section>
+        <br>
 
 
 
@@ -872,14 +1120,14 @@ large graphs.</div>
           <div class="col">
             <p>
               Fyaml
- was developed by Barry Baker<br>              &copy; 2024 
+ was developed by Barry Baker and Zach Moon<br>              &copy; 2024 
 </p>
           </div>
           <div class="col">
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on "2024-12-11 01:53 +0000" <br>&copy; <a rel="license" href="http://www.gnu.org/licenses/old-licenses/fdl-1.2.en.html">GNU Free Documentation License</a>             </p>
+ on "2025-01-23 13:47 +0000" <br>&copy; <a rel="license" href="http://www.gnu.org/licenses/old-licenses/fdl-1.2.en.html">GNU Free Documentation License</a>             </p>
           </div>
         </div>
         <br>

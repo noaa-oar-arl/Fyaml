@@ -7,10 +7,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
       <meta name="description" content="A modern lightweight Fortran YAML parser">
-    <meta name="author" content="Barry Baker" >
+    <meta name="author" content="Barry Baker and Zach Moon" >
     <link rel="icon" href="../favicon.png">
 
-    <title>yaml_error &ndash; Fyaml </title>
+    <title>find_nested_node &ndash; Fyaml</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
@@ -63,8 +63,8 @@
 
     <div class="container">
   <div class="row">
-    <h1>yaml_error
-      <small>Derived Type</small>
+    <h1>find_nested_node
+      <small>Function</small>
       
     </h1>
       <div class="container p-2 mb-4 bg-light border rounded-3">
@@ -74,21 +74,21 @@
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                 title="<p> 6.9% of total for derived types.</p>Including implementation: 4 statements,  2.4% of total for derived types.">4 statements</a>
+                 title=" 2.7% of total for procedures.">30 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
               <i class="fa fa-code"></i>
-              <a href="../src/yaml_types.F90"> Source File</a>
+              <a href="../src/yaml_parser.F90"> Source File</a>
             </li>
         </ul>
       </div>
       <div class="col">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb justify-content-end mb-0">
-                <li class="breadcrumb-item"><a href='../sourcefile/yaml_types.f90.html'>yaml_types.F90</a></li>
-                <li class="breadcrumb-item"><a href='../module/yaml_types.html'>yaml_types</a></li>
-            <li class="breadcrumb-item active" aria-current="page">yaml_error</li>
+                <li class="breadcrumb-item"><a href='../sourcefile/yaml_parser.f90.html'>yaml_parser.F90</a></li>
+                <li class="breadcrumb-item"><a href='../module/yaml_parser.html'>yaml_parser</a></li>
+            <li class="breadcrumb-item active" aria-current="page">find_nested_node</li>
           </ol>
         </nav>
       </div>
@@ -114,8 +114,10 @@
       </a>
       <div id="vars-0" class="collapse">
         <div class="list-group list-group-flush">
-            <a class="list-group-item" href="../type/yaml_error.html#variable-has_error">has_error</a>
-            <a class="list-group-item" href="../type/yaml_error.html#variable-message~2">message</a>
+            <a class="list-group-item" href="../proc/find_nested_node.html#variable-current~25">current</a>
+            <a class="list-group-item" href="../proc/find_nested_node.html#variable-delim_pos">delim_pos</a>
+            <a class="list-group-item" href="../proc/find_nested_node.html#variable-first_key">first_key</a>
+            <a class="list-group-item" href="../proc/find_nested_node.html#variable-remaining_path~3">remaining_path</a>
         </div>
       </div>
     </div>
@@ -145,14 +147,72 @@
     </div>
     
     <div class="col-md-9" id='text'>
-      <h2 id="type-def-statement">
-        type, public :: yaml_error</h2>
-    <p>Error handling type for YAML operations</p>
-<p>Used to track and report errors during YAML processing.</p>
+    <h2>public recursive function find_nested_node(node, key_path) result(found_node)  
+</h2>
+    
+
+    <p>Find a nested node by key path</p>
+<p>@param[in] node Node to start search from
+@param[in] key_path Key path to search for, separated by '%'
+@return Found node matching the key path</p>
+
+
+    <h3>Arguments</h3>
+        <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-node~17"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+<td></td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>node</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-key_path"></span>
+              character(len=*),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>key_path</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+      <h3>Return Value
+        <small>
+          <span class="anchor" id="variable-found_node"></span>
+          type(<a href='../type/yaml_node.html'>yaml_node</a>), pointer
+        </small>
+      </h3>
+      
     <br>
 
-    <section>
-    <h2>Components</h2>
+
+    <section>    
+      <h2>Variables</h2>
       <table class="table table-striped varlist">
     <thead>
       <tr>
@@ -165,34 +225,68 @@
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-has_error"></span>
-              logical,
+              <span class="anchor" id="variable-current~25"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
             </td>
-              <td>public</td>
+              <td>public,</td>
             <td>
-              
+              pointer
             </td>
             <td>::</td>
-            <td><strong>has_error</strong></td>
-<td> =</td>
-                <td>.false.</td>
+            <td><strong>current</strong></td>
+                <td></td>
+                <td></td>
             <td>
                 
             </td>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-message~2"></span>
-              character(len=256),
+              <span class="anchor" id="variable-delim_pos"></span>
+              integer,
             </td>
               <td>public</td>
             <td>
               
             </td>
             <td>::</td>
-            <td><strong>message</strong></td>
-<td> =</td>
-                <td>&#39;&#39;</td>
+            <td><strong>delim_pos</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-first_key"></span>
+              character(len=:),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>first_key</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-remaining_path~3"></span>
+              character(len=:),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>remaining_path</strong></td>
+                <td></td>
+                <td></td>
             <td>
                 
             </td>
@@ -203,9 +297,14 @@
     </section>
     <br>
     
+    
+
+    
+    
 
 
 
+    
     
     </div>
   </div>
@@ -218,14 +317,14 @@
           <div class="col">
             <p>
               Fyaml
- was developed by Barry Baker<br>              &copy; 2024 
+ was developed by Barry Baker and Zach Moon<br>              &copy; 2024 
 </p>
           </div>
           <div class="col">
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on "2024-12-11 01:53 +0000" <br>&copy; <a rel="license" href="http://www.gnu.org/licenses/old-licenses/fdl-1.2.en.html">GNU Free Documentation License</a>             </p>
+ on "2025-01-23 13:47 +0000" <br>&copy; <a rel="license" href="http://www.gnu.org/licenses/old-licenses/fdl-1.2.en.html">GNU Free Documentation License</a>             </p>
           </div>
         </div>
         <br>

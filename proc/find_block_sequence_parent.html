@@ -10,7 +10,7 @@
     <meta name="author" content="Barry Baker and Zach Moon" >
     <link rel="icon" href="../favicon.png">
 
-    <title>parse_line &ndash; Fyaml</title>
+    <title>find_block_sequence_parent &ndash; Fyaml</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
@@ -63,8 +63,8 @@
 
     <div class="container">
   <div class="row">
-    <h1>parse_line
-      <small>Subroutine</small>
+    <h1>find_block_sequence_parent
+      <small>Function</small>
       
     </h1>
       <div class="container p-2 mb-4 bg-light border rounded-3">
@@ -74,7 +74,7 @@
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                 title="19.6% of total for procedures.">216 statements</a>
+                 title=" 7.4% of total for procedures.">82 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -88,7 +88,7 @@
           <ol class="breadcrumb justify-content-end mb-0">
                 <li class="breadcrumb-item"><a href='../sourcefile/yaml_parser.f90.html'>yaml_parser.F90</a></li>
                 <li class="breadcrumb-item"><a href='../module/yaml_parser.html'>yaml_parser</a></li>
-            <li class="breadcrumb-item active" aria-current="page">parse_line</li>
+            <li class="breadcrumb-item active" aria-current="page">find_block_sequence_parent</li>
           </ol>
         </nav>
       </div>
@@ -114,18 +114,17 @@
       </a>
       <div id="vars-0" class="collapse">
         <div class="list-group list-group-flush">
-            <a class="list-group-item" href="../proc/parse_line.html#variable-current_indent">current_indent</a>
-            <a class="list-group-item" href="../proc/parse_line.html#variable-current_node~2">current_node</a>
-            <a class="list-group-item" href="../proc/parse_line.html#variable-debug_msg~3">debug_msg</a>
-            <a class="list-group-item" href="../proc/parse_line.html#variable-error_msg~2">error_msg</a>
-            <a class="list-group-item" href="../proc/parse_line.html#variable-io_stat~3">io_stat</a>
-            <a class="list-group-item" href="../proc/parse_line.html#variable-is_sequence_item">is_sequence_item</a>
-            <a class="list-group-item" href="../proc/parse_line.html#variable-local_line">local_line</a>
-            <a class="list-group-item" href="../proc/parse_line.html#variable-new_node">new_node</a>
-            <a class="list-group-item" href="../proc/parse_line.html#variable-parent_indent">parent_indent</a>
-            <a class="list-group-item" href="../proc/parse_line.html#variable-parent_key">parent_key</a>
-            <a class="list-group-item" href="../proc/parse_line.html#variable-parent_node">parent_node</a>
-            <a class="list-group-item" href="../proc/parse_line.html#variable-pos~2">pos</a>
+            <a class="list-group-item" href="../proc/find_block_sequence_parent.html#variable-max_stack">MAX_STACK</a>
+            <a class="list-group-item" href="../proc/find_block_sequence_parent.html#variable-alloc_stat~2">alloc_stat</a>
+            <a class="list-group-item" href="../proc/find_block_sequence_parent.html#variable-best_candidate">best_candidate</a>
+            <a class="list-group-item" href="../proc/find_block_sequence_parent.html#variable-current~21">current</a>
+            <a class="list-group-item" href="../proc/find_block_sequence_parent.html#variable-current_indent~4">current_indent</a>
+            <a class="list-group-item" href="../proc/find_block_sequence_parent.html#variable-debug_msg~5">debug_msg</a>
+            <a class="list-group-item" href="../proc/find_block_sequence_parent.html#variable-found_match">found_match</a>
+            <a class="list-group-item" href="../proc/find_block_sequence_parent.html#variable-indent_level~2">indent_level</a>
+            <a class="list-group-item" href="../proc/find_block_sequence_parent.html#variable-item_indent">item_indent</a>
+            <a class="list-group-item" href="../proc/find_block_sequence_parent.html#variable-stack">stack</a>
+            <a class="list-group-item" href="../proc/find_block_sequence_parent.html#variable-stack_top">stack_top</a>
         </div>
       </div>
     </div>
@@ -155,20 +154,14 @@
     </div>
     
     <div class="col-md-9" id='text'>
-    <h2>public  subroutine parse_line(line, doc, status, line_num)  
+    <h2>public  function find_block_sequence_parent(root, item_node) result(parent)  
 </h2>
     
 
-    <p>Parse a single line of YAML content</p>
-<p>Processes a line and updates document structure. Handles:
-- Indentation
-- Sequence items
-- Key-value pairs
-- Nested structures</p>
-<p>@param[in]     line Input line
-@param[in,out] doc  Document being built
-@param[out]    status Status code
-@param[in]     line_num Line number of the input line</p>
+    <p>Find parent node for block sequence item</p>
+<p>@param[in] root Root node to start search from
+@param[in] item_node Node representing the sequence item
+@return Parent node found for the sequence item</p>
 
 
     <h3>Arguments</h3>
@@ -184,60 +177,30 @@
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-line~3"></span>
-              character(len=*),
+              <span class="anchor" id="variable-root~6"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
             </td>
-<td>intent(in)</td>
+<td></td>
               <td></td>            <td>
-              
+              pointer
             </td>
             <td>::</td>
-            <td><strong>line</strong></td>
+            <td><strong>root</strong></td>
             <td>
                 
             </td>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-doc~2"></span>
-              type(<a href='../type/yaml_document.html'>yaml_document</a>),
+              <span class="anchor" id="variable-item_node"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
             </td>
-<td>intent(inout)</td>
+<td></td>
               <td></td>            <td>
-              
+              pointer
             </td>
             <td>::</td>
-            <td><strong>doc</strong></td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-status~4"></span>
-              integer,
-            </td>
-<td>intent(out)</td>
-              <td></td>            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>status</strong></td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-line_num~3"></span>
-              integer,
-            </td>
-<td>intent(in)</td>
-              <td></td>            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>line_num</strong></td>
+            <td><strong>item_node</strong></td>
             <td>
                 
             </td>
@@ -245,6 +208,13 @@
     </tbody>
   </table>
 
+      <h3>Return Value
+        <small>
+          <span class="anchor" id="variable-parent~5"></span>
+          type(<a href='../type/yaml_node.html'>yaml_node</a>), pointer
+        </small>
+      </h3>
+      
     <br>
     <div class="card">
       <div class="card-header">
@@ -256,176 +226,32 @@
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <!-- Generated by graphviz version 2.43.0 (0)
  -->
-<!-- Title: proc~~parse_line~~CallsGraph Pages: 1 -->
-<svg id="procparse_lineCallsGraph" width="554pt" height="318pt"
- viewBox="0.00 0.00 554.00 318.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="proc~~parse_line~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 314)">
-<title>proc~~parse_line~~CallsGraph</title>
-<polygon fill="white" stroke="transparent" points="-4,4 -4,-314 550,-314 550,4 -4,4"/>
-<!-- proc~parse_line -->
-<g id="proc~~parse_line~~CallsGraph_node1" class="node">
-<title>proc~parse_line</title>
-<polygon fill="none" stroke="black" points="67,-166 0,-166 0,-142 67,-142 67,-166"/>
-<text text-anchor="middle" x="33.5" y="-151.6" font-family="Helvetica,sans-Serif" font-size="10.50">parse_line</text>
-</g>
-<!-- proc~count_leading_spaces -->
-<g id="proc~~parse_line~~CallsGraph_node2" class="node">
-<title>proc~count_leading_spaces</title>
-<g id="a_proc~~parse_line~~CallsGraph_node2"><a xlink:href="../proc/count_leading_spaces.html" xlink:title="count_leading_spaces">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="249.5,-310 119.5,-310 119.5,-286 249.5,-286 249.5,-310"/>
-<text text-anchor="middle" x="184.5" y="-295.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">count_leading_spaces</text>
-</a>
-</g>
-</g>
-<!-- proc~parse_line&#45;&gt;proc~count_leading_spaces -->
-<g id="proc~~parse_line~~CallsGraph_edge1" class="edge">
-<title>proc~parse_line&#45;&gt;proc~count_leading_spaces</title>
-<path fill="none" stroke="#ff0000" d="M37.78,-166.27C45.09,-191.15 65.12,-247.67 103,-277 105.3,-278.78 107.74,-280.41 110.28,-281.91"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="108.75,-285.06 119.25,-286.48 111.93,-278.82 108.75,-285.06"/>
+<!-- Title: proc~~find_block_sequence_parent~~CallsGraph Pages: 1 -->
+<svg id="procfind_block_sequence_parentCallsGraph" width="283pt" height="32pt"
+ viewBox="0.00 0.00 283.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~find_block_sequence_parent~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>proc~~find_block_sequence_parent~~CallsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 279,-28 279,4 -4,4"/>
+<!-- proc~find_block_sequence_parent -->
+<g id="proc~~find_block_sequence_parent~~CallsGraph_node1" class="node">
+<title>proc~find_block_sequence_parent</title>
+<polygon fill="none" stroke="black" points="163,-24 0,-24 0,0 163,0 163,-24"/>
+<text text-anchor="middle" x="81.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">find_block_sequence_parent</text>
 </g>
 <!-- proc~debug_print -->
-<g id="proc~~parse_line~~CallsGraph_node3" class="node">
+<g id="proc~~find_block_sequence_parent~~CallsGraph_node2" class="node">
 <title>proc~debug_print</title>
-<g id="a_proc~~parse_line~~CallsGraph_node3"><a xlink:href="../proc/debug_print.html" xlink:title="debug_print">
-<polygon fill="#d9534f" stroke="#d9534f" points="399.5,-197 323.5,-197 323.5,-173 399.5,-173 399.5,-197"/>
-<text text-anchor="middle" x="361.5" y="-182.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">debug_print</text>
+<g id="a_proc~~find_block_sequence_parent~~CallsGraph_node2"><a xlink:href="../proc/debug_print.html" xlink:title="debug_print">
+<polygon fill="#d9534f" stroke="#d9534f" points="275,-24 199,-24 199,0 275,0 275,-24"/>
+<text text-anchor="middle" x="237" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">debug_print</text>
 </a>
 </g>
-</g>
-<!-- proc~parse_line&#45;&gt;proc~debug_print -->
-<g id="proc~~parse_line~~CallsGraph_edge2" class="edge">
-<title>proc~parse_line&#45;&gt;proc~debug_print</title>
-<path fill="none" stroke="#ff0000" d="M67.25,-157.11C125.18,-162.62 245.94,-174.11 313.01,-180.48"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="313.01,-184 323.3,-181.46 313.67,-177.03 313.01,-184"/>
-</g>
-<!-- proc~find_block_sequence_parent -->
-<g id="proc~~parse_line~~CallsGraph_node4" class="node">
-<title>proc~find_block_sequence_parent</title>
-<g id="a_proc~~parse_line~~CallsGraph_node4"><a xlink:href="../proc/find_block_sequence_parent.html" xlink:title="find_block_sequence_parent">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="266,-268 103,-268 103,-244 266,-244 266,-268"/>
-<text text-anchor="middle" x="184.5" y="-253.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">find_block_sequence_parent</text>
-</a>
-</g>
-</g>
-<!-- proc~parse_line&#45;&gt;proc~find_block_sequence_parent -->
-<g id="proc~~parse_line~~CallsGraph_edge3" class="edge">
-<title>proc~parse_line&#45;&gt;proc~find_block_sequence_parent</title>
-<path fill="none" stroke="#ff0000" d="M41.43,-166.21C52.23,-184.1 74.79,-217.24 103,-235 105.81,-236.77 108.77,-238.39 111.82,-239.88"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="110.64,-243.18 121.21,-243.94 113.42,-236.76 110.64,-243.18"/>
-</g>
-<!-- proc~find_parent_by_indent -->
-<g id="proc~~parse_line~~CallsGraph_node5" class="node">
-<title>proc~find_parent_by_indent</title>
-<g id="a_proc~~parse_line~~CallsGraph_node5"><a xlink:href="../proc/find_parent_by_indent.html" xlink:title="find_parent_by_indent">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="249.5,-226 119.5,-226 119.5,-202 249.5,-202 249.5,-226"/>
-<text text-anchor="middle" x="184.5" y="-211.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">find_parent_by_indent</text>
-</a>
-</g>
-</g>
-<!-- proc~parse_line&#45;&gt;proc~find_parent_by_indent -->
-<g id="proc~~parse_line~~CallsGraph_edge4" class="edge">
-<title>proc~parse_line&#45;&gt;proc~find_parent_by_indent</title>
-<path fill="none" stroke="#ff0000" d="M56.64,-166.03C69.87,-172.96 87.14,-181.54 103,-188 112.39,-191.82 122.56,-195.47 132.42,-198.76"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="131.53,-202.16 142.13,-201.93 133.7,-195.5 131.53,-202.16"/>
-</g>
-<!-- proc~initialize_node -->
-<g id="proc~~parse_line~~CallsGraph_node6" class="node">
-<title>proc~initialize_node</title>
-<g id="a_proc~~parse_line~~CallsGraph_node6"><a xlink:href="../proc/initialize_node.html" xlink:title="initialize_node">
-<polygon fill="#d9534f" stroke="#d9534f" points="546,-104 457,-104 457,-80 546,-80 546,-104"/>
-<text text-anchor="middle" x="501.5" y="-89.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">initialize_node</text>
-</a>
-</g>
-</g>
-<!-- proc~parse_line&#45;&gt;proc~initialize_node -->
-<g id="proc~~parse_line~~CallsGraph_edge5" class="edge">
-<title>proc~parse_line&#45;&gt;proc~initialize_node</title>
-<path fill="none" stroke="#ff0000" d="M40.17,-141.79C49.88,-122.52 71.73,-85.74 103,-71 220.86,-15.46 380.72,-53.11 456.79,-76.82"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="455.92,-80.22 466.51,-79.92 458.05,-73.55 455.92,-80.22"/>
-</g>
-<!-- proc~integer_to_string -->
-<g id="proc~~parse_line~~CallsGraph_node7" class="node">
-<title>proc~integer_to_string</title>
-<g id="a_proc~~parse_line~~CallsGraph_node7"><a xlink:href="../proc/integer_to_string.html" xlink:title="integer_to_string">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="235.5,-104 133.5,-104 133.5,-80 235.5,-80 235.5,-104"/>
-<text text-anchor="middle" x="184.5" y="-89.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">integer_to_string</text>
-</a>
-</g>
-</g>
-<!-- proc~parse_line&#45;&gt;proc~integer_to_string -->
-<g id="proc~~parse_line~~CallsGraph_edge6" class="edge">
-<title>proc~parse_line&#45;&gt;proc~integer_to_string</title>
-<path fill="none" stroke="#ff0000" d="M51.51,-141.95C64.95,-132.9 84.47,-120.78 103,-113 109.59,-110.23 116.65,-107.75 123.73,-105.55"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="124.77,-108.89 133.38,-102.72 122.8,-102.17 124.77,-108.89"/>
-</g>
-<!-- proc~parse_flow_form -->
-<g id="proc~~parse_line~~CallsGraph_node8" class="node">
-<title>proc~parse_flow_form</title>
-<g id="a_proc~~parse_line~~CallsGraph_node8"><a xlink:href="../proc/parse_flow_form.html" xlink:title="parse_flow_form">
-<polygon fill="#d9534f" stroke="#d9534f" points="234.5,-146 134.5,-146 134.5,-122 234.5,-122 234.5,-146"/>
-<text text-anchor="middle" x="184.5" y="-131.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">parse_flow_form</text>
-</a>
-</g>
-</g>
-<!-- proc~parse_line&#45;&gt;proc~parse_flow_form -->
-<g id="proc~~parse_line~~CallsGraph_edge7" class="edge">
-<title>proc~parse_line&#45;&gt;proc~parse_flow_form</title>
-<path fill="none" stroke="#ff0000" d="M67.2,-149.61C83.98,-147.36 104.94,-144.55 124.43,-141.93"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="125.01,-145.38 134.45,-140.58 124.08,-138.45 125.01,-145.38"/>
-</g>
-<!-- proc~record_indent_level -->
-<g id="proc~~parse_line~~CallsGraph_node9" class="node">
-<title>proc~record_indent_level</title>
-<g id="a_proc~~parse_line~~CallsGraph_node9"><a xlink:href="../proc/record_indent_level.html" xlink:title="record_indent_level">
-<polygon fill="#d9534f" stroke="#d9534f" points="243,-24 126,-24 126,0 243,0 243,-24"/>
-<text text-anchor="middle" x="184.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">record_indent_level</text>
-</a>
-</g>
-</g>
-<!-- proc~parse_line&#45;&gt;proc~record_indent_level -->
-<g id="proc~~parse_line~~CallsGraph_edge8" class="edge">
-<title>proc~parse_line&#45;&gt;proc~record_indent_level</title>
-<path fill="none" stroke="#ff0000" d="M38.37,-141.87C46.5,-118.35 67.57,-66.35 103,-38 107.7,-34.24 112.96,-31.01 118.48,-28.25"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="120.25,-31.29 127.96,-24.03 117.4,-24.9 120.25,-31.29"/>
 </g>
 <!-- proc~find_block_sequence_parent&#45;&gt;proc~debug_print -->
-<g id="proc~~parse_line~~CallsGraph_edge9" class="edge">
+<g id="proc~~find_block_sequence_parent~~CallsGraph_edge1" class="edge">
 <title>proc~find_block_sequence_parent&#45;&gt;proc~debug_print</title>
-<path fill="none" stroke="#7fff00" d="M238.88,-243.94C248.05,-241.34 257.38,-238.35 266,-235 289.09,-226.02 313.78,-212.82 332.14,-202.23"/>
-<polygon fill="#7fff00" stroke="#7fff00" points="334,-205.2 340.86,-197.12 330.46,-199.16 334,-205.2"/>
-</g>
-<!-- proc~find_parent_by_indent&#45;&gt;proc~debug_print -->
-<g id="proc~~parse_line~~CallsGraph_edge10" class="edge">
-<title>proc~find_parent_by_indent&#45;&gt;proc~debug_print</title>
-<path fill="none" stroke="#00ff3f" d="M249.67,-203.37C270.77,-199.87 293.82,-196.05 313.41,-192.8"/>
-<polygon fill="#00ff3f" stroke="#00ff3f" points="314.02,-196.25 323.31,-191.16 312.87,-189.34 314.02,-196.25"/>
-</g>
-<!-- proc~parse_flow_form&#45;&gt;proc~debug_print -->
-<g id="proc~~parse_line~~CallsGraph_edge12" class="edge">
-<title>proc~parse_flow_form&#45;&gt;proc~debug_print</title>
-<path fill="none" stroke="#7f00ff" d="M226.97,-146.09C253.08,-153.69 286.82,-163.53 313.86,-171.41"/>
-<polygon fill="#7f00ff" stroke="#7f00ff" points="312.91,-174.78 323.49,-174.21 314.87,-168.06 312.91,-174.78"/>
-</g>
-<!-- proc~add_sequence_item -->
-<g id="proc~~parse_line~~CallsGraph_node10" class="node">
-<title>proc~add_sequence_item</title>
-<g id="a_proc~~parse_line~~CallsGraph_node10"><a xlink:href="../proc/add_sequence_item.html" xlink:title="add_sequence_item">
-<polygon fill="#d9534f" stroke="#d9534f" points="421,-135 302,-135 302,-111 421,-111 421,-135"/>
-<text text-anchor="middle" x="361.5" y="-120.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">add_sequence_item</text>
-</a>
-</g>
-</g>
-<!-- proc~parse_flow_form&#45;&gt;proc~add_sequence_item -->
-<g id="proc~~parse_line~~CallsGraph_edge11" class="edge">
-<title>proc~parse_flow_form&#45;&gt;proc~add_sequence_item</title>
-<path fill="none" stroke="#7f00ff" d="M234.71,-130.91C252.37,-129.8 272.61,-128.52 291.62,-127.33"/>
-<polygon fill="#7f00ff" stroke="#7f00ff" points="291.97,-130.81 301.73,-126.69 291.53,-123.83 291.97,-130.81"/>
-</g>
-<!-- proc~add_sequence_item&#45;&gt;proc~initialize_node -->
-<g id="proc~~parse_line~~CallsGraph_edge13" class="edge">
-<title>proc~add_sequence_item&#45;&gt;proc~initialize_node</title>
-<path fill="none" stroke="#ff0000" d="M416.25,-110.93C426.35,-108.66 436.92,-106.28 447.01,-104.02"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="447.93,-107.4 456.92,-101.79 446.39,-100.57 447.93,-107.4"/>
+<path fill="none" stroke="#ff0000" d="M163.3,-12C171.93,-12 180.5,-12 188.56,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="188.83,-15.5 198.83,-12 188.83,-8.5 188.83,-15.5"/>
 </g>
 </g>
 </svg>
@@ -520,44 +346,59 @@ large graphs.</div>
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <!-- Generated by graphviz version 2.43.0 (0)
  -->
-<!-- Title: proc~~parse_line~~CalledByGraph Pages: 1 -->
-<svg id="procparse_lineCalledByGraph" width="345pt" height="32pt"
- viewBox="0.00 0.00 345.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="proc~~parse_line~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
-<title>proc~~parse_line~~CalledByGraph</title>
-<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 341,-28 341,4 -4,4"/>
+<!-- Title: proc~~find_block_sequence_parent~~CalledByGraph Pages: 1 -->
+<svg id="procfind_block_sequence_parentCalledByGraph" width="544pt" height="32pt"
+ viewBox="0.00 0.00 544.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~find_block_sequence_parent~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>proc~~find_block_sequence_parent~~CalledByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 540,-28 540,4 -4,4"/>
+<!-- proc~find_block_sequence_parent -->
+<g id="proc~~find_block_sequence_parent~~CalledByGraph_node1" class="node">
+<title>proc~find_block_sequence_parent</title>
+<polygon fill="none" stroke="black" points="536,-24 373,-24 373,0 536,0 536,-24"/>
+<text text-anchor="middle" x="454.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">find_block_sequence_parent</text>
+</g>
 <!-- proc~parse_line -->
-<g id="proc~~parse_line~~CalledByGraph_node1" class="node">
+<g id="proc~~find_block_sequence_parent~~CalledByGraph_node2" class="node">
 <title>proc~parse_line</title>
-<polygon fill="none" stroke="black" points="337,-24 270,-24 270,0 337,0 337,-24"/>
-<text text-anchor="middle" x="303.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">parse_line</text>
+<g id="a_proc~~find_block_sequence_parent~~CalledByGraph_node2"><a xlink:href="../proc/parse_line.html" xlink:title="parse_line">
+<polygon fill="#d9534f" stroke="#d9534f" points="337,-24 270,-24 270,0 337,0 337,-24"/>
+<text text-anchor="middle" x="303.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">parse_line</text>
+</a>
+</g>
+</g>
+<!-- proc~parse_line&#45;&gt;proc~find_block_sequence_parent -->
+<g id="proc~~find_block_sequence_parent~~CalledByGraph_edge1" class="edge">
+<title>proc~parse_line&#45;&gt;proc~find_block_sequence_parent</title>
+<path fill="none" stroke="#ff0000" d="M337.2,-12C344.98,-12 353.66,-12 362.67,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="362.96,-15.5 372.96,-12 362.96,-8.5 362.96,-15.5"/>
 </g>
 <!-- proc~parse_yaml_wrapper -->
-<g id="proc~~parse_line~~CalledByGraph_node2" class="node">
+<g id="proc~~find_block_sequence_parent~~CalledByGraph_node3" class="node">
 <title>proc~parse_yaml_wrapper</title>
-<g id="a_proc~~parse_line~~CalledByGraph_node2"><a xlink:href="../proc/parse_yaml_wrapper.html" xlink:title="parse_yaml_wrapper">
+<g id="a_proc~~find_block_sequence_parent~~CalledByGraph_node3"><a xlink:href="../proc/parse_yaml_wrapper.html" xlink:title="parse_yaml_wrapper">
 <polygon fill="#d9534f" stroke="#d9534f" points="234,-24 110,-24 110,0 234,0 234,-24"/>
 <text text-anchor="middle" x="172" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">parse_yaml_wrapper</text>
 </a>
 </g>
 </g>
 <!-- proc~parse_yaml_wrapper&#45;&gt;proc~parse_line -->
-<g id="proc~~parse_line~~CalledByGraph_edge1" class="edge">
+<g id="proc~~find_block_sequence_parent~~CalledByGraph_edge2" class="edge">
 <title>proc~parse_yaml_wrapper&#45;&gt;proc~parse_line</title>
 <path fill="none" stroke="#ff0000" d="M234.34,-12C242.98,-12 251.7,-12 259.89,-12"/>
 <polygon fill="#ff0000" stroke="#ff0000" points="259.92,-15.5 269.92,-12 259.92,-8.5 259.92,-15.5"/>
 </g>
 <!-- interface~parse_yaml -->
-<g id="proc~~parse_line~~CalledByGraph_node3" class="node">
+<g id="proc~~find_block_sequence_parent~~CalledByGraph_node4" class="node">
 <title>interface~parse_yaml</title>
-<g id="a_proc~~parse_line~~CalledByGraph_node3"><a xlink:href="../interface/parse_yaml.html" xlink:title="parse_yaml">
+<g id="a_proc~~find_block_sequence_parent~~CalledByGraph_node4"><a xlink:href="../interface/parse_yaml.html" xlink:title="parse_yaml">
 <polygon fill="#a7506f" stroke="#a7506f" points="74,-24 0,-24 0,0 74,0 74,-24"/>
 <text text-anchor="middle" x="37" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">parse_yaml</text>
 </a>
 </g>
 </g>
 <!-- interface~parse_yaml&#45;&gt;proc~parse_yaml_wrapper -->
-<g id="proc~~parse_line~~CalledByGraph_edge2" class="edge">
+<g id="proc~~find_block_sequence_parent~~CalledByGraph_edge3" class="edge">
 <title>interface~parse_yaml&#45;&gt;proc~parse_yaml_wrapper</title>
 <path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M74.34,-12C82.25,-12 90.87,-12 99.61,-12"/>
 <polygon fill="#ff0000" stroke="#ff0000" points="99.89,-15.5 109.89,-12 99.89,-8.5 99.89,-15.5"/>
@@ -662,7 +503,75 @@ large graphs.</div>
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-current_indent"></span>
+              <span class="anchor" id="variable-max_stack"></span>
+              integer,
+            </td>
+              <td>public,</td>
+            <td>
+parameter               
+            </td>
+            <td>::</td>
+            <td><strong>MAX_STACK</strong></td>
+<td> =</td>
+                <td>100</td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-alloc_stat~2"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>alloc_stat</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-best_candidate"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>best_candidate</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-current~21"></span>
+              type(<a href='../type/yaml_node.html'>yaml_node</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>current</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-current_indent~4"></span>
               integer,
             </td>
               <td>public</td>
@@ -679,24 +588,7 @@ large graphs.</div>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-current_node~2"></span>
-              type(<a href='../type/yaml_node.html'>yaml_node</a>),
-            </td>
-              <td>public,</td>
-            <td>
-              pointer
-            </td>
-            <td>::</td>
-            <td><strong>current_node</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-debug_msg~3"></span>
+              <span class="anchor" id="variable-debug_msg~5"></span>
               character(len=256),
             </td>
               <td>public</td>
@@ -713,41 +605,7 @@ large graphs.</div>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-error_msg~2"></span>
-              character(len=256),
-            </td>
-              <td>public</td>
-            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>error_msg</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-io_stat~3"></span>
-              integer,
-            </td>
-              <td>public</td>
-            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>io_stat</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-is_sequence_item"></span>
+              <span class="anchor" id="variable-found_match"></span>
               logical,
             </td>
               <td>public</td>
@@ -755,7 +613,7 @@ large graphs.</div>
               
             </td>
             <td>::</td>
-            <td><strong>is_sequence_item</strong></td>
+            <td><strong>found_match</strong></td>
                 <td></td>
                 <td></td>
             <td>
@@ -764,41 +622,7 @@ large graphs.</div>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-local_line"></span>
-              character(len=:),
-            </td>
-              <td>public,</td>
-            <td>
-              allocatable
-            </td>
-            <td>::</td>
-            <td><strong>local_line</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-new_node"></span>
-              type(<a href='../type/yaml_node.html'>yaml_node</a>),
-            </td>
-              <td>public,</td>
-            <td>
-              pointer
-            </td>
-            <td>::</td>
-            <td><strong>new_node</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-parent_indent"></span>
+              <span class="anchor" id="variable-indent_level~2"></span>
               integer,
             </td>
               <td>public</td>
@@ -806,7 +630,7 @@ large graphs.</div>
               
             </td>
             <td>::</td>
-            <td><strong>parent_indent</strong></td>
+            <td><strong>indent_level</strong></td>
                 <td></td>
                 <td></td>
             <td>
@@ -815,41 +639,7 @@ large graphs.</div>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-parent_key"></span>
-              character(len=:),
-            </td>
-              <td>public,</td>
-            <td>
-              allocatable
-            </td>
-            <td>::</td>
-            <td><strong>parent_key</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-parent_node"></span>
-              type(<a href='../type/yaml_node.html'>yaml_node</a>),
-            </td>
-              <td>public,</td>
-            <td>
-              pointer
-            </td>
-            <td>::</td>
-            <td><strong>parent_node</strong></td>
-                <td></td>
-                <td></td>
-            <td>
-                
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-pos~2"></span>
+              <span class="anchor" id="variable-item_indent"></span>
               integer,
             </td>
               <td>public</td>
@@ -857,7 +647,41 @@ large graphs.</div>
               
             </td>
             <td>::</td>
-            <td><strong>pos</strong></td>
+            <td><strong>item_indent</strong></td>
+                <td></td>
+                <td></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-stack"></span>
+              type(<a href='../type/stack_entry.html'>stack_entry</a>),
+            </td>
+              <td>public,</td>
+            <td>
+              allocatable
+            </td>
+            <td>::</td>
+            <td><strong>stack</strong>(:)</td>
+                <td></td>
+                <td></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-stack_top"></span>
+              integer,
+            </td>
+              <td>public</td>
+            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>stack_top</strong></td>
                 <td></td>
                 <td></td>
             <td>

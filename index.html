@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
       <meta name="description" content="A modern lightweight Fortran YAML parser">
-    <meta name="author" content="Barry Baker" >
+    <meta name="author" content="Barry Baker and Zach Moon" >
     <link rel="icon" href="./favicon.png">
 
     <title> Fyaml </title>
@@ -78,17 +78,36 @@
       <div class="row" id='text'>
         <div class=col-md-8>
           <h1>Fyaml</h1>
-          <h1>Fyaml - A Modern Fortran YAML Parser</h1>
-<p>A lightweight YAML parser written in modern Fortran that supports nested structures, sequences, and various data types. Designed for scientific computing applications needing configuration file support.</p>
-<h2>Features</h2>
+          <h1>fyaml - A Modern Fortran YAML Parser</h1>
+<p>A feature-rich YAML parser written in modern Fortran, supporting complex data structures and designed for scientific computing applications.</p>
+<h2>Key Features</h2>
 <ul>
-<li>Parse YAML files into native Fortran data structures</li>
-<li>Support for strings, integers, floats, booleans, and null values</li>
-<li>Handle nested mappings and sequences</li>
-<li>Comment parsing</li>
-<li>Debug logging with configurable levels</li>
-<li>Dot notation access for nested values</li>
-<li>Memory safe with pointer management</li>
+<li><strong>Comprehensive YAML Support</strong></li>
+<li>Full support for YAML 1.2 specification</li>
+<li>Multi-document processing</li>
+<li>Anchors and aliases resolution</li>
+<li>Complex nested structures</li>
+<li>
+<p>Sequence and mapping support</p>
+</li>
+<li>
+<p><strong>Rich Data Type Support</strong></p>
+</li>
+<li>Strings, integers, floats (single/double precision)</li>
+<li>Booleans with multiple formats (true/false, yes/no, on/off)</li>
+<li>Date and time parsing</li>
+<li>Null values</li>
+<li>
+<p>Multi-line strings</p>
+</li>
+<li>
+<p><strong>Advanced Features</strong></p>
+</li>
+<li>Dot notation for nested access (e.g., "config.database.host")</li>
+<li>Array and sequence iteration</li>
+<li>Automatic type conversion</li>
+<li>Memory-safe implementation</li>
+<li>Error handling with detailed messages</li>
 </ul>
 <h2>Requirements</h2>
 <ul>
@@ -104,40 +123,103 @@ make
 make<span class="w"> </span>install
 </code></pre></div>
 
-<h2>Usage</h2>
-<p>1) Create a YAML configuration file:</p>
-<div class="codehilite"><pre><span></span><code><span class="nt">database</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">localhost</span>
-<span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5432</span>
-<span class="w">  </span><span class="nt">credentials</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admin</span>
-<span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secret</span>
+<h2>Usage Examples</h2>
+<p>1) Create a complex YAML configuration:</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">simulation</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">timestep</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="w">    </span><span class="nt">max_iterations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">    </span><span class="nt">tolerances</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0e-6</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0e-8</span>
+<span class="w">  </span><span class="nt">output</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">netcdf</span>
+<span class="w">    </span><span class="nt">variables</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">temperature</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">pressure</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">velocity</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">frequency</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
 </code></pre></div>
 
-<p>2) Parse it in your Fortran code:</p>
-<div class="codehilite"><pre><span></span><code><span class="k">program </span><span class="n">example</span>
+<p>2) Parse and access data:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">program </span><span class="n">simulation_setup</span>
 <span class="w">    </span><span class="k">use </span><span class="n">fyaml</span>
-<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">fyaml_doc</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">doc</span>
-<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">yaml_value</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">val</span>
 
-<span class="w">    </span><span class="k">call </span><span class="n">doc</span><span class="p">%</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">doc</span><span class="p">%</span><span class="n">root</span><span class="p">%</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;database.host&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="k">print</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Host:&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">val</span><span class="p">%</span><span class="n">str_val</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">fyaml_doc</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">config</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">yaml_value</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">val</span>
+<span class="w">    </span><span class="kt">real</span><span class="p">(</span><span class="n">dp</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">timestep</span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="p">:),</span><span class="w"> </span><span class="k">allocatable</span><span class="p">,</span><span class="w"> </span><span class="k">dimension</span><span class="p">(:)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">variables</span>
+
+<span class="w">    </span><span class="c">! Load configuration</span>
+<span class="w">    </span><span class="k">call </span><span class="n">config</span><span class="p">%</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;simulation.yaml&quot;</span><span class="p">)</span>
+
+<span class="w">    </span><span class="c">! Get scalar values using dot notation</span>
+<span class="w">    </span><span class="n">timestep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">config</span><span class="p">%</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;simulation.parameters.timestep&quot;</span><span class="p">)%</span><span class="n">get_real</span><span class="p">()</span>
+
+<span class="w">    </span><span class="c">! Get array of strings</span>
+<span class="w">    </span><span class="n">variables</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">config</span><span class="p">%</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;simulation.output.variables&quot;</span><span class="p">)%</span><span class="n">get_string_array</span><span class="p">()</span>
+
+<span class="w">    </span><span class="c">! Check if a key exists</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">config</span><span class="p">%</span><span class="n">has_key</span><span class="p">(</span><span class="s2">&quot;simulation.output.format&quot;</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        print</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Output format:&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">config</span><span class="p">%</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;simulation.output.format&quot;</span><span class="p">)%</span><span class="n">get_str</span><span class="p">()</span>
+<span class="w">    </span><span class="k">end if</span>
 <span class="k">end program</span>
 </code></pre></div>
 
-<h2>Project Structure</h2>
-<div class="codehilite"><pre><span></span><code>.
-├── CMakeLists.txt
-├── src/
-│   ├── yaml_types.f90    ! Core type definitions
-│   ├── yaml_parser.f90   ! YAML parsing implementation
-│   └── fyaml.f90         ! High-level interface
-├── tests/
-│   └── test_example.yaml
-└── example/
-    ├── example.yaml
-    └── yaml_example.f90
+<p>3) Working with sequences and mappings:</p>
+<div class="codehilite"><pre><span></span><code><span class="c">! Iterate over sequence</span>
+<span class="k">type</span><span class="p">(</span><span class="n">yaml_value</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">tolerances</span>
+<span class="n">tolerances</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">config</span><span class="p">%</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;simulation.parameters.tolerances&quot;</span><span class="p">)</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">tolerances</span><span class="p">%</span><span class="n">is_sequence</span><span class="p">())</span><span class="w"> </span><span class="k">then</span>
+<span class="k">    do </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">tolerances</span><span class="p">%</span><span class="n">size</span><span class="p">()</span>
+<span class="w">        </span><span class="k">print</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Tolerance&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;:&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">tolerances</span><span class="p">%</span><span class="n">get</span><span class="p">(</span><span class="n">i</span><span class="p">)%</span><span class="n">get_real</span><span class="p">()</span>
+<span class="w">    </span><span class="k">end do</span>
+<span class="k">end if</span>
+</code></pre></div>
+
+<p>4) Getting all keys from a YAML document:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Example configuration</span>
+<span class="nt">database</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">localhost</span>
+<span class="w">  </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5432</span>
+<span class="nt">logging</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">debug</span>
+<span class="w">  </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app.log</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="k">program </span><span class="n">key_example</span>
+<span class="w">    </span><span class="k">use </span><span class="n">fyaml</span>
+
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">fyaml_doc</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">config</span>
+<span class="w">    </span><span class="k">type</span><span class="p">(</span><span class="n">yaml_value</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">root_value</span><span class="p">,</span><span class="w"> </span><span class="n">db_value</span>
+<span class="w">    </span><span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="p">:),</span><span class="w"> </span><span class="k">allocatable</span><span class="p">,</span><span class="w"> </span><span class="k">dimension</span><span class="p">(:)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">root_keys</span><span class="p">,</span><span class="w"> </span><span class="n">db_keys</span>
+
+<span class="w">    </span><span class="c">! Load configuration</span>
+<span class="w">    </span><span class="k">call </span><span class="n">config</span><span class="p">%</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">)</span>
+
+<span class="w">    </span><span class="c">! Get all root level keys</span>
+<span class="w">    </span><span class="n">root_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">config</span><span class="p">%</span><span class="n">root</span>
+<span class="w">    </span><span class="n">root_keys</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">root_value</span><span class="p">%</span><span class="n">get_keys</span><span class="p">()</span>
+<span class="w">    </span><span class="k">print</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Root level keys:&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">root_keys</span><span class="w">  </span><span class="c">! Will print: database, logging</span>
+
+<span class="w">    </span><span class="c">! Get keys from nested section</span>
+<span class="w">    </span><span class="n">db_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">config</span><span class="p">%</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;database&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">db_keys</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">db_value</span><span class="p">%</span><span class="n">get_keys</span><span class="p">()</span>
+<span class="w">    </span><span class="k">print</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Database keys:&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">db_keys</span><span class="w">  </span><span class="c">! Will print: host, port</span>
+
+<span class="w">    </span><span class="c">! Check if specific keys exist</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">root_value</span><span class="p">%</span><span class="n">has_key</span><span class="p">(</span><span class="s2">&quot;database&quot;</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
+<span class="k">        print</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Database configuration found!&quot;</span>
+<span class="w">    </span><span class="k">end if</span>
+<span class="k">end program</span>
+</code></pre></div>
+
+<h2>Error Handling</h2>
+<div class="codehilite"><pre><span></span><code><span class="kt">logical</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">success</span>
+<span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="p">:),</span><span class="w"> </span><span class="k">allocatable</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">error_msg</span>
+
+<span class="k">call </span><span class="n">config</span><span class="p">%</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">success</span><span class="p">,</span><span class="w"> </span><span class="n">error_msg</span><span class="p">)</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="w"> </span><span class="n">success</span><span class="p">)</span><span class="w"> </span><span class="k">then</span>
+<span class="k">    print</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Error loading YAML:&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">error_msg</span>
+<span class="w">    </span><span class="k">error stop</span>
+<span class="k">end if</span>
 </code></pre></div>
 
 <h2>Testing</h2>
@@ -156,8 +238,9 @@ make<span class="w"> </span>install
         </div>
           <div class="col-md-4">
             <div class="card card-body bg-light">
+                <img src="media/FYAML.png" alt="Developer picture" class="card-img-top">
               <h2 class="card-title">Developer Info</h2>
-              <h4 class="card-text">Barry Baker</h4>
+              <h4 class="card-text">Barry Baker and Zach Moon</h4>
               <p class="card-text"></p>
             </div>
           </div>
@@ -189,7 +272,7 @@ make<span class="w"> </span>install
           <div class="col-xs-6 col-sm-3">
             <div>
               <h3>Procedures</h3>
-              <ul><li><a href='proc/count_leading_spaces.html'>count_leading_spaces</a></li><li><a href='proc/debug_print.html'>debug_print</a></li><li><a href='proc/determine_value_type.html'>determine_value_type</a></li><li><a href='proc/initialize_document.html'>initialize_document</a></li><li><a href='proc/initialize_node.html'>initialize_node</a></li></ul>
+              <ul><li><a href='proc/add_sequence_item.html'>add_sequence_item</a></li><li><a href='proc/check_key_hierarchy.html'>check_key_hierarchy</a></li><li><a href='interface/check_sequence.html'>check_sequence</a></li><li><a href='proc/check_sequence_node.html'>check_sequence_node</a></li><li><a href='proc/cleanup_indent_history.html'>cleanup_indent_history</a></li></ul>
             </div>
             <div>
               <ul>
@@ -200,7 +283,7 @@ make<span class="w"> </span>install
           <div class="col-xs-6 col-sm-3">
             <div>
               <h3>Derived Types</h3>
-              <ul><li><a href='type/fyaml_doc.html'>fyaml_doc</a></li><li><a href='type/yaml_dict.html'>yaml_dict</a></li><li><a href='type/yaml_document.html'>yaml_document</a></li><li><a href='type/yaml_error.html'>yaml_error</a></li><li><a href='type/yaml_node.html'>yaml_node</a></li></ul>
+              <ul><li><a href='type/fyaml_doc.html'>fyaml_doc</a></li><li><a href='type/indent_tracker.html'>indent_tracker</a></li><li><a href='type/stack_entry.html'>stack_entry</a></li><li><a href='type/yaml_dict.html'>yaml_dict</a></li><li><a href='type/yaml_document.html'>yaml_document</a></li></ul>
             </div>
             <div>
               <ul>
@@ -217,14 +300,14 @@ make<span class="w"> </span>install
           <div class="col">
             <p>
               Fyaml
- was developed by Barry Baker<br>              &copy; 2024 
+ was developed by Barry Baker and Zach Moon<br>              &copy; 2024 
 </p>
           </div>
           <div class="col">
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on "2024-12-11 01:53 +0000" <br>&copy; <a rel="license" href="http://www.gnu.org/licenses/old-licenses/fdl-1.2.en.html">GNU Free Documentation License</a>             </p>
+ on "2025-01-23 13:47 +0000" <br>&copy; <a rel="license" href="http://www.gnu.org/licenses/old-licenses/fdl-1.2.en.html">GNU Free Documentation License</a>             </p>
           </div>
         </div>
         <br>
