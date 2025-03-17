@@ -34,6 +34,7 @@ module test_utils
     ! Test files
     character(len=*), parameter :: TEST_FILE = SOURCE_DIR//"/test_example.yaml"
     character(len=*), parameter :: TEST_MULTI_DOC_FILE = SOURCE_DIR//"/test_example_multi_doc.yaml"
+    character(len=*), parameter :: TEST_ANCHORS_FILE = SOURCE_DIR//"/test_example_anchors.yaml"
 
     ! Remove duplicate test data - consolidate into single section
     ! Test data parameters
@@ -1264,7 +1265,7 @@ contains
         test_anchors_aliases = ERR_SUCCESS
 
         ! Load test file with anchors - use correct path without "tests/" prefix
-        call doc%load("test_example_anchors.yaml", success)
+        call doc%load(TEST_ANCHORS_FILE, success)
         if (.not. success) then
             write(error_unit,*) "Failed to load YAML file"
             test_anchors_aliases = ERR_ALLOC
