@@ -26,6 +26,13 @@ module yaml_types
         logical :: is_float = .false.     !< Float flag
         logical :: is_string = .true.     !< String flag (default)
         logical :: is_root = .false.      !< Root node flag (replaces is_root_key)
+
+        ! Anchor/alias support
+        character(len=:), allocatable :: anchor      !< Anchor name if node is anchored
+        character(len=:), allocatable :: alias_name  !< Name of referenced anchor if is_alias=.true.
+        type(yaml_node), pointer :: anchor_target => null() !< Points to referenced anchor node
+        logical :: is_alias = .false.  !< True if node is an alias reference
+        logical :: is_merged = .false. !< True if node is a merged reference (<<)
     end type yaml_node
 
     !> Document container type

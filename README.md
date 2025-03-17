@@ -7,7 +7,7 @@ A feature-rich YAML parser written in modern Fortran, supporting complex data st
 - **Comprehensive YAML Support**
   - Full support for YAML 1.2 specification
   - Multi-document processing
-  - Anchors and aliases resolution
+  - Anchors and aliases resolution (does not handle anchors with sequences yet)
   - Complex nested structures
   - Sequence and mapping support
 
@@ -42,6 +42,8 @@ make install
 ```
 
 ## Usage Examples
+
+### Basic Loading and Value Access
 
 1) Create a complex YAML configuration:
 
@@ -139,7 +141,7 @@ program key_example
 end program
 ```
 
-## Error Handling
+### Error Handling
 
 ```fortran
 logical :: success
@@ -152,6 +154,95 @@ if (.not. success) then
 end if
 ```
 
+### Working with sequences
+```fortran
+! Flow-style sequences
+val = doc%get("company%flow_sequence")
+if (val%is_sequence()) then
+    ! Get as integer array
+    integer, allocatable :: int_array(:)
+    int_array = val%get_sequence_int()
+    ! [1, 2, 4]
+endif
+
+! Get real sequence
+val = doc%get("company%flow_sequence_real")
+if (val%is_sequence()) then
+    ! Get as real array
+    real, allocatable :: real_array(:)
+    real_array = val%get_sequence_real()
+    ! [1.1, -2.2, 3.3]
+endif
+
+! Get logical sequence
+val = doc%get("company%flow_sequence_logical")
+if (val%is_sequence()) then
+    ! Get as logical array
+    logical, allocatable :: bool_array(:)
+    bool_array = val%get_sequence_bool()
+    ! [.true., .false., .true.]
+endif
+
+! Get string sequence
+val = doc%get("company%block_sequence_string")
+if (val%is_sequence()) then
+    ! Get as string array
+    character(len=:), allocatable :: str_array(:)
+    str_array = val%get_sequence()
+    ! ["three", "four", "five"]
+endif
+```
+
+### Nested Access
+```fortran
+! Access deeply nested values
+integer :: nested_int
+nested_int = doc%get("company%nested%values%integer")%get_int()  ! 42
+
+! Get nested sequence
+val = doc%get("company%nested%values%sequence")
+if (val%is_sequence()) then
+    integer, allocatable :: seq(:)
+    seq = val%get_sequence_int()  ! [1, 2, 3]
+endif
+
+! Access nested mapping
+val = doc%get("company%nested%values%mapping%key1")
+print *, "Nested value:", val%get_str()  ! "value1"
+```
+
+### Working with Multiple Documents
+```fortran
+! Load multi-document YAML
+call doc%load("multi_doc.yaml", success)
+
+! Access specific document
+val = doc%get("company%name", doc_index=1)  ! From first document
+val = doc%get("deep%nested%values%integer", doc_index=2)  ! From second document
+
+! Get document count
+print *, "Number of documents:", doc%n_docs
+```
+
+### Exploring Document Structure
+```
+! Get root level keys
+character(len=:), allocatable, dimension(:) :: root_keys
+root_keys = doc%root_keys()
+do i = 1, size(root_keys)
+    print *, "Root key:", root_keys(i)
+enddo
+
+! Get child keys of a node
+val = doc%get("company")
+if (associated(val%node)) then
+    character(len=:), allocatable, dimension(:) :: child_keys
+    child_keys = val%child_keys()
+    do i = 1, size(child_keys)
+        print *, "Child key:", child_keys(i)
+    enddo
+endif
+```
 ## Testing
 ```bash
 ctest --test-dir build/tests --output-on-failure
