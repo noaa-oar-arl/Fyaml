@@ -31,6 +31,10 @@ module test_utils
     ! Debug level
     integer, parameter :: DEBUG = DEBUG_INFO  ! Use DEBUG_INFO from yaml_parser
 
+    ! Test files
+    character(len=*), parameter :: TEST_FILE = SOURCE_DIR//"/test_example.yaml"
+    character(len=*), parameter :: TEST_MULTI_DOC_FILE = SOURCE_DIR//"/test_example_multi_doc.yaml"
+
     ! Remove duplicate test data - consolidate into single section
     ! Test data parameters
     integer, parameter :: flow_seq_int(3) = [1, 2, 4]
@@ -168,7 +172,7 @@ contains
     ! Test routines returning status
     integer function test_basic_loading()
         type(fyaml_doc) :: doc
-        character(len=100) :: filename = "test_example.yaml"
+        character(len=*), parameter :: filename = TEST_FILE
         logical :: success
 
         test_basic_loading = ERR_SUCCESS
@@ -200,7 +204,7 @@ contains
             return
         endif
 
-        call doc%load("test_example.yaml")
+        call doc%load(TEST_FILE)
 
         ! Get company node and validate
         key = "company"
@@ -300,7 +304,7 @@ contains
         type(yaml_node), pointer :: current  ! Add this declaration
 
         status = ERR_SUCCESS
-        call doc%load("test_example.yaml")
+        call doc%load(TEST_FILE)
 
         ! Initialize seq_items to avoid warning
         allocate(character(len=0) :: seq_items(0))
@@ -763,7 +767,7 @@ contains
         test_nested_access = ERR_SUCCESS
 
         ! Load test file
-        call doc%load("test_example.yaml", success)
+        call doc%load(TEST_FILE, success)
         if (.not. success) then
             write(error_unit,*) "Failed to load YAML file"
             test_nested_access = ERR_ALLOC
@@ -997,8 +1001,8 @@ contains
         test_multiple_docs = ERR_SUCCESS
 
         ! Load test file (ensure file exists in binary dir)
-        write(error_unit,*) "Loading test file: test_example_multi_doc.yaml"
-        call doc%load("test_example_multi_doc.yaml", success)
+        write(error_unit,*) "Loading test file: "//TEST_MULTI_DOC_FILE
+        call doc%load(TEST_MULTI_DOC_FILE, success)
         if (.not. success) then
             write(error_unit,*) "Failed to load YAML file"
             test_multiple_docs = ERR_ALLOC
@@ -1050,7 +1054,7 @@ contains
         test_get_value = ERR_SUCCESS
 
         ! Load test file
-        call doc%load("test_example.yaml", success)
+        call doc%load(TEST_FILE, success)
         if (.not. success) then
             write(error_unit,*) "Failed to load YAML file"
             test_get_value = ERR_ALLOC
@@ -1126,7 +1130,7 @@ contains
         test_get_values = ERR_SUCCESS
 
         ! Load test file
-        call doc%load("test_example.yaml", success)
+        call doc%load(TEST_FILE, success)
         if (.not. success) then
             write(error_unit,*) "Failed to load YAML file"
             test_get_values = ERR_ALLOC
@@ -1204,7 +1208,7 @@ contains
         test_root_keys = ERR_SUCCESS
 
         ! Load test file
-        call doc%load("test_example.yaml", success)
+        call doc%load(TEST_FILE, success)
         if (.not. success) then
             write(error_unit,*) "Failed to load YAML file"
             test_root_keys = ERR_ALLOC
