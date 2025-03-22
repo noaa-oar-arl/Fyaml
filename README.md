@@ -28,6 +28,7 @@ A feature-rich YAML parser written in modern Fortran, supporting complex data st
 
 - Fortran 2008 compliant compiler (gfortran 8.0+ or ifort 19.0+)
 - CMake 3.12+
+- `fpm` 0.10.1+
 
 ## Installation
 
@@ -39,6 +40,17 @@ cmake ..
 make
 make install
 ```
+
+### Installing with `fpm`
+
+To build `Fyaml` with the [Fortran Package Manager](https://fpm.fortran-lang.org/), add the following to your project's `fpm.toml`:
+
+```toml
+[dependencies]
+fyaml = { git="git@github.com:noaa-oar-arl/Fyaml.git", branch = "main" }
+```
+
+Then, `fpm build`.
 
 ## Usage Examples
 
