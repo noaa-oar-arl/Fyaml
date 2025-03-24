@@ -4,9 +4,12 @@ license = "LICENSE"
 
 [build]
 auto-executables = true
-auto-tests = true
+auto-tests = false
 auto-examples = true
 module-naming = false
+
+[library]
+source-dir = "src"
 
 [install]
 library = true
@@ -15,3 +18,49 @@ library = true
 implicit-typing = false
 implicit-external = false
 source-form = "free"
+
+[preprocess]
+[preprocess.cpp]
+suffixes = ["F90"]
+directories = ["tests"]
+macros = ["SOURCE_DIR='./src/'"]
+
+[[test]]
+name = "test_basic_loading"
+source-dir = "tests"
+main = "test_basic_loading_main.F90"
+
+[[test]]
+name = "test_basic_types"
+source-dir = "tests"
+main = "test_basic_types_main.F90"
+
+[[test]]
+name = "test_get_values"
+source-dir = "tests"
+main = "test_get_values_main.F90"
+
+[[test]]
+name = "test_get_value"
+source-dir = "tests"
+main = "test_get_value_main.F90"
+
+[[test]]
+name = "test_multiple_docs"
+source-dir = "tests"
+main = "test_multiple_docs_main.F90"
+
+[[test]]
+name = "test_nested_access"
+source-dir = "tests"
+main = "test_nested_access_main.F90"
+
+[[test]]
+name = "test_root_keys"
+source-dir = "tests"
+main = "test_root_keys_main.F90"
+
+[[test]]
+name = "test_sequences"
+source-dir = "tests"
+main = "test_sequences_main.F90"
