@@ -1180,22 +1180,6 @@ contains
         end do
     end function test_get_values
 
-    ! Update check_null function
-    function check_null(self) result(is_null)
-        class(yaml_value), intent(in) :: self
-        logical :: is_null
-
-        is_null = .false.
-        if (.not. associated(self%node)) return
-
-        ! Check for null value ('~' or empty)
-        if (trim(adjustl(self%node%value)) == '~' .or. &
-            len_trim(adjustl(self%node%value)) == 0) then
-            is_null = .true.
-            self%node%is_null = .true.  ! Set the flag
-        endif
-    end function check_null
-
     integer function test_root_keys()
         type(fyaml_doc) :: doc
         ! type(yaml_value) :: val
