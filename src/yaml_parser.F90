@@ -851,6 +851,7 @@ end subroutine parse_yaml_internal
       ! Initialize
       in_quotes = .false.
       in_bracket = .false.
+      item = ""
       nullify(prev_item)
 
       ! Handle flow form sequences
@@ -896,6 +897,8 @@ end subroutine parse_yaml_internal
       character(len=*), intent(in) :: value
       type(yaml_node), pointer :: new_item, current
       character(len=:), allocatable :: clean_value
+
+      clean_value = ""
 
       ! Clean the value
       clean_value = trim(adjustl(value))
@@ -1505,6 +1508,8 @@ end subroutine parse_mapping
       integer :: count, i
       character(len=256) :: debug_msg
       character(len=:), allocatable :: clean_value
+
+      clean_value = ""
 
       ! Count items first
       count = 0

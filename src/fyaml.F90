@@ -993,9 +993,6 @@ contains
         type(yaml_node), pointer :: current
         integer :: count, i
 
-        ! Initialize with empty array
-        allocate(character(len=0) :: keys(0))
-
         ! Early return checks
         if (.not. associated(node)) return
         if (.not. associated(node%children)) return
@@ -1006,6 +1003,7 @@ contains
         ! Allocate array for keys
         if (allocated(keys)) deallocate(keys)
         allocate(character(len=32) :: keys(count))
+        keys = ""
 
         ! Fill array with child keys
         current => node%children
