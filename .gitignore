@@ -36,3 +36,4 @@
 # ignore potential build directories
 build/
 doc/
+.qodo

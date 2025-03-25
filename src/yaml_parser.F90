@@ -50,6 +50,10 @@ module yaml_parser
   private :: parse_yaml_internal
   private :: set_indent_width
   private :: detect_indent_width
+  private :: process_anchor_alias
+  private :: find_anchor_node
+  private :: resolve_aliases
+  private :: copy_node_value
 
   ! Move check_sequence interface declaration here
   interface check_sequence
@@ -395,6 +399,15 @@ contains
     ! Clean up indent history
     call cleanup_indent_history()
 
+    ! After successful parsing, resolve all aliases
+    if (status == ERR_SUCCESS) then
+        do i = 1, size(docs)
+            if (associated(docs(i)%root)) then
+                call resolve_aliases(docs(i)%root)
+            endif
+        end do
+    endif
+
 end subroutine parse_yaml_internal
 
   !> Initialize a new YAML document
@@ -497,6 +510,9 @@ end subroutine parse_yaml_internal
     if (len_trim(new_node%key) > 0) then
       call record_indent_level(current_indent, new_node%key, line_num)
     endif
+
+    ! Process anchors and aliases before regular parsing
+    local_line = process_anchor_alias(local_line, new_node)
 
     ! Parse sequence item
     if (is_sequence_item) then
@@ -1058,16 +1074,30 @@ end subroutine parse_mapping
   !! @param[in,out] node Node to initialize
   subroutine initialize_node(node)
     type(yaml_node), pointer, intent(inout) :: node
+
+    ! Basic initialization
     node%key = ''
     node%value = ''
     node%children => null()
     node%next => null()
+    node%parent => null()
+    node%indent = 0
+    node%line_num = 0
+    node%last_child_line = 0
     node%is_sequence = .false.
     node%is_null = .false.
     node%is_boolean = .false.
     node%is_integer = .false.
     node%is_float = .false.
     node%is_string = .true.
+    node%is_root = .false.
+
+    ! Initialize anchor/alias fields
+    if (allocated(node%anchor)) deallocate(node%anchor)
+    if (allocated(node%alias_name)) deallocate(node%alias_name)
+    node%anchor_target => null()
+    node%is_alias = .false.
+    node%is_merged = .false.
   end subroutine initialize_node
 
   !> Determine value type of node
@@ -1960,5 +1990,173 @@ end subroutine parse_mapping
     end do
     indent_history => null()
   end subroutine
+
+  !> Process anchor and alias declarations in a line
+  !!
+  !! @param[in] line Line containing potential anchor/alias
+  !! @param[inout] node Node to update with anchor/alias info
+  !! @return Cleaned line with anchor/alias declarations removed
+  function process_anchor_alias(line, node) result(cleaned_line)
+    character(len=*), intent(in) :: line
+    type(yaml_node), pointer, intent(inout) :: node
+    character(len=:), allocatable :: cleaned_line
+    integer :: anchor_pos, alias_pos, end_pos
+
+    cleaned_line = trim(line)
+
+    ! Check for anchor (&)
+    anchor_pos = index(cleaned_line, '&')
+    if (anchor_pos > 0) then
+        end_pos = index(cleaned_line(anchor_pos:), ' ')
+        if (end_pos == 0) end_pos = len_trim(cleaned_line) + 1
+
+        if (allocated(node%anchor)) deallocate(node%anchor)
+        allocate(character(len=end_pos-2) :: node%anchor)
+        node%anchor = cleaned_line(anchor_pos+1:anchor_pos+end_pos-2)
+
+        cleaned_line = trim(cleaned_line(:anchor_pos-1)) // ' ' // &
+                     trim(cleaned_line(anchor_pos+end_pos:))
+        call debug_print(DEBUG_INFO, "Found anchor: "//trim(node%anchor))
+    endif
+
+    ! Check for alias (*)
+    alias_pos = index(cleaned_line, '*')
+    if (alias_pos > 0) then
+        end_pos = index(cleaned_line(alias_pos:), ' ')
+        if (end_pos == 0) end_pos = len_trim(cleaned_line) + 1
+
+        if (allocated(node%alias_name)) deallocate(node%alias_name)
+        allocate(character(len=end_pos-2) :: node%alias_name)
+        node%alias_name = cleaned_line(alias_pos+1:alias_pos+end_pos-2)
+        node%is_alias = .true.
+
+        cleaned_line = trim(cleaned_line(:alias_pos-1)) // ' ' // &
+                     trim(cleaned_line(alias_pos+end_pos:))
+        call debug_print(DEBUG_INFO, "Found alias reference: "//trim(node%alias_name))
+    endif
+
+    ! Check for merge key (<<)
+    if (index(cleaned_line, '<<:') > 0) then
+        node%is_merged = .true.
+        call debug_print(DEBUG_INFO, "Found merge key")
+    endif
+
+    cleaned_line = trim(adjustl(cleaned_line))
+  end function process_anchor_alias
+
+  !> Find a node with a specific anchor name
+  !!
+  !! @param[in] root Root node to start search from
+  !! @param[in] anchor_name Name of anchor to find
+  !! @return Pointer to node with matching anchor
+  recursive function find_anchor_node(root, anchor_name) result(found)
+    type(yaml_node), pointer :: root, found
+    character(len=*), intent(in) :: anchor_name
+    type(yaml_node), pointer :: current
+
+    nullify(found)
+    if (.not. associated(root)) return
+
+    current => root
+    do while (associated(current))
+        ! Check if current node has matching anchor
+        if (allocated(current%anchor) .and. .not. current%is_alias) then
+            if (trim(current%anchor) == trim(anchor_name)) then
+                found => current
+                return
+            endif
+        endif
+
+        ! Check children recursively
+        if (associated(current%children)) then
+            found => find_anchor_node(current%children, anchor_name)
+            if (associated(found)) return
+        endif
+
+        current => current%next
+    end do
+  end function find_anchor_node
+
+  !> Resolve all alias references in the document
+  !!
+  !! @param[inout] root Root node of document
+  recursive subroutine resolve_aliases(root)
+    type(yaml_node), pointer, intent(inout) :: root
+    type(yaml_node), pointer :: current, anchor_node
+    character(len=256) :: debug_msg
+
+    if (.not. associated(root)) return
+
+    current => root
+    do while (associated(current))
+        if (current%is_alias .and. allocated(current%alias_name)) then
+            ! Find referenced anchor
+            anchor_node => find_anchor_node(root, current%alias_name)
+            if (associated(anchor_node)) then
+                ! Copy values from anchor node
+                call copy_node_value(anchor_node, current)
+                write(debug_msg, '(A,A,A)') "Resolved alias ", &
+                    trim(current%alias_name), " to anchor node"
+                call debug_print(DEBUG_INFO, trim(debug_msg))
+            else
+                write(debug_msg, '(A,A)') "Warning: Unresolved alias reference: ", &
+                    trim(current%alias_name)
+                call debug_print(DEBUG_ERROR, trim(debug_msg))
+            endif
+        endif
+
+        ! Process children recursively
+        if (associated(current%children)) then
+            call resolve_aliases(current%children)
+        endif
+
+        current => current%next
+    end do
+  end subroutine resolve_aliases
+
+  !> Copy values from source node to target node
+  !!
+  !! @param[in] src Source node to copy from
+  !! @param[inout] dst Destination node to copy to
+  subroutine copy_node_value(src, dst)
+    type(yaml_node), pointer, intent(in) :: src
+    type(yaml_node), pointer, intent(inout) :: dst
+
+    if (.not. associated(src) .or. .not. associated(dst)) return
+
+    ! Copy basic values
+    dst%value = src%value
+    dst%is_sequence = src%is_sequence
+    dst%is_null = src%is_null
+    dst%is_boolean = src%is_boolean
+    dst%is_integer = src%is_integer
+    dst%is_float = src%is_float
+    dst%is_string = src%is_string
+
+    ! Link to anchor target for future reference
+    dst%anchor_target => src
+  end subroutine copy_node_value
+
+  !> Add helper function to check if a node is a sequence container
+  function is_sequence_container(node) result(is_container)
+    type(yaml_node), pointer, intent(in) :: node
+    logical :: is_container
+
+    is_container = .false.
+    if (.not. associated(node)) return
+
+    if (node%is_sequence) then
+        is_container = .true.
+        return
+    endif
+
+    ! Check if node has sequence children
+    if (associated(node%children)) then
+        if (node%children%is_sequence) then
+            is_container = .true.
+            node%is_sequence = .true.  ! Mark parent as container
+        endif
+    endif
+  end function is_sequence_container
 
 end module yaml_parser

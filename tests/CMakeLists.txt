@@ -23,7 +23,7 @@ set_target_properties(test_utils PROPERTIES
 foreach(test IN ITEMS
     test_basic_loading test_basic_types test_sequences
     test_nested_access test_get_value test_get_values
-    test_multiple_docs test_root_keys)
+    test_multiple_docs test_root_keys test_anchors_aliases)
     # Add executable
     add_executable(${test} ${test}_main.F90)
     # Link with test_utils and fyaml
