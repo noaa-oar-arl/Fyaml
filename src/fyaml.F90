@@ -588,7 +588,7 @@ contains
         type(yaml_pair), pointer :: current
         character(len=:), allocatable, dimension(:) :: key_parts
         character(len=:), allocatable :: remaining_path
-        integer :: i, path_start
+        integer :: path_start
 
         write(error_unit,*) "DEBUG: Dictionary get_value for key:", trim(key)
         val%node => null()

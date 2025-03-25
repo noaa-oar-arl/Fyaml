@@ -120,7 +120,7 @@ contains
     character(len=*), intent(in) :: message
     integer, intent(in), optional :: error_code
     character(len=*), intent(in), optional :: msg_type
-    character(len=:), allocatable :: prefix, formatted_msg
+    character(len=:), allocatable :: prefix
 
     if (level <= debug_level) then
       ! Determine prefix based on message type
@@ -429,9 +429,9 @@ end subroutine parse_yaml_internal
     integer, intent(in) :: line_num  ! Add line number parameter
     type(yaml_node), pointer :: new_node, current_node, parent_node
     integer :: pos, current_indent, parent_indent, io_stat
-    character(len=:), allocatable :: local_line, parent_key
+    character(len=:), allocatable :: local_line
     logical :: is_sequence_item
-    character(len=256) :: debug_msg, error_msg  ! Added error_msg here
+    character(len=256) :: debug_msg
 
     call debug_print(DEBUG_INFO, "Parsing line: "//trim(line))
 
@@ -739,7 +739,7 @@ end subroutine parse_yaml_internal
     type(yaml_node), pointer, intent(in) :: new_node
     type(yaml_node), pointer :: last_node, current_node, prev_node
     integer :: current_indent
-    character(len=256) :: debug_msg
+    ! character(len=256) :: debug_msg
 
     nullify(last_node)
     current_indent = parent%indent + indent_width
@@ -906,9 +906,9 @@ end subroutine parse_yaml_internal
   subroutine parse_flow_form(line, node)
       character(len=*), intent(in) :: line
       type(yaml_node), pointer, intent(inout) :: node
-      integer :: pos, start, end, item_start, item_end
+      integer :: pos, start, end, item_start
       character(len=:), allocatable :: content, item
-      type(yaml_node), pointer :: current_item, prev_item
+      type(yaml_node), pointer :: prev_item
       logical :: in_quotes, in_bracket
 
       ! Initialize
@@ -1080,7 +1080,6 @@ end subroutine parse_mapping
     real :: r_value
     integer :: i_value
     logical :: l_value
-    logical :: is_real, is_int
     integer :: rc
     character(len=32) :: temp_str  ! Buffer for numeric conversions
 

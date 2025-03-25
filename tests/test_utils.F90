@@ -1198,7 +1198,7 @@ contains
 
     integer function test_root_keys()
         type(fyaml_doc) :: doc
-        type(yaml_value) :: val
+        ! type(yaml_value) :: val
         character(len=:), allocatable, dimension(:) :: root_keys
         logical :: success
         integer :: i, status
