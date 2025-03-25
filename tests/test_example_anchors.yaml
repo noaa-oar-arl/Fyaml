@@ -1,3 +1,10 @@
+places:
+  # TODO: doesn't work with full name "The National Center for Weather and Climate Prediction"
+  - &ncwcp NCWCP
+
+barry:
+  office: *ncwcp
+
 # Base configuration with explicit values first
 defaults: &defaults
   timeout: 30

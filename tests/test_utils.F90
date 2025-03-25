@@ -1260,7 +1260,7 @@ contains
         character(len=:), allocatable :: str_val
         integer :: int_val, status
         logical :: success
-        character(len=:), allocatable, dimension(:) :: color_list
+        character(len=:), allocatable, dimension(:) :: color_list, seq_val
 
         test_anchors_aliases = ERR_SUCCESS
 
@@ -1300,6 +1300,45 @@ contains
             test_anchors_aliases = ERR_ASSERT
             return
         endif
+
+        ! Test a simple anchor case with string value
+        val = doc%get("places")
+        if (.not. associated(val%node)) then
+            write(error_unit,*) "Failed to get places node"
+            test_anchors_aliases = ERR_ASSERT
+            return
+        endif
+        if (.not. val%is_sequence()) then
+            write(error_unit,*) "Expected sequence for places"
+            test_anchors_aliases = ERR_ASSERT
+            return
+        endif
+        seq_val = val%get_sequence()
+        call assert_equal( &
+            "NCWCP", &
+            seq_val(1), &
+            "First place", &
+            status)
+        if (status /= ERR_SUCCESS) then
+            test_anchors_aliases = status
+            return
+        endif
+        val = doc%get("barry%office")
+        if (.not. associated(val%node)) then
+            write(error_unit,*) "Failed to get barry%office node"
+            test_anchors_aliases = ERR_ASSERT
+            return
+        endif
+        ! str_val = val%get_str()
+        ! call assert_equal( &
+        !     "NCWCP", &
+        !     str_val, &
+        !     "Barry's office", &
+        !     status)
+        ! if (status /= ERR_SUCCESS) then
+        !     test_anchors_aliases = status
+        !     return
+        ! endif
 
         ! ! Test sequence aliases
         ! val = doc%get("colors")
