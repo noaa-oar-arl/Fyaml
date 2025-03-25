@@ -58,7 +58,6 @@ module fyaml
     private :: get_nested_real
     private :: get_nested_bool  ! Add boolean getter
     private :: get_value_nested
-    private :: find_child_by_key
     private :: check_sequence_impl ! New private implementation
     private :: safe_allocate_string
     private :: determine_value_type ! New private subroutine
@@ -227,22 +226,6 @@ contains
         return
     end subroutine load_yaml_doc
 
-    !> Convert a yaml_node to yaml_value
-    !!
-    !! @param[in] node Source YAML node
-    !! @return Value container wrapping the node
-    function node_to_value(node) result(val)
-        type(yaml_node), pointer, intent(in) :: node
-        type(yaml_value) :: val
-
-        if (.not. associated(node)) then
-            val%node => null()
-            return
-        endif
-
-        val%node => node
-    end function
-
     !> Get string value from yaml_value
     !!
     !! @param[in] self Value container instance
@@ -363,40 +346,6 @@ contains
             is_seq = check_sequence_node(self%node)
         endif
     end function check_sequence_impl
-
-    !> Print yaml_node children keys
-    !!
-    !! @param[in] node Node to print
-    !! @param[in] prefix Optional indentation prefix
-    subroutine print_node_children(node, prefix)
-        type(yaml_node), pointer, intent(in) :: node
-        character(len=*), intent(in), optional :: prefix
-        type(yaml_node), pointer :: current
-        character(len=:), allocatable :: indent
-
-        if (.not. associated(node)) then
-            write(error_unit,*) "No node to print children"
-            return
-        endif
-
-        indent = ""
-        if (present(prefix)) indent = prefix
-
-        write(error_unit,*) trim(indent)//"Node key:", trim(node%key)
-        write(error_unit,*) trim(indent)//"Node value:", trim(node%value)
-        write(error_unit,*) trim(indent)//"Has children:", associated(node%children)
-
-        if (associated(node%children)) then
-            write(error_unit,*) trim(indent)//"Children:"
-            current => node%children
-            do while (associated(current))
-                write(error_unit,*) trim(indent)//"  -", trim(current%key), &
-                                  " (value:", trim(current%value), ")", &
-                                  " has_children:", associated(current%children)
-                current => current%next
-            end do
-        endif
-    end subroutine print_node_children
 
     !> Convert YAML node structure to dictionary
     !!
@@ -900,40 +849,6 @@ contains
             val = this%docs(1)
         endif
     end function get_default_doc
-
-    !> Find child node by key
-    !!
-    !! @param[in] node Parent node to search
-    !! @param[in] search_key Key to find
-    !! @return Value container for found child
-    function find_child_by_key(node, search_key) result(found_val)
-        type(yaml_node), pointer, intent(in) :: node
-        character(len=*), intent(in) :: search_key
-        type(yaml_value) :: found_val
-        type(yaml_node), pointer :: current
-
-        write(error_unit,*) "DEBUG: Searching for child with key:", trim(search_key)
-        found_val%node => null()
-
-        ! Search only immediate children
-        if (associated(node%children)) then
-            current => node%children
-            do while (associated(current))
-                write(error_unit,*) "DEBUG: Checking child node:", trim(current%key)
-                if (trim(adjustl(current%key)) == trim(adjustl(search_key))) then
-                    write(error_unit,*) "DEBUG: Found matching child node"
-                    found_val%node => current
-                    ! Preserve sequence flags
-                    if (current%is_sequence .and. associated(current%children)) then
-                        current%children%is_sequence = .true.
-                    endif
-                    return
-                endif
-                current => current%next
-            end do
-        endif
-        write(error_unit,*) "DEBUG: Child not found"
-    end function find_child_by_key
 
     !> Split a path by % delimiter
     !!
