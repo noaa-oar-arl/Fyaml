@@ -40,13 +40,14 @@ module yaml_parser
   public :: find_sequence_parent_node, to_lower, count_leading_spaces
   public :: check_sequence, parse_yaml
   public :: find_nested_node  ! Add this function to the public interface at the top of the module
+  public :: set_indent_width
+  public :: set_debug_level
 
   ! Private interfaces
   private :: is_real_string
   private :: is_int_string
   private :: is_block_sequence
   private :: parse_yaml_internal
-  private :: set_indent_width
 
   ! Move check_sequence interface declaration here
   interface check_sequence
