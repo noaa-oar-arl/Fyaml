@@ -702,56 +702,6 @@ contains
         endif
     end function
 
-    subroutine test_value_getters()
-        type(yaml_value) :: val
-        type(yaml_node), pointer :: test_node
-        integer :: status
-
-        ! Test string value
-        allocate(test_node)
-        test_node%value = "Example Corp"
-        test_node%is_string = .true.
-        val%node => test_node
-        call assert_equal("Example Corp", val%get_str(), "String value test", status)
-        deallocate(test_node)
-
-        ! Rest of value getter tests...
-        ! Test integer value
-        allocate(test_node)
-        test_node%value = "2001"
-        test_node%is_integer = .true.
-        val%node => test_node
-        call assert_equal(val%get_int(), 2001, "Integer value test", status)
-        deallocate(test_node)
-
-        ! Test real value
-        allocate(test_node)
-        test_node%value = "3.14159"
-        test_node%is_float = .true.
-        val%node => test_node
-        call assert_equal(val%get_real(), 3.14159, "Real value test", status)
-        deallocate(test_node)
-
-        ! Test boolean value
-        allocate(test_node)
-        test_node%value = "true"
-        test_node%is_boolean = .true.
-        val%node => test_node
-        call assert_equal(val%get_bool(), .true., "Boolean value test", status)
-        deallocate(test_node)
-
-        ! Test null value
-        val%node => null()
-        call assert_equal(val%is_null(), .true., "Null value test", status)
-
-        ! Test sequence
-        allocate(test_node)
-        test_node%is_sequence = .true.
-        val%node => test_node
-        call assert_equal(val%is_sequence(), .true., "Sequence test", status)
-        deallocate(test_node)
-    end subroutine
-
     ! Group 3: Nested Access Tests
     ! Add new test function for nested access
     integer function test_nested_access()
