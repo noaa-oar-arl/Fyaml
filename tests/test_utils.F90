@@ -1294,10 +1294,18 @@ contains
             test_anchors_aliases = ERR_ASSERT
             return
         endif
-
         if (.not. val%node%is_boolean) then
             write(error_unit,*) "Expected boolean for debug setting"
             test_anchors_aliases = ERR_ASSERT
+            return
+        endif
+        call assert_equal( &
+            .true., &
+            val%get_bool(), &
+            "Debug setting should be true", &
+            status)
+        if (status /= ERR_SUCCESS) then
+            test_anchors_aliases = status
             return
         endif
 
