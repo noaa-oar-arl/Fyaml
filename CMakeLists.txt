@@ -16,9 +16,6 @@ endif()
 
 cmake_print_variables(CMAKE_Fortran_COMPILER CMAKE_Fortran_COMPILER_ID CMAKE_BUILD_TYPE)
 
-# Set default compiler options for Fortran
-set(_fyaml_compiler_options "")
-
 # First ensure we're setting platform-specific flags
 if(APPLE)
     # Get MacOS SDK path
@@ -44,6 +41,13 @@ if(APPLE)
         "${SDKROOT}/usr/include"
         "/usr/local/include"
     )
+endif()
+
+# Set default compiler options for Fortran
+set(_fyaml_compiler_options "")
+
+if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+  list(APPEND _fyaml_compiler_options -ffree-line-length-none)
 endif()
 
 # Add debug flags for Fortran
