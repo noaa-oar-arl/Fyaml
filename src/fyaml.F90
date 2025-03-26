@@ -275,7 +275,7 @@ call debug_print(DEBUG_INFO, "Node not associated for string value")
             call debug_print(DEBUG_INFO, "Retrieved string value: "//trim(str_val))
         else
             str_val = ''
-            write(debug_msg,"(A,4(A,L))") &
+            write(debug_msg,"(A,4(A,L1))") &
                 "Node is not a string type. Type flags:", &
                 " is_string=", self%node%is_string, &
                 " is_integer=", self%node%is_integer, &
@@ -623,16 +623,16 @@ call debug_print(DEBUG_INFO, "Node not associated for string value")
                     val%node => current%value%node
                     ! Ensure type is determined for direct matches
                     call determine_value_type(val%node)
-                    write(debug_msg,'(A,L)') "Node has children: ", associated(val%node%children)
+                    write(debug_msg,'(A,L1)') "Node has children: ", associated(val%node%children)
                     call debug_print(DEBUG_INFO, debug_msg)
                     call debug_print(DEBUG_INFO, "Node value: "//trim(val%node%value))
-                    write(debug_msg,'(A,L)') "Is integer: ", val%node%is_integer
+                    write(debug_msg,'(A,L1)') "Is integer: ", val%node%is_integer
                     call debug_print(DEBUG_INFO, debug_msg)
                     return
                 else
                     ! For nested access
                     val%node => current%value%node
-                    write(debug_msg,'(A,L)') "Node has children: ", associated(val%node%children)
+                    write(debug_msg,'(A,L1)') "Node has children: ", associated(val%node%children)
                     call debug_print(DEBUG_INFO, debug_msg)
 
                     if (.not. associated(val%node%children)) then
@@ -805,7 +805,7 @@ call debug_print(DEBUG_INFO, "Node not associated for string value")
             endif
 
             call debug_print(DEBUG_INFO, "Found node value: "//trim(temp%node%value))
-            write(debug_msg,"(A,4(A,L))") &
+            write(debug_msg,"(A,4(A,L1))") &
                 "Node type flags:", &
                 " is_string=", temp%node%is_string, &
                 " is_integer=", temp%node%is_integer, &
