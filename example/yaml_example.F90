@@ -1,7 +1,6 @@
 program test_fyaml
     use fyaml
-    use yaml_parser, only: yaml_node
-    use yaml_types
+    use yaml_types, only: yaml_node
     implicit none
 
     type(fyaml_doc) :: doc

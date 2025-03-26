@@ -11,20 +11,20 @@
 !! ```
 !!
 !! @note Supports strings, integers, reals, booleans, nulls, and sequences
-!! @version 1.0.0
+!! @version 0.1.0
 !! @see yaml_parser
 !! @see yaml_types
 module fyaml
-    use yaml_parser, only: yaml_node, check_sequence_node, parse_yaml, &
-        integer_to_string, &
+    use yaml_parser, only: parse_yaml, &
+        check_sequence, integer_to_string, &
         debug_print, DEBUG_INFO, DEBUG_ERROR, DEBUG_WARNING
-    use yaml_types
+    use yaml_types, only: yaml_node, yaml_document
     use, intrinsic :: iso_fortran_env, only: error_unit
     implicit none
 
     private
     public :: fyaml_doc, yaml_value, yaml_dict, yaml_pair, error_unit
-    public :: split_key, count_children, get_child_keys, get_root_keys  ! Add count_children, get_child_keys, and get_root_keys to public list
+    public :: split_key, count_children, get_child_keys, get_root_keys
 
     ! Add interface declaration for nested value getters
     interface get_nested_value
@@ -52,23 +52,6 @@ module fyaml
         module procedure get_node_child_keys
         module procedure get_value_child_keys
     end interface
-
-    ! Add private declarations here
-    private :: get_doc_nested
-    private :: get_nested_str
-    private :: get_nested_int
-    private :: get_nested_real
-    private :: get_nested_bool  ! Add boolean getter
-    private :: get_value_nested
-    private :: find_child_by_key
-    private :: check_sequence_impl ! New private implementation
-    private :: safe_allocate_string
-    private :: determine_value_type ! New private subroutine
-    private :: get_sequence_values  ! Add private declaration
-    private :: get_sequence_integers ! Add private declaration
-    private :: get_sequence_reals    ! Add private declaration
-    private :: get_sequence_bools    ! Add private declaration
-    private :: get_sequence_size  ! Add to private declarations
 
     !> Value container type supporting multiple YAML data types
     !!
@@ -367,7 +350,7 @@ call debug_print(DEBUG_INFO, "Node not associated for string value")
 
         is_seq = .false.
         if (associated(self%node)) then
-            is_seq = check_sequence_node(self%node)
+            is_seq = check_sequence(self%node)
         endif
     end function check_sequence_impl
 

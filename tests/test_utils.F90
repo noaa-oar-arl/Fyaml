@@ -4,8 +4,8 @@
 !! Includes tests for all supported data types and structures.
 module test_utils
     use fyaml
-    use yaml_parser, only: yaml_node, DEBUG_INFO, debug_print
-    use yaml_types
+    use yaml_parser, only: DEBUG_INFO, debug_print
+    use yaml_types, only: yaml_node
     use iso_fortran_env, only: error_unit
     implicit none
     private

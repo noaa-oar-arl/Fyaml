@@ -13,6 +13,14 @@ module yaml_parser
   use iso_fortran_env, only: error_unit, output_unit
   implicit none
 
+  private
+  public :: parse_yaml
+  public :: check_sequence, find_sequence_parent_node
+  public :: find_nested_node
+  public :: integer_to_string, to_lower, count_leading_spaces
+  public :: debug_print, set_debug_level, get_debug_level
+  public :: DEBUG_SILENT, DEBUG_ERROR, DEBUG_WARNING, DEBUG_INFO
+
   ! Debug levels
   !=============
   !> No debug output
@@ -35,56 +43,32 @@ module yaml_parser
   !> Memory allocation error
   integer, parameter :: ERR_MEMORY = 3
 
-  ! Module variables
-  !=================
-  integer :: debug_level = DEBUG_INFO
-  integer :: indent_width = 2  ! Default indentation width
+  ! Constants for debug output formatting
+  character(len=*), parameter :: DBG_NEW_NODE = "--- NEW NODE: "
+  character(len=*), parameter :: DBG_PARENT   = "=== PARENT: "
+  character(len=*), parameter :: DBG_CHILD    = "  |- CHILD: "
+  character(len=*), parameter :: DBG_SIBLING  = "  |+ SIBLING: "
+  character(len=*), parameter :: DBG_LEVEL    = "LEVEL "
+  character(len=*), parameter :: DBG_INDENT   = "    "
 
-  ! Public interfaces
-  public :: find_sequence_parent_node, to_lower, count_leading_spaces
-  public :: check_sequence, parse_yaml
-  public :: find_nested_node  ! Add this function to the public interface at the top of the module
+  ! Format specifiers for debug messages
+  character(len=*), parameter :: DBG_FMT_INDENT = "(2A)"
+  character(len=*), parameter :: DBG_FMT_NODE = "(3A,I0)"
+  character(len=*), parameter :: DBG_FMT_KEY = "(2A)"
+  character(len=*), parameter :: DBG_FMT_LEVEL = "(A,I0,2A,I0)"
 
-  ! Private interfaces
-  private :: is_real_string
-  private :: is_int_string
-  private :: is_block_sequence
-  private :: find_last_sequence_item
-  private :: find_last_nonsequence_node
-  private :: parse_yaml_internal
-  private :: set_indent_width
-  private :: detect_indent_width
-
-  ! Move check_sequence interface declaration here
   interface check_sequence
     module procedure check_sequence_node
   end interface
 
-  ! Update interface for parse_yaml
   interface parse_yaml
     module procedure parse_yaml_wrapper
   end interface
 
-  ! Add type definition at module level before contains
   type :: stack_entry
     type(yaml_node), pointer :: node => null()
   end type stack_entry
 
-  ! Add constants for debug output formatting
-  character(len=*), parameter :: DBG_NEW_NODE    = "--- NEW NODE: "
-  character(len=*), parameter :: DBG_PARENT      = "=== PARENT: "
-  character(len=*), parameter :: DBG_CHILD       = "  |- CHILD: "
-  character(len=*), parameter :: DBG_SIBLING     = "  |+ SIBLING: "
-  character(len=*), parameter :: DBG_LEVEL       = "LEVEL "
-  character(len=*), parameter :: DBG_INDENT      = "    "
-
-  ! Add new format specifiers for debug messages
-  character(len=*), parameter :: DBG_FMT_INDENT = "(2A)"  ! Changed from "(A,I0)"
-  character(len=*), parameter :: DBG_FMT_NODE = "(3A,I0)"  ! Changed from "(A,A,A,I0)"
-  character(len=*), parameter :: DBG_FMT_KEY = "(2A)"  ! No change needed
-  character(len=*), parameter :: DBG_FMT_LEVEL = "(A,I0,2A,I0)"  ! Changed from "(2A,I0,2A)"
-
-  ! Add tracking for last key at each indent level
   type :: indent_tracker
     integer :: indent
     character(len=:), allocatable :: last_key
@@ -92,18 +76,26 @@ module yaml_parser
     type(indent_tracker), pointer :: next => null()
   end type indent_tracker
 
-  ! Add module variable to track indentation history
+  ! Module variables
+  !=================
+  integer :: debug_level = DEBUG_INFO
+  integer :: indent_width = 2  !< Default indentation width
   type(indent_tracker), pointer, save :: indent_history => null()
 
 contains
 
-  !> Set the debug output level for the YAML parser
+  !> Set the debug output level.
   !!
   !! @param[in] level Debug level (DEBUG_ERROR or DEBUG_INFO)
   subroutine set_debug_level(level)
     integer, intent(in) :: level
     debug_level = level
   end subroutine
+
+  !> Get the current debug output level.
+  integer function get_debug_level() result(res)
+    res = debug_level
+  end function
 
   !> Set the indentation width used for parsing YAML structure
   !!
