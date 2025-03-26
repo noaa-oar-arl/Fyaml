@@ -6,8 +6,8 @@ Thank you for your interest in contributing to Fyaml! This document outlines the
 
 1. Fork and clone the repository:
 ```bash
-git clone https://github.com/yourusername/fyaml.git
-cd fyaml
+git clone https://github.com/your-username/Fyaml.git
+cd Fyaml
 ```
 
 2. Set up development environment:
@@ -45,6 +45,10 @@ git checkout -b feature/your-feature-name
 5. Run the test suite:
 ```bash
 ctest --test-dir build/tests --output-on-failure
+```
+Or if your CMake is older than 3.20:
+```bash
+(cd build/tests && ctest --output-on-failure)
 ```
 
 ### Submit a Pull Request with:
