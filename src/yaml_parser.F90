@@ -15,6 +15,8 @@ module yaml_parser
 
   ! Debug levels
   !=============
+  !> No debug output
+  integer, parameter :: DEBUG_SILENT = 0
   !> Show only error messages
   integer, parameter :: DEBUG_ERROR = 1
   !> Show general info messages
