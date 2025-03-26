@@ -621,7 +621,7 @@ end subroutine parse_yaml_internal
             ! Find parent based on indentation
             parent_node => find_parent_by_indent(doc%root, current_indent, line_num)
 
-            write(debug_msg, '(A,A,A,I0,A,L1)') "Node: ", trim(new_node%key), &
+            write(debug_msg, '(A,A,A,I0,A,L1)') "Node: ", trim(adjustl(new_node%key)), &
                                                " at indent ", current_indent, &
                                                " is root: ", (current_indent == 0)
             call debug_print(DEBUG_INFO, debug_msg)
@@ -639,7 +639,7 @@ end subroutine parse_yaml_internal
                 endif
                 nullify(new_node%parent)  ! Ensure no parent for root nodes
             else if (associated(parent_node)) then
-                write(debug_msg, '(A,A,A,I0)') "Found parent '", trim(parent_node%key), &
+                write(debug_msg, '(A,A,A,I0)') "Found parent '", trim(adjustl(parent_node%key)), &
                                               "' at indent ", parent_node%indent
                 call debug_print(DEBUG_INFO, trim(debug_msg))
 
@@ -672,10 +672,10 @@ end subroutine parse_yaml_internal
 
             ! Debug output for node hierarchy
             if (associated(new_node%parent)) then
-                write(debug_msg, '(A,A,A,A)') "Node ", trim(new_node%key), &
-                                           " has parent ", trim(new_node%parent%key)
+                write(debug_msg, '(A,A,A,A)') "Node ", trim(adjustl(new_node%key)), &
+                                           " has parent ", trim(adjustl(new_node%parent%key))
             else
-                write(debug_msg, '(A,A,A)') "Node ", trim(new_node%key), &
+                write(debug_msg, '(A,A,A)') "Node ", trim(adjustl(new_node%key)), &
                                          " is at root level"
             endif
             call debug_print(DEBUG_INFO, debug_msg)
@@ -1764,7 +1764,7 @@ end subroutine parse_mapping
             ! Only consider nodes before the current line
             if (current%line_num < line_num) then
                 write(debug_msg, '(A,A,A,I0,A,I0)') &
-                    "Checking node: ", trim(current%key), &
+                    "Checking node: ", trim(adjustl(current%key)), &
                     " at line ", current%line_num, &
                     " indent ", current%indent
                 call debug_print(DEBUG_INFO, debug_msg)
@@ -1774,7 +1774,7 @@ end subroutine parse_mapping
                     if (.not. associated(best_parent)) then
                         best_parent => current
                         write(debug_msg, '(A,A,A,I0,A,I0)') &
-                            "Found exact indent match: ", trim(current%key), &
+                            "Found exact indent match: ", trim(adjustl(current%key)), &
                             " at line ", current%line_num, &
                             " indent ", current%indent
                         call debug_print(DEBUG_INFO, debug_msg)
@@ -1783,7 +1783,7 @@ end subroutine parse_mapping
                             if (current%line_num > best_parent%line_num) then
                                 best_parent => current
                                 write(debug_msg, '(A,A,A,I0,A,I0)') &
-                                    "Found exact indent match: ", trim(current%key), &
+                                    "Found exact indent match: ", trim(adjustl(current%key)), &
                                     " at line ", current%line_num, &
                                     " indent ", current%indent
                                 call debug_print(DEBUG_INFO, debug_msg)
@@ -1798,7 +1798,7 @@ end subroutine parse_mapping
                     if (.not. associated(last_valid_parent)) then
                         last_valid_parent => current
                         write(debug_msg, '(A,A,A,I0,A,I0)') &
-                            "Found first valid parent: ", trim(current%key), &
+                            "Found first valid parent: ", trim(adjustl(current%key)), &
                             " at line ", current%line_num, &
                             " indent ", current%indent
                         call debug_print(DEBUG_INFO, debug_msg)
@@ -1807,7 +1807,7 @@ end subroutine parse_mapping
                         if (current%indent > last_valid_parent%indent) then
                             last_valid_parent => current
                             write(debug_msg, '(A,A,A,I0,A,I0)') &
-                                "Found better parent (higher indent): ", trim(current%key), &
+                                "Found better parent (higher indent): ", trim(adjustl(current%key)), &
                                 " at line ", current%line_num, &
                                 " indent ", current%indent
                             call debug_print(DEBUG_INFO, debug_msg)
@@ -1815,7 +1815,7 @@ end subroutine parse_mapping
                                 current%line_num > last_valid_parent%line_num) then
                             last_valid_parent => current
                             write(debug_msg, '(A,A,A,I0,A,I0)') &
-                                "Found better parent (same indent, later line): ", trim(current%key), &
+                                "Found better parent (same indent, later line): ", trim(adjustl(current%key)), &
                                 " at line ", current%line_num, &
                                 " indent ", current%indent
                             call debug_print(DEBUG_INFO, debug_msg)
@@ -1853,14 +1853,14 @@ end subroutine parse_mapping
     if (associated(best_parent)) then
         parent => best_parent
         write(debug_msg, '(A,A,A,I0,A,I0)') &
-            "Selected exact match parent: ", trim(parent%key), &
+            "Selected exact match parent: ", trim(adjustl(parent%key)), &
             " at line ", parent%line_num, &
             " indent ", parent%indent
         call debug_print(DEBUG_INFO, debug_msg)
     else if (associated(last_valid_parent)) then
         parent => last_valid_parent
         write(debug_msg, '(A,A,A,I0,A,I0)') &
-            "Selected closest valid parent: ", trim(parent%key), &
+            "Selected closest valid parent: ", trim(adjustl(parent%key)), &
             " at line ", parent%line_num, &
             " indent ", parent%indent
         call debug_print(DEBUG_INFO, debug_msg)

@@ -458,10 +458,10 @@ call debug_print(DEBUG_INFO, "Node not associated for string value")
 
             ! Handle nested structures
             if (associated(current%children)) then
-                write(debug_msg, '(A,A,A,L1,A,I0)') "Creating nested dictionary for: ", &
-                                             trim(current%key), &
+                write(debug_msg, '(A,A,A,L1,A,I0,A)') "Creating nested dictionary for: ", &
+                                             trim(adjustl(current%key)), &
                                              " (root level: ", is_root_level, &
-                                             " indent: ", current%indent  ! Changed from indent_level to indent
+                                             " indent: ", current%indent, ")"
 
                 call debug_print(DEBUG_INFO, debug_msg)
 
