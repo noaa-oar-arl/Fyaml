@@ -12,6 +12,7 @@ target_link_libraries(fyaml PRIVATE ${_fyaml_compiler_options})
 
 # Install the library
 install(TARGETS fyaml
+    RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib)
 
