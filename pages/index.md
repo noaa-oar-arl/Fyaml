@@ -20,6 +20,7 @@ git clone https://github.com/yourusername/fyaml.git
 cd fyaml
 mkdir build && cd build
 cmake ..
+make
 make install
 ```
 
