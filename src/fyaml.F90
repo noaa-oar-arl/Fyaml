@@ -17,14 +17,17 @@
 module fyaml
     use yaml_parser, only: parse_yaml, &
         check_sequence, integer_to_string, &
-        debug_print, DEBUG_INFO, DEBUG_ERROR, DEBUG_WARNING
+        debug_print, set_debug_level, get_debug_level, &
+        DEBUG_SILENT, DEBUG_INFO, DEBUG_ERROR, DEBUG_WARNING
     use yaml_types, only: yaml_node, yaml_document
     use, intrinsic :: iso_fortran_env, only: error_unit
     implicit none
 
     private
-    public :: fyaml_doc, yaml_value, yaml_dict, yaml_pair, error_unit
+    public :: fyaml_doc, yaml_node, yaml_value, yaml_dict, yaml_pair
     public :: split_key, count_children, get_child_keys, get_root_keys
+    public :: debug_print, set_debug_level, get_debug_level
+    public :: DEBUG_SILENT, DEBUG_ERROR, DEBUG_WARNING, DEBUG_INFO
 
     ! Add interface declaration for nested value getters
     interface get_nested_value
