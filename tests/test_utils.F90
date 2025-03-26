@@ -4,8 +4,6 @@
 !! Includes tests for all supported data types and structures.
 module test_utils
     use fyaml
-    use yaml_parser, only: yaml_node, DEBUG_INFO, debug_print  ! Changed from DEBUG_VERBOSE to DEBUG_INFO
-    use yaml_types
     use iso_fortran_env, only: error_unit
     implicit none
     private
@@ -668,7 +666,7 @@ contains
             do while (associated(current))
                 items(i) = trim(adjustl(current%value))
                 write(debug_msg, '(A,I0,A,A)') "Item ", i, ": ", trim(items(i))
-                call debug_print(DEBUG_INFO, debug_msg)  ! Changed from DEBUG_VERBOSE
+                call debug_print(DEBUG_INFO, debug_msg)
                 i = i + 1
                 current => current%next
             end do

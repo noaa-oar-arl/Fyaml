@@ -1,7 +1,6 @@
 program test_fyaml
     use fyaml
-    use yaml_parser, only: yaml_node
-    use yaml_types
+    use iso_fortran_env, only: error_unit
     implicit none
 
     type(fyaml_doc) :: doc

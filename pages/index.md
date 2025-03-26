@@ -159,8 +159,9 @@ end program
 ### Debug Output with Configurable Levels
 
 ```fortran
-use yaml_parser, only: set_debug_level, DEBUG_VERBOSE
-call set_debug_level(DEBUG_VERBOSE)
+call set_debug_level(DEBUG_INFO)   ! verbose
+call set_debug_level(DEBUG_ERROR)  ! only errors
+call set_debug_level(DEBUG_SILENT) ! quiet
 ```
 
 ### Examples

@@ -11,18 +11,23 @@
 !! ```
 !!
 !! @note Supports strings, integers, reals, booleans, nulls, and sequences
-!! @version 1.0.0
+!! @version 0.1.0
 !! @see yaml_parser
 !! @see yaml_types
 module fyaml
-    use yaml_parser, only: yaml_node, check_sequence_node, parse_yaml, debug_print, DEBUG_INFO  ! Add DEBUG_INFO to imports
-    use yaml_types
+    use yaml_parser, only: parse_yaml, &
+        check_sequence, integer_to_string, &
+        debug_print, set_debug_level, get_debug_level, &
+        DEBUG_SILENT, DEBUG_INFO, DEBUG_ERROR, DEBUG_WARNING
+    use yaml_types, only: yaml_node, yaml_document
     use, intrinsic :: iso_fortran_env, only: error_unit
     implicit none
 
     private
-    public :: fyaml_doc, yaml_value, yaml_dict, yaml_pair, error_unit
-    public :: split_key, count_children, get_child_keys, get_root_keys  ! Add count_children, get_child_keys, and get_root_keys to public list
+    public :: fyaml_doc, yaml_node, yaml_value, yaml_dict, yaml_pair
+    public :: split_key, count_children, get_child_keys, get_root_keys
+    public :: debug_print, set_debug_level, get_debug_level
+    public :: DEBUG_SILENT, DEBUG_ERROR, DEBUG_WARNING, DEBUG_INFO
 
     ! Add interface declaration for nested value getters
     interface get_nested_value
@@ -50,23 +55,6 @@ module fyaml
         module procedure get_node_child_keys
         module procedure get_value_child_keys
     end interface
-
-    ! Add private declarations here
-    private :: get_doc_nested
-    private :: get_nested_str
-    private :: get_nested_int
-    private :: get_nested_real
-    private :: get_nested_bool  ! Add boolean getter
-    private :: get_value_nested
-    private :: find_child_by_key
-    private :: check_sequence_impl ! New private implementation
-    private :: safe_allocate_string
-    private :: determine_value_type ! New private subroutine
-    private :: get_sequence_values  ! Add private declaration
-    private :: get_sequence_integers ! Add private declaration
-    private :: get_sequence_reals    ! Add private declaration
-    private :: get_sequence_bools    ! Add private declaration
-    private :: get_sequence_size  ! Add to private declarations
 
     !> Value container type supporting multiple YAML data types
     !!
@@ -146,6 +134,7 @@ contains
         integer :: rc, ios, i
         integer :: unit_num
         character(len=1024) :: buffer
+        character(len=256) :: debug_msg
 
         ok = .false.
 
@@ -156,7 +145,7 @@ contains
         ! Check if file exists first
         inquire(file=filename, exist=file_exists)
         if (.not. file_exists) then
-            write(error_unit,*) 'YAML file not found:', trim(filename)
+            call debug_print(DEBUG_ERROR, 'YAML file not found: '//trim(filename))
             if (present(success)) success = .false.
             return
         endif
@@ -164,7 +153,7 @@ contains
         ! Open file with error checking
         open(newunit=unit_num, file=filename, status='old', action='read', iostat=ios, iomsg=buffer)
         if (ios /= 0) then
-            write(error_unit,*) 'Error opening file:', trim(filename), ' - ', trim(buffer)
+            call debug_print(DEBUG_ERROR, 'Error opening file: '//trim(filename)//' - '//trim(buffer))
             if (present(success)) success = .false.
             return
         endif
@@ -172,7 +161,7 @@ contains
         ! Test read first line to verify file is readable
         read(unit_num, '(A)', iostat=ios, end=100) buffer
         if (ios /= 0) then
-            write(error_unit,*) 'Error reading file:', trim(filename)
+            call debug_print(DEBUG_ERROR, 'Error reading file: '//trim(filename))
             if (present(success)) success = .false.
             close(unit_num)
             return
@@ -184,13 +173,13 @@ contains
         close(unit_num)
 
         if (rc /= 0) then
-            write(error_unit,*) 'Error parsing YAML:', trim(filename)
+            call debug_print(DEBUG_ERROR, 'Error parsing YAML: '//trim(filename))
             if (present(success)) success = .false.
             return
         endif
 
         if (.not. allocated(parsed_docs)) then
-            write(error_unit,*) 'No documents parsed from file:', trim(filename)
+            call debug_print(DEBUG_ERROR, 'No documents parsed from file: '//trim(filename))
             if (present(success)) success = .false.
             return
         endif
@@ -199,7 +188,7 @@ contains
         this%n_docs = size(parsed_docs)
         allocate(this%docs(this%n_docs), stat=ios)
         if (ios /= 0) then
-            write(error_unit,*) 'Error allocating document array'
+            call debug_print(DEBUG_ERROR, 'Error allocating document array')
             if (present(success)) success = .false.
             if (allocated(parsed_docs)) deallocate(parsed_docs)
             return
@@ -211,7 +200,8 @@ contains
                 call convert_node_to_dict(parsed_docs(i)%root, this%docs(i))
                 ok = .true.
             else
-                write(error_unit,*) 'Warning: Document', i, 'has no root node'
+                write(debug_msg,'(A,I0,A)') 'Document ', i, ' has no root node'
+                call debug_print(DEBUG_WARNING, debug_msg)
             endif
         end do
 
@@ -221,7 +211,7 @@ contains
 
 100     continue
         ! Handle empty file
-        write(error_unit,*) 'Empty or invalid YAML file:', trim(filename)
+        call debug_print(DEBUG_ERROR, 'Empty or invalid YAML file: '//trim(filename))
         if (present(success)) success = .false.
         close(unit_num)
         return
@@ -251,11 +241,12 @@ contains
         class(yaml_value), intent(inout) :: self  ! Changed from intent(in) to intent(inout)
         character(len=:), allocatable :: str_val
         logical :: was_string
+        character(len=256) :: debug_msg
 
         if (.not. associated(self%node)) then
+call debug_print(DEBUG_INFO, "Node not associated for string value")
             str_val = ''
-            write(error_unit,*) "DEBUG: Node not associated for string value"
-            return
+                        return
         endif
 
         ! Store if it was already marked as string
@@ -267,14 +258,16 @@ contains
         ! If it wasn't originally a string but became one, or was one already
         if (self%node%is_string .or. was_string) then
             str_val = trim(self%node%value)
-            write(error_unit,*) "DEBUG: Retrieved string value:", trim(str_val)
+            call debug_print(DEBUG_INFO, "Retrieved string value: "//trim(str_val))
         else
             str_val = ''
-            write(error_unit,*) "DEBUG: Node is not a string type. Type flags:", &
-                              " is_string=", self%node%is_string, &
-                              " is_integer=", self%node%is_integer, &
-                              " is_float=", self%node%is_float, &
-                              " is_boolean=", self%node%is_boolean
+            write(debug_msg,"(A,4(A,L1))") &
+                "Node is not a string type. Type flags:", &
+                " is_string=", self%node%is_string, &
+                " is_integer=", self%node%is_integer, &
+                " is_float=", self%node%is_float, &
+                " is_boolean=", self%node%is_boolean
+            call debug_print(DEBUG_INFO, debug_msg)
         endif
     end function
 
@@ -289,7 +282,7 @@ contains
 
         int_val = 0
         if (.not. associated(self%node)) then
-            write(error_unit,*) "DEBUG: Node not associated for integer value"
+            call debug_print(DEBUG_INFO, "Node not associated for integer value")
             return
         endif
 
@@ -301,13 +294,13 @@ contains
         if (self%node%is_integer) then
             read(self%node%value, *, iostat=ios) int_val
             if (ios /= 0) then
-                write(error_unit,*) "DEBUG: Failed to convert value to integer:", trim(self%node%value)
+                call debug_print(DEBUG_WARNING, "Failed to convert value to integer: "//trim(self%node%value))
                 int_val = 0
             else
-                write(error_unit,*) "DEBUG: Successfully converted to integer:", int_val
+                call debug_print(DEBUG_INFO, "Successfully converted to integer: "//trim(integer_to_string(int_val)))
             endif
         else
-            write(error_unit,*) "DEBUG: Node is not an integer type. Value:", trim(self%node%value)
+            call debug_print(DEBUG_INFO, "Node is not an integer type. Value: "//trim(self%node%value))
         endif
     end function
 
@@ -360,7 +353,7 @@ contains
 
         is_seq = .false.
         if (associated(self%node)) then
-            is_seq = check_sequence_node(self%node)
+            is_seq = check_sequence(self%node)
         endif
     end function check_sequence_impl
 
@@ -375,7 +368,7 @@ contains
         character(len=:), allocatable :: indent
 
         if (.not. associated(node)) then
-            write(error_unit,*) "No node to print children"
+            call debug_print(DEBUG_INFO, "No node to print children")
             return
         endif
 
@@ -412,7 +405,7 @@ contains
         integer :: alloc_stat
 
         if (.not. associated(node)) then
-            write(error_unit,*) "WARNING: Empty node passed to convert_node_to_dict"
+            call debug_print(DEBUG_WARNING, "Empty node passed to convert_node_to_dict")
             return
         endif
 
@@ -439,7 +432,7 @@ contains
             ! Create new pair
             allocate(new_pair, stat=alloc_stat)
             if (alloc_stat /= 0) then
-                write(error_unit,*) "ERROR: Failed to allocate new pair"
+                call debug_print(DEBUG_ERROR, "Failed to allocate new pair")
                 return
             endif
 
@@ -451,17 +444,17 @@ contains
 
             ! Handle nested structures
             if (associated(current%children)) then
-                write(debug_msg, '(A,A,A,L1,A,I0)') "Creating nested dictionary for: ", &
-                                             trim(current%key), &
+                write(debug_msg, '(A,A,A,L1,A,I0,A)') "Creating nested dictionary for: ", &
+                                             trim(adjustl(current%key)), &
                                              " (root level: ", is_root_level, &
-                                             " indent: ", current%indent  ! Changed from indent_level to indent
+                                             " indent: ", current%indent, ")"
 
                 call debug_print(DEBUG_INFO, debug_msg)
 
                 ! Create nested dictionary
                 allocate(new_pair%nested, stat=alloc_stat)
                 if (alloc_stat /= 0) then
-                    write(error_unit,*) "ERROR: Failed to allocate nested dictionary"
+                    call debug_print(DEBUG_ERROR, "Failed to allocate nested dictionary")
                     deallocate(new_pair)
                     return
                 endif
@@ -589,58 +582,64 @@ contains
         character(len=:), allocatable, dimension(:) :: key_parts
         character(len=:), allocatable :: remaining_path
         integer :: i, path_start
+        character(len=256) :: debug_msg
 
-        write(error_unit,*) "DEBUG: Dictionary get_value for key:", trim(key)
+        call debug_print(DEBUG_INFO, "Dictionary get_value for key: "//trim(key))
         val%node => null()
 
         ! Split key into parts
         key_parts = split_key(key)
-        write(error_unit,*) "DEBUG: Looking for key part:", trim(key_parts(1))
+        call debug_print(DEBUG_INFO, "Looking for key part: "//trim(key_parts(1)))
 
         ! Start with first level search
         current => this%first
         do while (associated(current))
-            write(error_unit,*) "DEBUG: Checking pair with key:", trim(current%key), &
-                              " against target:", trim(key_parts(1))
+            write(debug_msg,'(4(A))') &
+                "Checking pair with key: ", trim(current%key), &
+                " against target: ", trim(key_parts(1))
+            call debug_print(DEBUG_INFO, debug_msg)
 
             ! Do exact string comparison after trimming and adjusting
             if (trim(adjustl(current%key)) == trim(adjustl(key_parts(1)))) then
-                write(error_unit,*) "DEBUG: Found first level match for:", trim(key_parts(1))
+                call debug_print(DEBUG_INFO, "Found first level match for key: "//trim(key_parts(1)))
 
                 if (size(key_parts) == 1) then
                     ! Direct match at this level
+                    call debug_print(DEBUG_INFO, "Found direct match at first level")
                     val%node => current%value%node
                     ! Ensure type is determined for direct matches
                     call determine_value_type(val%node)
-                    write(error_unit,*) "DEBUG: Found direct match at first level"
-                    write(error_unit,*) "DEBUG: Node has children:", associated(val%node%children)
-                    write(error_unit,*) "DEBUG: Node value:", trim(val%node%value)
-                    write(error_unit,*) "DEBUG: Is integer:", val%node%is_integer
+                    write(debug_msg,'(A,L1)') "Node has children: ", associated(val%node%children)
+                    call debug_print(DEBUG_INFO, debug_msg)
+                    call debug_print(DEBUG_INFO, "Node value: "//trim(val%node%value))
+                    write(debug_msg,'(A,L1)') "Is integer: ", val%node%is_integer
+                    call debug_print(DEBUG_INFO, debug_msg)
                     return
                 else
                     ! For nested access
                     val%node => current%value%node
-                    write(error_unit,*) "DEBUG: Node children status:", associated(val%node%children)
+                    write(debug_msg,'(A,L1)') "Node has children: ", associated(val%node%children)
+                    call debug_print(DEBUG_INFO, debug_msg)
 
                     if (.not. associated(val%node%children)) then
-                        write(error_unit,*) "DEBUG: No children available for nested access"
+                        call debug_print(DEBUG_INFO, "No children available for nested access")
                         val%node => null()
                     else
                         ! Get remaining path
                         path_start = len_trim(key_parts(1)) + 2
                         remaining_path = trim(key(path_start:))
-                        write(error_unit,*) "DEBUG: Continuing with nested path:", trim(remaining_path)
+                        call debug_print(DEBUG_INFO, "Continuing with nested path: "//trim(remaining_path))
                         val = val%get(remaining_path)
                     endif
                     return
                 endif
             endif
 
-            write(error_unit,*) "DEBUG: Moving to next pair"
+            call debug_print(DEBUG_INFO, "Moving to next pair")
             current => current%next
         end do
 
-        write(error_unit,*) "DEBUG: Key not found in dictionary:", trim(key_parts(1))
+        call debug_print(DEBUG_INFO, "Key not found in dictionary: "//trim(key_parts(1)))
         val%node => null()
     end function get_value
 
@@ -683,45 +682,45 @@ contains
         type(yaml_node), pointer :: current
         integer :: i
 
-        write(error_unit,*) "DEBUG: Starting get_value_nested for key:", trim(key)
+        call debug_print(DEBUG_INFO, "Starting get_value_nested for key: "//trim(key))
         val%node => null()
 
         if (.not. associated(self%node)) then
-            write(error_unit,*) "DEBUG: Initial node is not associated"
+            call debug_print(DEBUG_INFO, "Initial node is not associated")
             return
         endif
 
         ! Split key into parts
         key_parts = split_key(key)
-        write(error_unit,*) "DEBUG: Looking for first key part:", trim(key_parts(1))
+        call debug_print(DEBUG_INFO, "Looking for first key part: "//trim(key_parts(1)))
 
         ! Handle direct children mode for better traversal
         current => self%node
         if (associated(current%children)) then
             current => current%children
         else
-            write(error_unit,*) "DEBUG: Node has no children"
+            call debug_print(DEBUG_INFO, "Node has no children")
             return
         endif
 
         ! Search through children at this level
         do while (associated(current))
-            write(error_unit,*) "DEBUG: Checking node key:", trim(current%key), &
-                               " against target:", trim(key_parts(1))
+            call debug_print(DEBUG_INFO, "Checking node key: "//trim(current%key) &
+                //" against target: "//trim(key_parts(1)))
 
             if (trim(adjustl(current%key)) == trim(adjustl(key_parts(1)))) then
-                write(error_unit,*) "DEBUG: Found match for:", trim(key_parts(1))
+                call debug_print(DEBUG_INFO, "Found match for: "//trim(key_parts(1)))
 
                 if (size(key_parts) == 1) then
                     ! Found final target
                     val%node => current
                     call determine_value_type(val%node)
-                    write(error_unit,*) "DEBUG: Final target found with value:", trim(val%node%value)
+                    call debug_print(DEBUG_INFO, "Final target found with value: "//trim(val%node%value))
                     return
                 else
                     ! Need to traverse deeper
                     temp_val%node => current
-                    write(error_unit,*) "DEBUG: Going deeper with node:", trim(current%key)
+                    call debug_print(DEBUG_INFO, "Going deeper with node: "//trim(current%key))
 
                     ! Build remaining path
                     remaining_path = ""
@@ -729,7 +728,7 @@ contains
                         if (i > 2) remaining_path = trim(remaining_path) // "%"
                         remaining_path = trim(remaining_path) // trim(key_parts(i))
                     end do
-                    write(error_unit,*) "DEBUG: Continuing with remaining path:", trim(remaining_path)
+                    call debug_print(DEBUG_INFO, "Continuing with remaining path: "//trim(remaining_path))
                     val = temp_val%get(remaining_path)
                     return
                 endif
@@ -737,7 +736,7 @@ contains
             current => current%next
         end do
 
-        write(error_unit,*) "DEBUG: Key not found:", trim(key_parts(1))
+        call debug_print(DEBUG_INFO, "Key not found: "//trim(key_parts(1)))
     end function get_value_nested
 
     !> Get nested value for fyaml_doc type
@@ -776,8 +775,9 @@ contains
         integer, intent(in), optional :: doc_index
         character(len=:), allocatable :: val
         type(yaml_value) :: temp
+        character(len=256) :: debug_msg
 
-        write(error_unit,*) "DEBUG: Getting nested string for path:", trim(path)
+        call debug_print(DEBUG_INFO, "Getting nested string for path: "//trim(path))
 
         temp = self%get(path, doc_index)
         if (associated(temp%node)) then
@@ -790,17 +790,21 @@ contains
                 temp%node%is_string = .true.
             endif
 
-            write(error_unit,*) "DEBUG: Found node value:", trim(temp%node%value)
-            write(error_unit,*) "DEBUG: Node type flags - string:", temp%node%is_string, &
-                              " int:", temp%node%is_integer, &
-                              " float:", temp%node%is_float, &
-                              " bool:", temp%node%is_boolean
+            call debug_print(DEBUG_INFO, "Found node value: "//trim(temp%node%value))
+            write(debug_msg,"(A,4(A,L1))") &
+                "Node type flags:", &
+                " is_string=", temp%node%is_string, &
+                " is_integer=", temp%node%is_integer, &
+                " is_float=", temp%node%is_float, &
+                " is_boolean=", temp%node%is_boolean
+            call debug_print(DEBUG_INFO, debug_msg)
 
             ! Get string value
             val = trim(temp%node%value)
-            write(error_unit,*) "DEBUG: Returning string value:", trim(val)
+            call debug_print(DEBUG_INFO, "Returning string value: "//trim(val))
         else
-            write(error_unit,*) "DEBUG: Node not found for path:", trim(path)
+            call debug_print(DEBUG_INFO, "Node not found for path: "//trim(path))
+            call debug_print(DEBUG_INFO, "Returning empty string")
             val = ''
         endif
     end function get_nested_str
@@ -818,15 +822,15 @@ contains
         integer :: val
         type(yaml_value) :: temp
 
-        write(error_unit,*) "DEBUG: Getting nested integer for path:", trim(path)
+        call debug_print(DEBUG_INFO, "Getting nested integer for path: "//trim(path))
         temp = self%get(path, doc_index)
         if (associated(temp%node)) then
             ! Force type determination
             call determine_value_type(temp%node)
             val = temp%get_int()
-            write(error_unit,*) "DEBUG: Found integer value:", val
+            call debug_print(DEBUG_INFO, "Found integer value: "//trim(integer_to_string(val)))
         else
-            write(error_unit,*) "DEBUG: Node not found, returning 0"
+            call debug_print(DEBUG_INFO, "Node not found, returning 0")
             val = 0
         endif
     end function get_nested_int
@@ -844,6 +848,7 @@ contains
         real :: val
         type(yaml_value) :: temp
 
+call debug_print(DEBUG_INFO, "Getting nested real for path: "//trim(path))
         temp = self%get(path, doc_index)
         if (associated(temp%node)) then
             val = temp%get_real()
@@ -865,6 +870,7 @@ contains
         logical :: val
         type(yaml_value) :: temp
 
+call debug_print(DEBUG_INFO, "Getting nested boolean for path: "//trim(path))
         temp = self%get(path, doc_index)
         if (associated(temp%node)) then
             val = temp%get_bool()
@@ -912,16 +918,16 @@ contains
         type(yaml_value) :: found_val
         type(yaml_node), pointer :: current
 
-        write(error_unit,*) "DEBUG: Searching for child with key:", trim(search_key)
+        call debug_print(DEBUG_INFO, "Searching for child with key: "//trim(search_key))
         found_val%node => null()
 
         ! Search only immediate children
         if (associated(node%children)) then
             current => node%children
             do while (associated(current))
-                write(error_unit,*) "DEBUG: Checking child node:", trim(current%key)
+                call debug_print(DEBUG_INFO, "Checking child node: "//trim(current%key))
                 if (trim(adjustl(current%key)) == trim(adjustl(search_key))) then
-                    write(error_unit,*) "DEBUG: Found matching child node"
+                    call debug_print(DEBUG_INFO, "Found matching child node")
                     found_val%node => current
                     ! Preserve sequence flags
                     if (current%is_sequence .and. associated(current%children)) then
@@ -932,7 +938,7 @@ contains
                 current => current%next
             end do
         endif
-        write(error_unit,*) "DEBUG: Child not found"
+        call debug_print(DEBUG_INFO, "Child not found")
     end function find_child_by_key
 
     !> Split a path by % delimiter
@@ -981,10 +987,11 @@ contains
         integer :: int_val, ios
         real :: real_val
         character(len=:), allocatable :: cleaned_value
+        character(len=256) :: debug_msg
 
         ! Reset type flags
         if (.not. associated(node)) then
-            write(error_unit,*) "DEBUG: Cannot determine type for null node"
+            call debug_print(DEBUG_INFO, "Cannot determine type for null node")
             return
         endif
 
@@ -998,8 +1005,8 @@ contains
         cleaned_value = trim(adjustl(node%value))
 
         if (len_trim(cleaned_value) == 0 .or. cleaned_value == '~') then
+            call debug_print(DEBUG_INFO, "Value determined as null")
             node%is_null = .true.
-            write(error_unit,*) "DEBUG: Value determined as null"
             return
         endif
 
@@ -1007,29 +1014,31 @@ contains
         read(cleaned_value, *, iostat=ios) int_val
         if (ios == 0 .and. index(cleaned_value, '.') == 0 .and. &
             index(cleaned_value, 'e') == 0 .and. index(cleaned_value, 'E') == 0) then
+            write(debug_msg,"(A,I0)") "Value determined as integer: ", int_val
+            call debug_print(DEBUG_INFO, debug_msg)
             node%is_integer = .true.
-            write(error_unit,*) "DEBUG: Value determined as integer:", int_val
             return
         endif
 
         ! Try real
         read(cleaned_value, *, iostat=ios) real_val
         if (ios == 0) then
+            write(debug_msg,"(A,E14.7)") "Value determined as real:", real_val
+            call debug_print(DEBUG_INFO, debug_msg)
             node%is_float = .true.
-            write(error_unit,*) "DEBUG: Value determined as real:", real_val
             return
         endif
 
         ! Check boolean
         if (cleaned_value == 'true' .or. cleaned_value == 'false') then
+            call debug_print(DEBUG_INFO, "Value determined as boolean: "//trim(cleaned_value))
             node%is_boolean = .true.
-            write(error_unit,*) "DEBUG: Value determined as boolean:", trim(cleaned_value)
             return
         endif
 
         ! Default to string
+        call debug_print(DEBUG_INFO, "Value determined as string: "//trim(cleaned_value))
         node%is_string = .true.
-        write(error_unit,*) "DEBUG: Value determined as string:", trim(cleaned_value)
     end subroutine determine_value_type
 
     !> Count direct children of a yaml_node
