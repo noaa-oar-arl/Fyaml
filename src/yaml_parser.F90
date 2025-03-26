@@ -662,7 +662,8 @@ end subroutine parse_yaml_internal
                 endif
             else
                 ! No valid parent found for non-root node - error
-                write(error_unit,*) "ERROR: No valid parent found for node at line", line_num
+                write(debug_msg, '(A,I0)') "No valid parent found for node at line ", line_num
+                call debug_print(DEBUG_ERROR, debug_msg, ERR_PARSE)
                 status = ERR_PARSE
                 return
             endif
