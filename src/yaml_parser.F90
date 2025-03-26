@@ -9,7 +9,7 @@
 !! @see yaml_types
 !! @see fyaml
 module yaml_parser
-  use yaml_types
+  use yaml_types, only: yaml_node, yaml_document
   use iso_fortran_env, only: error_unit, output_unit
   implicit none
 
