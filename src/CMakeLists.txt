@@ -17,6 +17,6 @@ install(TARGETS fyaml
     ARCHIVE DESTINATION lib)
 
 # Install module files
-install(DIRECTORY ${CMAKE_BINARY_DIR}/include/
+install(DIRECTORY ${CMAKE_BINARY_DIR}/include
     DESTINATION include
     FILES_MATCHING PATTERN "*.mod")
