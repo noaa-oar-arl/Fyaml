@@ -16,11 +16,11 @@ Fyaml provides a robust, easy-to-use YAML parser for Fortran applications. It ha
 ### Installation
 
 ```bash
-git clone https://github.com/yourusername/fyaml.git
-cd fyaml
-mkdir build && cd build
-cmake ..
-make install
+git clone https://github.com/noaa-oar-arl/Fyaml.git
+cd Fyaml
+cmake -B build -DCMAKE_INSTALL_PREFIX="$PWD/install"
+cmake --build build
+cmake --install build
 ```
 
 ## Basic Usage

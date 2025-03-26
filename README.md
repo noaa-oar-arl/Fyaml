@@ -32,12 +32,11 @@ A feature-rich YAML parser written in modern Fortran, supporting complex data st
 ## Installation
 
 ```bash
-git clone https://github.com/yourusername/fyaml.git
-cd fyaml
-mkdir build && cd build
-cmake ..
-make
-make install
+git clone https://github.com/noaa-oar-arl/Fyaml.git
+cd Fyaml
+cmake -B build -DCMAKE_INSTALL_PREFIX="$PWD/install"
+cmake --build build
+cmake --install build
 ```
 
 ## Usage Examples
@@ -154,6 +153,10 @@ end if
 ## Testing
 ```bash
 ctest --test-dir build/tests --output-on-failure
+```
+Or if your CMake is older than 3.20:
+```bash
+(cd build/tests && ctest --output-on-failure)
 ```
 
 ## Documentation
