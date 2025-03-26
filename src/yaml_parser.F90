@@ -19,8 +19,10 @@ module yaml_parser
   integer, parameter :: DEBUG_SILENT = 0
   !> Show only error messages
   integer, parameter :: DEBUG_ERROR = 1
+  !> Show warning messages
+  integer, parameter :: DEBUG_WARNING = 2
   !> Show general info messages
-  integer, parameter :: DEBUG_INFO = 2
+  integer, parameter :: DEBUG_INFO = 3
 
   ! Error codes
   !============
@@ -1462,8 +1464,8 @@ end subroutine parse_mapping
 
     ! Add indentation level check
     if (current_indent <= 0) then
-        write(debug_msg, '(A,I0)') "Warning: Invalid indentation level: ", current_indent
-        call debug_print(DEBUG_INFO, trim(debug_msg))
+        write(debug_msg, '(A,I0)') "Invalid indentation level: ", current_indent
+        call debug_print(DEBUG_WARNING, trim(debug_msg))
     endif
 
     ! Traverse tree to find closest parent with less indentation
