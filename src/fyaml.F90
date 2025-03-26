@@ -225,7 +225,7 @@ contains
 
 100     continue
         ! Handle empty file
-        write(error_unit,*) 'Empty or invalid YAML file:', trim(filename)
+        call debug_print(DEBUG_ERROR, 'Empty or invalid YAML file: '//trim(filename))
         if (present(success)) success = .false.
         close(unit_num)
         return
@@ -314,7 +314,7 @@ call debug_print(DEBUG_INFO, "Node not associated for string value")
                 call debug_print(DEBUG_INFO, "Successfully converted to integer: "//trim(integer_to_string(int_val)))
             endif
         else
-            write(error_unit,*) "DEBUG: Node is not an integer type. Value:", trim(self%node%value)
+            call debug_print(DEBUG_INFO, "Node is not an integer type. Value: "//trim(self%node%value))
         endif
     end function
 
@@ -596,6 +596,7 @@ call debug_print(DEBUG_INFO, "Node not associated for string value")
         character(len=:), allocatable, dimension(:) :: key_parts
         character(len=:), allocatable :: remaining_path
         integer :: i, path_start
+        character(len=256) :: debug_msg
 
         call debug_print(DEBUG_INFO, "Dictionary get_value for key: "//trim(key))
         val%node => null()
@@ -607,43 +608,48 @@ call debug_print(DEBUG_INFO, "Node not associated for string value")
         ! Start with first level search
         current => this%first
         do while (associated(current))
-            write(error_unit,*) "DEBUG: Checking pair with key:", trim(current%key), &
-                              " against target:", trim(key_parts(1))
+            write(debug_msg,'(4(A))') &
+                "Checking pair with key: ", trim(current%key), &
+                " against target: ", trim(key_parts(1))
+            call debug_print(DEBUG_INFO, debug_msg)
 
             ! Do exact string comparison after trimming and adjusting
             if (trim(adjustl(current%key)) == trim(adjustl(key_parts(1)))) then
-                write(error_unit,*) "DEBUG: Found first level match for:", trim(key_parts(1))
+                call debug_print(DEBUG_INFO, "Found first level match for key: "//trim(key_parts(1)))
 
                 if (size(key_parts) == 1) then
                     ! Direct match at this level
+                    call debug_print(DEBUG_INFO, "Found direct match at first level")
                     val%node => current%value%node
                     ! Ensure type is determined for direct matches
                     call determine_value_type(val%node)
-                    write(error_unit,*) "DEBUG: Found direct match at first level"
-                    write(error_unit,*) "DEBUG: Node has children:", associated(val%node%children)
-                    write(error_unit,*) "DEBUG: Node value:", trim(val%node%value)
-                    write(error_unit,*) "DEBUG: Is integer:", val%node%is_integer
+                    write(debug_msg,'(A,L)') "Node has children: ", associated(val%node%children)
+                    call debug_print(DEBUG_INFO, debug_msg)
+                    call debug_print(DEBUG_INFO, "Node value: "//trim(val%node%value))
+                    write(debug_msg,'(A,L)') "Is integer: ", val%node%is_integer
+                    call debug_print(DEBUG_INFO, debug_msg)
                     return
                 else
                     ! For nested access
                     val%node => current%value%node
-                    write(error_unit,*) "DEBUG: Node children status:", associated(val%node%children)
+                    write(debug_msg,'(A,L)') "Node has children: ", associated(val%node%children)
+                    call debug_print(DEBUG_INFO, debug_msg)
 
                     if (.not. associated(val%node%children)) then
-                        write(error_unit,*) "DEBUG: No children available for nested access"
+                        call debug_print(DEBUG_INFO, "No children available for nested access")
                         val%node => null()
                     else
                         ! Get remaining path
                         path_start = len_trim(key_parts(1)) + 2
                         remaining_path = trim(key(path_start:))
-                        write(error_unit,*) "DEBUG: Continuing with nested path:", trim(remaining_path)
+                        call debug_print(DEBUG_INFO, "Continuing with nested path: "//trim(remaining_path))
                         val = val%get(remaining_path)
                     endif
                     return
                 endif
             endif
 
-            write(error_unit,*) "DEBUG: Moving to next pair"
+            call debug_print(DEBUG_INFO, "Moving to next pair")
             current => current%next
         end do
 
@@ -713,22 +719,22 @@ call debug_print(DEBUG_INFO, "Node not associated for string value")
 
         ! Search through children at this level
         do while (associated(current))
-            write(error_unit,*) "DEBUG: Checking node key:", trim(current%key), &
-                               " against target:", trim(key_parts(1))
+            call debug_print(DEBUG_INFO, "Checking node key: "//trim(current%key) &
+                //" against target: "//trim(key_parts(1)))
 
             if (trim(adjustl(current%key)) == trim(adjustl(key_parts(1)))) then
-                write(error_unit,*) "DEBUG: Found match for:", trim(key_parts(1))
+                call debug_print(DEBUG_INFO, "Found match for: "//trim(key_parts(1)))
 
                 if (size(key_parts) == 1) then
                     ! Found final target
                     val%node => current
                     call determine_value_type(val%node)
-                    write(error_unit,*) "DEBUG: Final target found with value:", trim(val%node%value)
+                    call debug_print(DEBUG_INFO, "Final target found with value: "//trim(val%node%value))
                     return
                 else
                     ! Need to traverse deeper
                     temp_val%node => current
-                    write(error_unit,*) "DEBUG: Going deeper with node:", trim(current%key)
+                    call debug_print(DEBUG_INFO, "Going deeper with node: "//trim(current%key))
 
                     ! Build remaining path
                     remaining_path = ""
@@ -736,7 +742,7 @@ call debug_print(DEBUG_INFO, "Node not associated for string value")
                         if (i > 2) remaining_path = trim(remaining_path) // "%"
                         remaining_path = trim(remaining_path) // trim(key_parts(i))
                     end do
-                    write(error_unit,*) "DEBUG: Continuing with remaining path:", trim(remaining_path)
+                    call debug_print(DEBUG_INFO, "Continuing with remaining path: "//trim(remaining_path))
                     val = temp_val%get(remaining_path)
                     return
                 endif
@@ -783,6 +789,7 @@ call debug_print(DEBUG_INFO, "Node not associated for string value")
         integer, intent(in), optional :: doc_index
         character(len=:), allocatable :: val
         type(yaml_value) :: temp
+        character(len=256) :: debug_msg
 
         call debug_print(DEBUG_INFO, "Getting nested string for path: "//trim(path))
 
@@ -798,16 +805,20 @@ call debug_print(DEBUG_INFO, "Node not associated for string value")
             endif
 
             call debug_print(DEBUG_INFO, "Found node value: "//trim(temp%node%value))
-            write(error_unit,*) "DEBUG: Node type flags - string:", temp%node%is_string, &
-                              " int:", temp%node%is_integer, &
-                              " float:", temp%node%is_float, &
-                              " bool:", temp%node%is_boolean
+            write(debug_msg,"(A,4(A,L))") &
+                "Node type flags:", &
+                " is_string=", temp%node%is_string, &
+                " is_integer=", temp%node%is_integer, &
+                " is_float=", temp%node%is_float, &
+                " is_boolean=", temp%node%is_boolean
+            call debug_print(DEBUG_INFO, debug_msg)
 
             ! Get string value
             val = trim(temp%node%value)
             call debug_print(DEBUG_INFO, "Returning string value: "//trim(val))
         else
-            write(error_unit,*) "DEBUG: Node not found for path:", trim(path)
+            call debug_print(DEBUG_INFO, "Node not found for path: "//trim(path))
+            call debug_print(DEBUG_INFO, "Returning empty string")
             val = ''
         endif
     end function get_nested_str
@@ -833,7 +844,7 @@ call debug_print(DEBUG_INFO, "Node not associated for string value")
             val = temp%get_int()
             call debug_print(DEBUG_INFO, "Found integer value: "//trim(integer_to_string(val)))
         else
-            write(error_unit,*) "DEBUG: Node not found, returning 0"
+            call debug_print(DEBUG_INFO, "Node not found, returning 0")
             val = 0
         endif
     end function get_nested_int
@@ -928,9 +939,9 @@ call debug_print(DEBUG_INFO, "Getting nested boolean for path: "//trim(path))
         if (associated(node%children)) then
             current => node%children
             do while (associated(current))
-                write(error_unit,*) "DEBUG: Checking child node:", trim(current%key)
+                call debug_print(DEBUG_INFO, "Checking child node: "//trim(current%key))
                 if (trim(adjustl(current%key)) == trim(adjustl(search_key))) then
-                    write(error_unit,*) "DEBUG: Found matching child node"
+                    call debug_print(DEBUG_INFO, "Found matching child node")
                     found_val%node => current
                     ! Preserve sequence flags
                     if (current%is_sequence .and. associated(current%children)) then
