@@ -45,6 +45,7 @@ endif()
 
 # Set default compiler options for Fortran
 set(_fyaml_compiler_options "")
+set(_fyaml_link_options "")
 
 if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
   list(APPEND _fyaml_compiler_options -ffree-line-length-none)
@@ -81,6 +82,9 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel" AND CMAKE_BUILD_TYPE MATCHES "D
     0
     -diag-disable
     6379,10448)
+endif()
+if(CMAKE_Fortran_COMPILER_ID MATCHES "IntelLLVM" AND CMAKE_BUILD_TYPE MATCHES "Debug")
+  list(APPEND _fyaml_link_options -check;all)
 endif()
 
 # Set the Fortran standard
