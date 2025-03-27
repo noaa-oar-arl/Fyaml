@@ -40,16 +40,14 @@ module yaml_parser
   public :: find_sequence_parent_node, to_lower, count_leading_spaces
   public :: check_sequence, parse_yaml
   public :: find_nested_node  ! Add this function to the public interface at the top of the module
+  public :: set_indent_width
+  public :: set_debug_level
 
   ! Private interfaces
   private :: is_real_string
   private :: is_int_string
   private :: is_block_sequence
-  private :: find_last_sequence_item
-  private :: find_last_nonsequence_node
   private :: parse_yaml_internal
-  private :: set_indent_width
-  private :: detect_indent_width
 
   ! Move check_sequence interface declaration here
   interface check_sequence
@@ -120,7 +118,7 @@ contains
     character(len=*), intent(in) :: message
     integer, intent(in), optional :: error_code
     character(len=*), intent(in), optional :: msg_type
-    character(len=:), allocatable :: prefix, formatted_msg
+    character(len=:), allocatable :: prefix
 
     if (level <= debug_level) then
       ! Determine prefix based on message type
@@ -429,9 +427,9 @@ end subroutine parse_yaml_internal
     integer, intent(in) :: line_num  ! Add line number parameter
     type(yaml_node), pointer :: new_node, current_node, parent_node
     integer :: pos, current_indent, parent_indent, io_stat
-    character(len=:), allocatable :: local_line, parent_key
+    character(len=:), allocatable :: local_line
     logical :: is_sequence_item
-    character(len=256) :: debug_msg, error_msg  ! Added error_msg here
+    character(len=256) :: debug_msg
 
     call debug_print(DEBUG_INFO, "Parsing line: "//trim(line))
 
@@ -739,7 +737,7 @@ end subroutine parse_yaml_internal
     type(yaml_node), pointer, intent(in) :: new_node
     type(yaml_node), pointer :: last_node, current_node, prev_node
     integer :: current_indent
-    character(len=256) :: debug_msg
+    ! character(len=256) :: debug_msg
 
     nullify(last_node)
     current_indent = parent%indent + indent_width
@@ -788,67 +786,6 @@ end subroutine parse_yaml_internal
 
     last_node => new_node
   end function find_or_create_intermediate_nodes
-
-  !> Handle block sequence items, ensuring they're properly linked and labeled
-  !!
-  !! @param[in] line Input line containing sequence item
-  !! @param[inout] doc Document being built
-  !! @param[inout] node Node representing the sequence item
-  !! @param[out] status Status code indicating success or error
-  subroutine handle_block_sequence(line, doc, node, status)
-    character(len=*), intent(in) :: line
-    type(yaml_document), intent(inout) :: doc
-    type(yaml_node), pointer, intent(inout) :: node
-    integer, intent(out) :: status
-    type(yaml_node), pointer :: parent
-
-    ! Set sequence flags and get indentation
-    node%is_sequence = .true.  ! Mark current node as sequence
-    parent => find_sequence_parent_node(doc%root, node)
-
-    ! Set parent sequence flags
-    if (associated(parent)) then
-        parent%is_sequence = .true.  ! Mark parent as sequence container
-        if (associated(parent%children)) then
-            parent%children%is_sequence = .true.  ! Mark children as sequence items
-        endif
-
-        ! Set key from parent if not already set
-        if (len_trim(node%key) == 0) then
-            node%key = trim(adjustl(parent%key))
-        endif
-    endif
-
-    ! Set root sequence flags if needed
-    if (.not. associated(parent) .and. associated(doc%root)) then
-        doc%root%is_sequence = .true.
-        if (associated(doc%root%children)) then
-            doc%root%children%is_sequence = .true.
-        endif
-    endif
-
-    status = ERR_SUCCESS
-  end subroutine handle_block_sequence
-
-  !> Find the last sequence item at a given indentation level
-  !!
-  !! @param[in] root Root node to start search from
-  !! @param[in] indent Indentation level to search for
-  !! @return Last sequence item found at the given indentation level
-  function find_last_sequence_item(root, indent) result(last_item)
-    type(yaml_node), pointer :: root, last_item
-    integer, intent(in) :: indent
-    type(yaml_node), pointer :: current
-
-    last_item => null()
-    current => root
-    do while (associated(current))
-        if (current%is_sequence .and. count_leading_spaces(current%value) == indent) then
-            last_item => current
-        endif
-        current => current%next
-    end do
-  end function
 
   !> Check if node has a sequence parent at given indent
   !!
@@ -906,14 +843,15 @@ end subroutine parse_yaml_internal
   subroutine parse_flow_form(line, node)
       character(len=*), intent(in) :: line
       type(yaml_node), pointer, intent(inout) :: node
-      integer :: pos, start, end, item_start, item_end
+      integer :: pos, start, end, item_start
       character(len=:), allocatable :: content, item
-      type(yaml_node), pointer :: current_item, prev_item
+      type(yaml_node), pointer :: prev_item
       logical :: in_quotes, in_bracket
 
       ! Initialize
       in_quotes = .false.
       in_bracket = .false.
+      item = ""
       nullify(prev_item)
 
       ! Handle flow form sequences
@@ -959,6 +897,8 @@ end subroutine parse_yaml_internal
       character(len=*), intent(in) :: value
       type(yaml_node), pointer :: new_item, current
       character(len=:), allocatable :: clean_value
+
+      clean_value = ""
 
       ! Clean the value
       clean_value = trim(adjustl(value))
@@ -1080,7 +1020,6 @@ end subroutine parse_mapping
     real :: r_value
     integer :: i_value
     logical :: l_value
-    logical :: is_real, is_int
     integer :: rc
     character(len=32) :: temp_str  ! Buffer for numeric conversions
 
@@ -1264,24 +1203,6 @@ end subroutine parse_mapping
     is_block = (len_trim(str) >= 2 .and. str(1:2) == '- ')
   end function is_block_sequence
 
-  !> Find the last non-sequence node (likely parent)
-  !!
-  !! @param[in] root Root node to start search from
-  !! @return Last non-sequence node found
-  function find_last_nonsequence_node(root) result(last_node)
-    type(yaml_node), pointer :: root, last_node
-    type(yaml_node), pointer :: current
-
-    last_node => null()
-    current => root
-    do while (associated(current))
-        if (.not. current%is_sequence .and. len_trim(current%key) > 0) then
-            last_node => current
-        endif
-        current => current%next
-    end do
-  end function
-
   !> Find parent node for block sequence item
   !!
   !! @param[in] root Root node to start search from
@@ -1399,42 +1320,6 @@ end subroutine parse_mapping
     deallocate(stack)
 
   end function find_block_sequence_parent
-
-  !> Detect indentation width from sequence structure
-  !!
-  !! @param[in] root Root node to start search from
-  !! @param[in] item_indent Indentation level of the item
-  !! @return Detected indentation width
-  function detect_indent_width(root, item_indent) result(width)
-    type(yaml_node), pointer, intent(in) :: root
-    integer, intent(in) :: item_indent
-    integer :: width
-    type(yaml_node), pointer :: current
-    logical :: found_parent
-
-    ! Start with default
-    width = indent_width
-    found_parent = .false.
-
-    ! Look for closest parent mapping with less indentation
-    current => root
-    do while (associated(current))
-        if (len_trim(current%key) > 0 .and. &    ! Has key (is mapping)
-            current%indent < item_indent .and. &  ! Less indented than item
-            .not. current%is_sequence) then       ! Not a sequence item itself
-
-            ! Found potential parent
-            if (.not. found_parent) then
-                width = item_indent - current%indent
-                found_parent = .true.
-            else if (current%indent > root%indent) then
-                ! Use closest parent's indentation difference
-                width = item_indent - current%indent
-            endif
-        endif
-        current => current%next
-    end do
-  end function detect_indent_width
 
   !> Find parent node containing key for sequence
   !!
@@ -1623,6 +1508,8 @@ end subroutine parse_mapping
       integer :: count, i
       character(len=256) :: debug_msg
       character(len=:), allocatable :: clean_value
+
+      clean_value = ""
 
       ! Count items first
       count = 0
