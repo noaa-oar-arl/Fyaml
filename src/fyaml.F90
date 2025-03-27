@@ -1250,7 +1250,7 @@ contains
         ! Allocate array for keys
         if (count > 0) then
             allocate(character(len=32) :: keys(count))
-            keys = ""
+            keys(:) = ""
 
             ! Fill array with root keys
             current => this%docs(1)%first
