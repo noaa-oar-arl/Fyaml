@@ -605,7 +605,7 @@ contains
 
         if (this%count > 0) then
             allocate(character(len=32) :: keys(this%count))
-            keys = ""
+            keys(:) = ""
             current => this%first
             i = 1
             do while (associated(current))
