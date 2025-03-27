@@ -34,5 +34,5 @@
 *.app
 
 # ignore potential build directories
-build/
+build*/
 doc/
