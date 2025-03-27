@@ -1,7 +1,7 @@
 set(_srcs
     test_utils.F90)
 
-add_compile_options(${_fyaml_compiler_options})
+add_compile_options(${_fyaml_compile_options})
 
 add_compile_definitions(SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 

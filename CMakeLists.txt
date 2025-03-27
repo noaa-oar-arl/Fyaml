@@ -26,7 +26,7 @@ if(APPLE)
     )
 
     # Add MacOS specific compiler and linker flags
-    list(APPEND _fyaml_compiler_options
+    list(APPEND _fyaml_compile_options
         "-L${SDKROOT}/usr/lib"
         "-L/usr/local/lib"
         "-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
@@ -44,18 +44,18 @@ if(APPLE)
 endif()
 
 # Set default compiler options for Fortran
-set(_fyaml_compiler_options "")
+set(_fyaml_compile_options "")
 set(_fyaml_link_options "")
 
 if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
-  list(APPEND _fyaml_compiler_options -ffree-line-length-none)
+  list(APPEND _fyaml_compile_options -ffree-line-length-none)
 endif()
 
 # Add debug flags for Fortran
 if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU" AND CMAKE_BUILD_TYPE MATCHES "Debug")
   list(
     APPEND
-    _fyaml_compiler_options
+    _fyaml_compile_options
     -Og
     # -Bstatic
     -Wall
@@ -69,7 +69,7 @@ if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU" AND CMAKE_BUILD_TYPE MATCHES "Debug")
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel" AND CMAKE_BUILD_TYPE MATCHES "Debug")
   list(
     APPEND
-    _fyaml_compiler_options
+    _fyaml_compile_options
     -O0
     -warn
     all
