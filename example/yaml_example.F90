@@ -1,3 +1,7 @@
+!> \brief Example program demonstrating YAML parsing functionality
+!>
+!> \details This example shows how to load a YAML file and access various types of data,
+!> including nested key access and sequence handling.
 program test_fyaml
     use fyaml
     use yaml_parser, only: yaml_node
@@ -33,6 +37,7 @@ program test_fyaml
     ! Get all person keys with proper deallocation/allocation
     if (associated(person%node%children)) then
         if (allocated(keys)) deallocate(keys)
+        if (.not. allocated(keys)) allocate(character(len=32) :: keys(0))
         keys = get_keys_from_node(person%node%children)
     endif
     print *, "Keys:", keys

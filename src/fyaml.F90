@@ -1,22 +1,22 @@
-!> A modern Fortran module for parsing YAML files
-!!
-!! This module provides functionality to read and parse YAML files into Fortran
-!! data structures. It supports nested dictionaries, sequences, and various data types.
-!!
-!! Example:
-!! ```fortran
-!! type(fyaml_doc) :: doc
-!! call doc%load("config.yaml")
-!! value = doc%get("config%nested%key")
-!! ```
-!!
-!! @note Supports strings, integers, reals, booleans, nulls, and sequences
-!! @version 1.0.0
-!! @see yaml_parser
-!! @see yaml_types
+!> \brief A modern Fortran module for parsing YAML files
+!>
+!> \details This module provides functionality to read and parse YAML files into Fortran
+!> data structures. It supports nested dictionaries, sequences, and various data types.
+!>
+!> Example:
+!> \code{.f90}
+!> type(fyaml_doc) :: doc
+!> call doc%load("config.yaml")
+!> value = doc%get("config%nested%key")
+!> \endcode
+!>
+!> \note Supports strings, integers, reals, booleans, nulls, and sequences
+!> \version 1.0.0
+!> \see yaml_parser
+!> \see yaml_types
 module fyaml
-    use yaml_parser, only: yaml_node, check_sequence_node, parse_yaml, debug_print, DEBUG_INFO  ! Add DEBUG_INFO to imports
-    use yaml_types
+    use yaml_parser, only: check_sequence_node, parse_yaml, debug_print, DEBUG_INFO
+    use yaml_types, only: yaml_node, yaml_document, copy_anchor_type_to_alias
     use, intrinsic :: iso_fortran_env, only: error_unit
     implicit none
 
@@ -134,9 +134,9 @@ module fyaml
 contains
     !> Load YAML document from file
     !!
-    !! @param[in,out] this     The document instance
-    !! @param[in]     filename Path to YAML file
-    !! @param[out]    success  Optional success indicator
+    !! \param[in,out] this     The document instance
+    !! \param[in]     filename Path to YAML file
+    !! \param[out]    success  Optional success indicator
     subroutine load_yaml_doc(this, filename, success)
         class(fyaml_doc), intent(inout) :: this
         character(len=*), intent(in) :: filename
@@ -229,8 +229,8 @@ contains
 
     !> Convert a yaml_node to yaml_value
     !!
-    !! @param[in] node Source YAML node
-    !! @return Value container wrapping the node
+    !! \param[in] node Source YAML node
+    !! \return Value container wrapping the node
     function node_to_value(node) result(val)
         type(yaml_node), pointer, intent(in) :: node
         type(yaml_value) :: val
@@ -245,8 +245,8 @@ contains
 
     !> Get string value from yaml_value
     !!
-    !! @param[in] self Value container instance
-    !! @return String value or empty string if invalid
+    !! \param[in] self Value container instance
+    !! \return String value or empty string if invalid
     function get_string_value(self) result(str_val)
         class(yaml_value), intent(inout) :: self  ! Changed from intent(in) to intent(inout)
         character(len=:), allocatable :: str_val
@@ -280,8 +280,8 @@ contains
 
     !> Get integer value from yaml_value
     !!
-    !! @param[in] self Value container instance
-    !! @return Integer value or 0 if invalid
+    !! \param[in] self Value container instance
+    !! \return Integer value or 0 if invalid
     function get_integer_value(self) result(int_val)
         class(yaml_value), intent(inout) :: self  ! Changed from intent(in) to intent(inout)
         integer :: int_val
@@ -313,8 +313,8 @@ contains
 
     !> Get real value from yaml_value
     !!
-    !! @param[in] self Value container instance
-    !! @return Real value or 0.0 if invalid
+    !! \param[in] self Value container instance
+    !! \return Real value or 0.0 if invalid
     function get_real_value(self) result(real_val)
         class(yaml_value), intent(inout) :: self
         real :: real_val
@@ -327,8 +327,8 @@ contains
 
     !> Get boolean value from yaml_value
     !!
-    !! @param[in] self Value container instance
-    !! @return Boolean value or false if invalid
+    !! \param[in] self Value container instance
+    !! \return Boolean value or false if invalid
     function get_boolean_value(self) result(bool_val)
         class(yaml_value), intent(inout) :: self
         logical :: bool_val
@@ -341,19 +341,19 @@ contains
 
     !> Check if value is null
     !!
-    !! @param[in] self Value container instance
-    !! @return True if value is null
+    !! \param[in] self Value container instance
+    !! \return True if value is null
     function check_null(self) result(is_null)
         class(yaml_value), intent(in) :: self
         logical :: is_null
 
         is_null = .not. associated(self%node) .or. self%node%is_null
-    end function
+    end function check_null
 
     !> Check if value is a sequence
     !!
-    !! @param[in] self Value container instance
-    !! @return True if value is a sequence
+    !! \param[in] self Value container instance
+    !! \return True if value is a sequence
     function check_sequence_impl(self) result(is_seq)
         class(yaml_value), intent(in) :: self
         logical :: is_seq
@@ -366,8 +366,8 @@ contains
 
     !> Print yaml_node children keys
     !!
-    !! @param[in] node Node to print
-    !! @param[in] prefix Optional indentation prefix
+    !! \param[in] node Node to print
+    !! \param[in] prefix Optional indentation prefix
     subroutine print_node_children(node, prefix)
         type(yaml_node), pointer, intent(in) :: node
         character(len=*), intent(in), optional :: prefix
@@ -400,8 +400,8 @@ contains
 
     !> Convert YAML node structure to dictionary
     !!
-    !! @param[in] node Source node to convert
-    !! @param[inout] dict Target dictionary
+    !! \param[in] node Source node to convert
+    !! \param[inout] dict Target dictionary
     recursive subroutine convert_node_to_dict(node, dict)
         type(yaml_node), pointer, intent(in) :: node
         type(yaml_dict), intent(inout) :: dict
@@ -545,9 +545,9 @@ contains
 
     !> Set value for a given key in dictionary
     !!
-    !! @param[in,out] this  The dictionary instance
-    !! @param[in]     key   Key to set
-    !! @param[in]     value Value to associate with key
+    !! \param[in,out] this  The dictionary instance
+    !! \param[in]     key   Key to set
+    !! \param[in]     value Value to associate with key
     subroutine set_value(this, key, value)
         class(yaml_dict), intent(inout) :: this
         character(len=*), intent(in) :: key
@@ -578,9 +578,9 @@ contains
 
     !> Get value associated with key from dictionary
     !!
-    !! @param[in] this Dictionary instance
-    !! @param[in] key Key to lookup
-    !! @return Value associated with key
+    !! \param[in] this Dictionary instance
+    !! \param[in] key Key to lookup
+    !! \return Value associated with key
     function get_value(this, key) result(val)
         class(yaml_dict), intent(inout) :: this  ! Changed from intent(in) to intent(inout)
         character(len=*), intent(in) :: key
@@ -646,8 +646,8 @@ contains
 
     !> Get all keys in dictionary
     !!
-    !! @param[in]  this Dictionary instance
-    !! @return     Array of all keys
+    !! \param[in]  this Dictionary instance
+    !! \return     Array of all keys
     function get_keys(this) result(keys)
         class(yaml_dict), intent(in) :: this
         character(len=:), allocatable, dimension(:) :: keys
@@ -671,9 +671,9 @@ contains
 
     !> Get nested value for yaml_value type
     !!
-    !! @param[in] self Value container instance
-    !! @param[in] key Nested key path with % delimiters
-    !! @return Value at nested path
+    !! \param[in] self Value container instance
+    !! \param[in] key Nested key path with % delimiters
+    !! \return Value at nested path
     recursive function get_value_nested(self, key) result(val)
         class(yaml_value), intent(inout) :: self
         character(len=*), intent(in) :: key
@@ -742,10 +742,10 @@ contains
 
     !> Get nested value for fyaml_doc type
     !!
-    !! @param[in] self Document instance
-    !! @param[in] path Nested path with % delimiters
-    !! @param[in] doc_index Optional document index
-    !! @return Value at nested path
+    !! \param[in] self Document instance
+    !! \param[in] path Nested path with % delimiters
+    !! \param[in] doc_index Optional document index
+    !! \return Value at nested path
     recursive function get_doc_nested(self, path, doc_index) result(val)
         class(fyaml_doc), intent(inout) :: self  ! Changed from intent(in) to intent(inout)
         character(len=*), intent(in) :: path
@@ -766,10 +766,10 @@ contains
 
     !> Get nested string value
     !!
-    !! @param[in] self Document instance
-    !! @param[in] path Nested path with % delimiters
-    !! @param[in] doc_index Optional document index
-    !! @return String value at nested path
+    !! \param[in] self Document instance
+    !! \param[in] path Nested path with % delimiters
+    !! \param[in] doc_index Optional document index
+    !! \return String value at nested path
     function get_nested_str(self, path, doc_index) result(val)
         class(fyaml_doc), intent(inout) :: self  ! Changed from intent(in) to intent(inout)
         character(len=*), intent(in) :: path
@@ -807,10 +807,10 @@ contains
 
     !> Get nested integer value
     !!
-    !! @param[in] self Document instance
-    !! @param[in] path Nested path with % delimiters
-    !! @param[in] doc_index Optional document index
-    !! @return Integer value at nested path
+    !! \param[in] self Document instance
+    !! \param[in] path Nested path with % delimiters
+    !! \param[in] doc_index Optional document index
+    !! \return Integer value at nested path
     function get_nested_int(self, path, doc_index) result(val)
         class(fyaml_doc), intent(inout) :: self  ! Changed from intent(in) to intent(inout)
         character(len=*), intent(in) :: path
@@ -833,10 +833,10 @@ contains
 
     !> Get nested real value
     !!
-    !! @param[in] self Document instance
-    !! @param[in] path Nested path with % delimiters
-    !! @param[in] doc_index Optional document index
-    !! @return Real value at nested path
+    !! \param[in] self Document instance
+    !! \param[in] path Nested path with % delimiters
+    !! \param[in] doc_index Optional document index
+    !! \return Real value at nested path
     function get_nested_real(self, path, doc_index) result(val)
         class(fyaml_doc), intent(inout) :: self  ! Changed from intent(in) to intent(inout)
         character(len=*), intent(in) :: path
@@ -854,10 +854,10 @@ contains
 
     !> Get nested boolean value
     !!
-    !! @param[in] self Document instance
-    !! @param[in] path Nested path with % delimiters
-    !! @param[in] doc_index Optional document index
-    !! @return Boolean value at nested path
+    !! \param[in] self Document instance
+    !! \param[in] path Nested path with % delimiters
+    !! \param[in] doc_index Optional document index
+    !! \return Boolean value at nested path
     function get_nested_bool(self, path, doc_index) result(val)
         class(fyaml_doc), intent(inout) :: self  ! Changed from intent(in) to intent(inout)
         character(len=*), intent(in) :: path
@@ -875,9 +875,9 @@ contains
 
     !> Get specific document by index
     !!
-    !! @param[in] this Document collection
-    !! @param[in] doc_index Index of document to get
-    !! @return Document at specified index
+    !! \param[in] this Document collection
+    !! \param[in] doc_index Index of document to get
+    !! \return Document at specified index
     function get_document(this, doc_index) result(val)
         class(fyaml_doc), intent(in) :: this
         integer, intent(in) :: doc_index
@@ -890,8 +890,8 @@ contains
 
     !> Get value from default document (first document)
     !!
-    !! @param[in] this Document collection
-    !! @return First document in collection
+    !! \param[in] this Document collection
+    !! \return First document in collection
     function get_default_doc(this) result(val)
         class(fyaml_doc), intent(in) :: this
         type(yaml_dict) :: val
@@ -903,9 +903,9 @@ contains
 
     !> Find child node by key
     !!
-    !! @param[in] node Parent node to search
-    !! @param[in] search_key Key to find
-    !! @return Value container for found child
+    !! \param[in] node Parent node to search
+    !! \param[in] search_key Key to find
+    !! \return Value container for found child
     function find_child_by_key(node, search_key) result(found_val)
         type(yaml_node), pointer, intent(in) :: node
         character(len=*), intent(in) :: search_key
@@ -937,8 +937,8 @@ contains
 
     !> Split a path by % delimiter
     !!
-    !! @param[in] path Path string to split
-    !! @return Array of path segments
+    !! \param[in] path Path string to split
+    !! \return Array of path segments
     function split_key(path) result(parts)
         character(len=*), intent(in) :: path
         character(len=:), allocatable, dimension(:) :: parts
@@ -975,7 +975,7 @@ contains
 
     !> Determine the type of a node's value
     !!
-    !! @param[inout] node Node to analyze
+    !! \param[inout] node Node to analyze
     subroutine determine_value_type(node)
         type(yaml_node), pointer, intent(inout) :: node
         integer :: int_val, ios
@@ -1034,8 +1034,8 @@ contains
 
     !> Count direct children of a yaml_node
     !!
-    !! @param[in] node Node to count children for
-    !! @return Number of direct children
+    !! \param[in] node Node to count children for
+    !! \return Number of direct children
     function count_node_children(node) result(count)
         type(yaml_node), pointer, intent(in) :: node
         integer :: count
@@ -1054,8 +1054,8 @@ contains
 
     !> Count direct children of a yaml_value
     !!
-    !! @param[in] val Value to count children for
-    !! @return Number of direct children
+    !! \param[in] val Value to count children for
+    !! \return Number of direct children
     function count_value_children(val) result(count)
         type(yaml_value), intent(in) :: val
         integer :: count
@@ -1070,8 +1070,8 @@ contains
 
     !> Get all child keys of a yaml_node
     !!
-    !! @param[in] node Node to get children from
-    !! @return Array of child key names
+    !! \param[in] node Node to get children from
+    !! \return Array of child key names
     function get_node_child_keys(node) result(keys)
         type(yaml_node), pointer, intent(in) :: node
         character(len=:), allocatable, dimension(:) :: keys
@@ -1104,8 +1104,8 @@ contains
 
     !> Get all child keys of a yaml_value
     !!
-    !! @param[in] val Value to get children from
-    !! @return Array of child key names
+    !! \param[in] val Value to get children from
+    !! \return Array of child key names
     function get_value_child_keys(val) result(keys)
         class(yaml_value), intent(in) :: val
         character(len=:), allocatable, dimension(:) :: keys
@@ -1120,9 +1120,9 @@ contains
 
     !> Get child value at specified index
     !!
-    !! @param[in] self Value container instance
-    !! @param[in] idx Index of child to retrieve (1-based)
-    !! @return Value container for child at index or null if invalid
+    !! \param[in] self Value container instance
+    !! \param[in] idx Index of child to retrieve (1-based)
+    !! \return Value container for child at index or null if invalid
     function get_child_at_index(self, idx) result(val)
         class(yaml_value), intent(in) :: self
         integer, intent(in) :: idx
@@ -1154,8 +1154,8 @@ contains
 
     !> Get sequence values as an array of strings
     !!
-    !! @param[in] self Value container instance
-    !! @return Array of sequence values as strings
+    !! \param[in] self Value container instance
+    !! \return Array of sequence values as strings
     function get_sequence_values(self) result(values)
         class(yaml_value), intent(in) :: self
         character(len=:), allocatable, dimension(:) :: values
@@ -1190,8 +1190,8 @@ contains
 
     !> Get sequence values as integers
     !!
-    !! @param[in] self Value container instance
-    !! @return Array of sequence values as integers
+    !! \param[in] self Value container instance
+    !! \return Array of sequence values as integers
     function get_sequence_integers(self) result(values)
         class(yaml_value), intent(in) :: self
         integer, allocatable, dimension(:) :: values
@@ -1227,8 +1227,8 @@ contains
 
     !> Get sequence values as reals
     !!
-    !! @param[in] self Value container instance
-    !! @return Array of sequence values as reals
+    !! \param[in] self Value container instance
+    !! \return Array of sequence values as reals
     function get_sequence_reals(self) result(values)
         class(yaml_value), intent(in) :: self
         real, allocatable, dimension(:) :: values
@@ -1264,8 +1264,8 @@ contains
 
     !> Get sequence values as logicals
     !!
-    !! @param[in] self Value container instance
-    !! @return Array of sequence values as logicals
+    !! \param[in] self Value container instance
+    !! \return Array of sequence values as logicals
     function get_sequence_bools(self) result(values)
         class(yaml_value), intent(in) :: self
         logical, allocatable, dimension(:) :: values
@@ -1300,8 +1300,8 @@ contains
 
     !> Get the size of a sequence
     !!
-    !! @param[in] self Value container instance
-    !! @return Size of sequence or 0 if not a sequence/invalid
+    !! \param[in] self Value container instance
+    !! \return Size of sequence or 0 if not a sequence/invalid
     function get_sequence_size(self) result(size)
         class(yaml_value), intent(in) :: self
         integer :: size
@@ -1316,8 +1316,8 @@ contains
 
     !> Get all root keys from the document
     !!
-    !! @param[in] this Document instance
-    !! @return Array of root key names
+    !! \param[in] this Document instance
+    !! \return Array of root key names
     function get_root_keys(this) result(keys)
         class(fyaml_doc), intent(in) :: this
         character(len=:), allocatable, dimension(:) :: keys

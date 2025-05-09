@@ -1,9 +1,10 @@
 places:
   # TODO: doesn't work with full name "The National Center for Weather and Climate Prediction"
   - &ncwcp NCWCP
-
+  - &full_name The National Center for Weather and Climate Prediction
 barry:
   office: *ncwcp
+  full: *full_name
 
 # Base configuration with explicit values first
 defaults: &defaults
@@ -12,6 +13,9 @@ defaults: &defaults
   settings: &base_settings
     debug: true
     verbose: false
+test:
+  - test1
+  - test2
 
 # Server configurations using anchors
 server1:

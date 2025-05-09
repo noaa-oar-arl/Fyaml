@@ -1,15 +1,15 @@
-!> Core YAML type definitions
-!!
-!! Defines the fundamental types needed for YAML parsing.
-!! These types form the backbone of the document structure.
-!!
-!! @private
+!> \brief Core YAML type definitions
+!>
+!> \details Defines the fundamental types needed for YAML parsing.
+!> These types form the backbone of the document structure.
+!>
+!> \private
 module yaml_types
     implicit none
     private
-    public :: yaml_node, yaml_document
+    public :: yaml_node, yaml_document, copy_anchor_type_to_alias
 
-    !> Core node type for YAML elements
+    !> \brief Core node type for YAML elements
     type :: yaml_node
         character(len=:), allocatable :: key    !< Node key name
         character(len=:), allocatable :: value  !< Node value content
@@ -35,10 +35,37 @@ module yaml_types
         logical :: is_merged = .false. !< True if node is a merged reference (<<)
     end type yaml_node
 
-    !> Document container type
+    !> \brief Document container type
     type :: yaml_document
         type(yaml_node), pointer :: root => null() !< Root node
     end type yaml_document
 
     ! Remove yaml_error type - handle errors through status codes
+
+    !> \brief Interface to copy anchor node type information to alias nodes
+    interface copy_anchor_type_to_alias
+        module procedure :: copy_anchor_type_to_alias_impl
+    end interface
+
+contains
+
+    !> \brief Copy type information from an anchor node to an alias node
+    !> \param[in,out] alias_node The alias node to update
+    !> \param[in] anchor_node The anchor node to copy from
+    subroutine copy_anchor_type_to_alias_impl(alias_node, anchor_node)
+        type(yaml_node), intent(inout) :: alias_node
+        type(yaml_node), intent(in) :: anchor_node
+
+        ! Copy type flags from anchor to alias
+        alias_node%is_sequence = anchor_node%is_sequence
+        alias_node%is_null = anchor_node%is_null
+        alias_node%is_boolean = anchor_node%is_boolean
+        alias_node%is_integer = anchor_node%is_integer
+        alias_node%is_float = anchor_node%is_float
+        alias_node%is_string = anchor_node%is_string
+
+        ! Don't copy is_root - an alias can't be a root node
+        ! Don't copy is_alias/is_merged - these are properties of the alias itself
+    end subroutine copy_anchor_type_to_alias_impl
+
 end module yaml_types

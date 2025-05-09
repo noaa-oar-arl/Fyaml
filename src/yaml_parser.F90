@@ -1,13 +1,13 @@
-!> YAML Parser module
-!!
-!! This module provides functionality for parsing YAML files into Fortran data structures.
-!! It handles document structure, value types, indentation, sequences, and mapping nodes.
-!!
-!! @note Supports basic YAML features including scalars, sequences, and mappings
-!! @author Barry Baker
-!! @version 0.1.0
-!! @see yaml_types
-!! @see fyaml
+!> \brief YAML Parser module
+!>
+!> \details This module provides functionality for parsing YAML files into Fortran data structures.
+!> It handles document structure, value types, indentation, sequences, and mapping nodes.
+!>
+!> \note Supports basic YAML features including scalars, sequences, and mappings
+!> \author Barry Baker
+!> \version 0.1.0
+!> \see yaml_types
+!> \see fyaml
 module yaml_parser
   use yaml_types
   use iso_fortran_env, only: error_unit, output_unit
@@ -465,15 +465,8 @@ end subroutine parse_yaml_internal
     current_indent = count_leading_spaces(line)
     is_sequence_item = is_block_sequence(adjustl(local_line))  ! Changed to use is_block_sequence
 
-    ! ! Memory allocation and validation checks
-    ! if (.not. associated(new_node)) then
-    !     call debug_print(DEBUG_ERROR, "Node pointer not associated", ERR_MEMORY)
-    !     status = ERR_MEMORY
-    !     return
-    ! endif
+    ! Memory allocation
     new_node => null()
-
-    ! Create new node
     allocate(new_node, stat=io_stat)
     if (io_stat == 0) then
         call initialize_node(new_node)
@@ -551,6 +544,19 @@ end subroutine parse_yaml_internal
                 end do
                 current_node%next => new_node
             endif
+
+            ! Update parent-child relationship
+            new_node%parent => parent_node
+
+            ! Check if this is a sequence item under an anchored parent
+            if (allocated(parent_node%anchor) .and. len_trim(parent_node%anchor) > 0) then
+                ! Ensure the parent is marked as a sequence
+                parent_node%is_sequence = .true.
+                write(debug_msg, '(A,A,A,A)') "Sequence item under anchored parent: ", &
+                    trim(parent_node%key), " with anchor: ", trim(parent_node%anchor)
+                call debug_print(DEBUG_INFO, debug_msg)
+            endif
+
             status = ERR_SUCCESS
         else
             ! If no parent found, try to add at root level
@@ -629,6 +635,17 @@ end subroutine parse_yaml_internal
             new_node%key = trim(local_line(1:pos-1))
             new_node%value = trim(adjustl(local_line(pos+1:)))
             new_node%indent = current_indent
+
+            ! Check if the node has an anchor - could be a sequence with no explicit items
+            ! This handles the case of "colors: &color_list" in preparation for later items
+            if (allocated(new_node%anchor) .and. len_trim(new_node%anchor) > 0) then
+                new_node%is_sequence = .true.  ! Mark anchored nodes as potential sequences
+                write(debug_msg, '(A,A,A,A)') "Node with anchor: ", trim(new_node%key), &
+                                            " with anchor: ", trim(new_node%anchor)
+                call debug_print(DEBUG_INFO, debug_msg)
+                write(debug_msg, '(A,A)') "Marking as potential sequence: ", trim(new_node%key)
+                call debug_print(DEBUG_INFO, debug_msg)
+            endif
 
             ! Find parent based on indentation
             parent_node => find_parent_by_indent(doc%root, current_indent, line_num)
@@ -1320,14 +1337,16 @@ end subroutine parse_mapping
   function find_block_sequence_parent(root, item_node) result(parent)
     type(yaml_node), pointer :: root, parent, item_node
     character(len=256) :: debug_msg
-    type(yaml_node), pointer :: current, best_candidate
-    type(stack_entry), allocatable :: stack(:)  ! Now stack_entry is defined
+    type(yaml_node), pointer :: current, best_candidate, anchored_candidate, last_parent
+    type(stack_entry), allocatable :: stack(:)
     integer :: item_indent, current_indent, indent_level, stack_top, alloc_stat
     logical :: found_match
     integer, parameter :: MAX_STACK = 100
 
     nullify(parent)
     nullify(best_candidate)
+    nullify(anchored_candidate)
+    nullify(last_parent)
     found_match = .false.
 
     ! Allocate stack
@@ -1350,7 +1369,82 @@ end subroutine parse_mapping
     write(debug_msg, *) "Finding parent for sequence item at indent:", item_indent
     call debug_print(DEBUG_INFO, trim(debug_msg))
 
-    ! Start with root node
+    ! First pass: look for anchored nodes before the current line
+    current => root
+    do while (associated(current))
+        if (current%line_num < item_node%line_num) then
+            ! Remember the most recent parent we used for a sequence item at this indent level
+            if (current%is_sequence .and. current%indent == 0 .and. item_indent == 2) then
+                write(debug_msg, *) "Found potential sequence parent: ", trim(current%key), &
+                                  " at line: ", current%line_num
+                call debug_print(DEBUG_INFO, trim(debug_msg))
+                last_parent => current
+            endif
+
+            ! Check if this is an anchored node
+            if (allocated(current%anchor) .and. len_trim(current%anchor) > 0) then
+                ! Check if it's at the right indent level for the sequence item
+                if (current%indent < item_node%indent) then
+                    write(debug_msg, *) "Found anchored node before sequence item: ", trim(current%key), &
+                                      " with anchor: ", trim(current%anchor), &
+                                      " at line: ", current%line_num
+                    call debug_print(DEBUG_INFO, trim(debug_msg))
+
+                    ! Check if this is immediately before the current item (compare line numbers)
+                    if (.not. associated(anchored_candidate) .or. &
+                        current%line_num > anchored_candidate%line_num) then
+                        anchored_candidate => current
+                        write(debug_msg, *) "Setting as candidate anchored parent: ", trim(current%key)
+                        call debug_print(DEBUG_INFO, trim(debug_msg))
+                    endif
+                endif
+            endif
+        endif
+        current => current%next
+    end do
+
+    ! Look for sequence items at same indent with same parent
+    if (item_indent == 2) then  ! Most sequence items are at indent 2
+        ! Look for other sequence items at this indent level
+        current => root
+        do while (associated(current))
+            ! Look for sequence items that immediately precede this one
+            if (current%is_sequence .and. current%indent == item_indent .and. &
+                current%line_num < item_node%line_num .and. &
+                current%line_num > item_node%line_num - 3) then  ! Within 2 lines
+
+                if (associated(current%parent)) then
+                    write(debug_msg, *) "Found recent sequence item with parent:", trim(current%parent%key)
+                    call debug_print(DEBUG_INFO, trim(debug_msg))
+
+                    ! Use the same parent as this nearby sequence item
+                    parent => current%parent
+                    deallocate(stack)
+                    return
+                endif
+            endif
+            current => current%next
+        end do
+    endif
+
+    ! Special case: Check for a line immediately before this one with an anchor
+    if (associated(anchored_candidate) .and. &
+        (anchored_candidate%line_num == item_node%line_num - 1 .or. &
+         item_node%line_num - anchored_candidate%line_num < 4)) then
+
+        write(debug_msg, *) "Found anchored parent near sequence item: ", trim(anchored_candidate%key)
+        call debug_print(DEBUG_INFO, trim(debug_msg))
+        parent => anchored_candidate
+
+        ! Mark it explicitly as a sequence since it's followed by a sequence item
+        parent%is_sequence = .true.
+
+        ! Return immediately with this parent
+        deallocate(stack)
+        return
+    endif
+
+    ! Start with root node for general search
     current => root
     do while (associated(current))
         ! Check current node
@@ -1361,7 +1455,7 @@ end subroutine parse_mapping
                               "' at indent:", current_indent
             call debug_print(DEBUG_INFO, trim(debug_msg))
 
-            ! Check if this could be a better parent
+            ! Check if this could be a better parent based on indentation
             if (current_indent < item_indent) then
                 if (current_indent > indent_level) then
                     best_candidate => current
@@ -1414,15 +1508,39 @@ end subroutine parse_mapping
         if (stack_top == 0 .and. .not. associated(current%next)) exit
     end do
 
-    ! Use the best candidate found
-    if (found_match .and. associated(best_candidate)) then
+    ! Choose the parent based on the search results
+    if (associated(anchored_candidate)) then
+        parent => anchored_candidate
+        write(debug_msg, *) "Selected anchored parent: ", trim(parent%key), &
+                          " at line:", parent%line_num
+        call debug_print(DEBUG_INFO, trim(debug_msg))
+    else if (found_match .and. associated(best_candidate)) then
         parent => best_candidate
-        write(debug_msg, *) "Selected parent: ", trim(parent%key), &
+        write(debug_msg, *) "Selected parent based on indent: ", trim(parent%key), &
                           " at indent:", parent%indent
+        call debug_print(DEBUG_INFO, trim(debug_msg))
+    else if (associated(last_parent)) then
+        parent => last_parent
+        write(debug_msg, *) "Selected previously used parent: ", trim(parent%key)
         call debug_print(DEBUG_INFO, trim(debug_msg))
     else
         write(debug_msg, *) "No suitable parent found for sequence at indent:", item_indent
         call debug_print(DEBUG_INFO, trim(debug_msg))
+
+        ! Last resort: find the most recent node by line number as parent
+        current => root
+        indent_level = -1
+        do while (associated(current))
+            if (current%line_num < item_node%line_num) then
+                if (.not. associated(parent) .or. current%line_num > parent%line_num) then
+                    parent => current
+                    write(debug_msg, *) "Last resort parent by line number: ", trim(current%key), &
+                                      " at line:", current%line_num
+                    call debug_print(DEBUG_INFO, trim(debug_msg))
+                endif
+            endif
+            current => current%next
+        end do
     endif
 
     ! Clean up
@@ -1618,26 +1736,52 @@ end subroutine parse_mapping
     type(yaml_node), pointer, intent(in) :: node
     logical :: is_seq
     type(yaml_node), pointer :: current
+    character(len=256) :: debug_msg
 
     is_seq = .false.
-    if (associated(node)) then
-        ! Check node itself
-        if (node%is_sequence) then
+    if (.not. associated(node)) return
+
+    ! Check node itself first
+    if (node%is_sequence) then
+        is_seq = .true.
+        write(debug_msg, '(A,A)') "Node is marked as sequence with key: ", trim(node%key)
+        call debug_print(DEBUG_INFO, debug_msg)
+        return
+    endif
+
+    ! Check if it's an anchored sequence
+    if (allocated(node%anchor) .and. len_trim(node%anchor) > 0) then
+        ! If it has anchor and empty value or sequence indicators
+        if (len_trim(node%value) == 0 .or. index(node%value, '[') > 0) then
             is_seq = .true.
+            node%is_sequence = .true.  ! Mark as sequence
+            write(debug_msg, '(A,A,A)') "Anchored node ", trim(node%key), " determined to be a sequence"
+            call debug_print(DEBUG_INFO, debug_msg)
             return
         endif
+    endif
 
-        ! Check children
-        if (associated(node%children)) then
-            current => node%children
-            ! If any child is marked as sequence, the parent is a sequence container
-            do while (associated(current))
-                if (current%is_sequence) then
-                    is_seq = .true.
-                    return
-                endif
-                current => current%next
-            end do
+    ! Check children
+    if (associated(node%children)) then
+        current => node%children
+        ! If any child is marked as sequence, the parent is a sequence container
+        do while (associated(current))
+            if (current%is_sequence) then
+                is_seq = .true.
+                node%is_sequence = .true.  ! Update parent flag
+                write(debug_msg, '(A,A,A)') "Node ", trim(node%key), " has sequence children"
+                call debug_print(DEBUG_INFO, debug_msg)
+                return
+            endif
+            current => current%next
+        end do
+
+        ! If node value is empty and has children, it might be a sequence
+        if (len_trim(node%value) == 0 .and. associated(node%children)) then
+            is_seq = .true.
+            node%is_sequence = .true.
+            write(debug_msg, '(A,A,A)') "Node ", trim(node%key), " likely a sequence (empty value with children)"
+            call debug_print(DEBUG_INFO, debug_msg)
         endif
     endif
   end function check_sequence_node
@@ -1713,7 +1857,7 @@ end subroutine parse_mapping
     integer :: parent_level_indent
     character(len=256) :: debug_msg
     logical :: is_root_level
-    type(yaml_node), pointer :: latest_root
+    type(yaml_node), pointer :: latest_root, anchor_candidate
 
     ! Initialize pointers and variables
     nullify(parent)
@@ -1721,6 +1865,7 @@ end subroutine parse_mapping
     nullify(last_valid_parent)
     nullify(latest_root)
     nullify(current)
+    nullify(anchor_candidate)
 
     ! Early return if root is not associated
     if (.not. associated(root)) then
@@ -1755,6 +1900,15 @@ end subroutine parse_mapping
                 "Found potential root-level node: ", trim(current%key), &
                 " at line ", current%line_num
             call debug_print(DEBUG_INFO, debug_msg)
+
+            ! Check if this is an anchored node - important for sequence anchors
+            if (allocated(current%anchor) .and. len_trim(current%anchor) > 0) then
+                anchor_candidate => current
+                write(debug_msg, '(A,A,A,A)') &
+                    "Found anchored root-level node: ", trim(current%key), &
+                    " with anchor: ", trim(current%anchor)
+                call debug_print(DEBUG_INFO, debug_msg)
+            endif
         endif
         if (.not. associated(current%next)) exit
         current => current%next
@@ -1889,6 +2043,20 @@ end subroutine parse_mapping
             " at line ", parent%line_num, &
             " indent ", parent%indent
         call debug_print(DEBUG_INFO, debug_msg)
+    else if (associated(anchor_candidate) .and. child_indent == 2) then
+        ! Special case: This might be a sequence item for an anchored parent
+        ! This handles "colors: &color_list" followed by "  - red" etc.
+        parent => anchor_candidate
+        write(debug_msg, '(A,A,A,A)') &
+            "Selected anchored parent: ", trim(parent%key), &
+            " with anchor ", trim(parent%anchor)
+        call debug_print(DEBUG_INFO, debug_msg)
+
+        ! Mark anchored node as sequence since it's being followed by sequence items
+        parent%is_sequence = .true.
+        write(debug_msg, '(A,A)') &
+            "Marked anchored node as sequence: ", trim(parent%key)
+        call debug_print(DEBUG_INFO, debug_msg)
     else
         write(debug_msg, '(A,I0,A,I0)') &
             "No suitable parent found for line ", line_num, &
@@ -2000,39 +2168,127 @@ end subroutine parse_mapping
     character(len=*), intent(in) :: line
     type(yaml_node), pointer, intent(inout) :: node
     character(len=:), allocatable :: cleaned_line
-    integer :: anchor_pos, alias_pos, end_pos
+    integer :: anchor_pos, alias_pos, end_pos, i, seq_marker_pos
+    character(len=256) :: debug_msg
+    logical :: in_quotes, is_seq
 
     cleaned_line = trim(line)
+
+    ! Check if this is a sequence - look for "- " or ":" followed by "[" (flow sequence)
+    is_seq = is_block_sequence(adjustl(cleaned_line))
+    seq_marker_pos = index(cleaned_line, '[')
+    if (seq_marker_pos > 0) then
+        ! Check if we have a flow sequence by looking for a preceding ':'
+        if (index(cleaned_line(1:seq_marker_pos), ':') > 0) then
+            is_seq = .true.
+        endif
+    endif
+
+    ! Also check if this is a key for a sequence (indentation level followed by list items)
+    ! This is important for anchored sequences like "colors: &color_list"
+    if (index(cleaned_line, ':') > 0 .and. .not. is_seq) then
+        ! This could be a key for a sequence that follows on subsequent lines
+        ! We'll mark it as a potential sequence now, and confirm during parsing
+        node%is_sequence = .true.
+        write(debug_msg, '(A,A)') "Detected potential sequence key: ", trim(cleaned_line)
+        call debug_print(DEBUG_INFO, debug_msg)
+    endif
+
+    if (is_seq) then
+        node%is_sequence = .true.
+        write(debug_msg, '(A,A)') "Detected sequence: ", trim(cleaned_line)
+        call debug_print(DEBUG_INFO, debug_msg)
+    endif
 
     ! Check for anchor (&)
     anchor_pos = index(cleaned_line, '&')
     if (anchor_pos > 0) then
-        end_pos = index(cleaned_line(anchor_pos:), ' ')
-        if (end_pos == 0) end_pos = len_trim(cleaned_line) + 1
+        write(debug_msg, '(A,I0)') "Found anchor marker at position: ", anchor_pos
+        call debug_print(DEBUG_INFO, debug_msg)
 
+        ! Find the end of the anchor name - look for space, comma, colon, quote, or end of line
+        end_pos = 0
+        in_quotes = .false.
+        do i = anchor_pos + 1, len_trim(cleaned_line)
+            if (cleaned_line(i:i) == '"') then
+                in_quotes = .not. in_quotes
+            end if
+
+            if (.not. in_quotes) then
+                if (cleaned_line(i:i) == ' ' .or. cleaned_line(i:i) == ',' .or. &
+                    cleaned_line(i:i) == ':' .or. cleaned_line(i:i) == '"') then
+                    end_pos = i - 1
+                    exit
+                end if
+            end if
+        end do
+
+        if (end_pos == 0) then
+            ! Anchor extends to end of line
+            end_pos = len_trim(cleaned_line)
+        end if
+
+        ! Clean up the anchor name
         if (allocated(node%anchor)) deallocate(node%anchor)
-        allocate(character(len=end_pos-2) :: node%anchor)
-        node%anchor = cleaned_line(anchor_pos+1:anchor_pos+end_pos-2)
+        allocate(character(len=end_pos-anchor_pos) :: node%anchor)
+        node%anchor = trim(adjustl(cleaned_line(anchor_pos+1:end_pos)))
 
+        ! Remove anchor from cleaned line
         cleaned_line = trim(cleaned_line(:anchor_pos-1)) // ' ' // &
-                     trim(cleaned_line(anchor_pos+end_pos:))
-        call debug_print(DEBUG_INFO, "Found anchor: "//trim(node%anchor))
+                     trim(cleaned_line(end_pos+1:))
+
+        write(debug_msg, '(A,A)') "Found anchor: '", trim(node%anchor) // "'"
+        call debug_print(DEBUG_INFO, debug_msg)
+
+        ! Important: If this line has a colon and an anchor, it might be a sequence head
+        ! This handles the case of "colors: &color_list" where colors is an anchor for sequence
+        if (index(cleaned_line, ':') > 0) then
+            node%is_sequence = .true.
+            write(debug_msg, '(A,A,A)') "Node ", trim(node%key), " marked as potential sequence anchor"
+            call debug_print(DEBUG_INFO, debug_msg)
+        endif
     endif
 
     ! Check for alias (*)
     alias_pos = index(cleaned_line, '*')
     if (alias_pos > 0) then
-        end_pos = index(cleaned_line(alias_pos:), ' ')
-        if (end_pos == 0) end_pos = len_trim(cleaned_line) + 1
+        write(debug_msg, '(A,I0)') "Found alias marker at position: ", alias_pos
+        call debug_print(DEBUG_INFO, debug_msg)
 
+        ! Find the end of the alias name - look for space, comma, colon, quote, or end of line
+        end_pos = 0
+        in_quotes = .false.
+        do i = alias_pos + 1, len_trim(cleaned_line)
+            if (cleaned_line(i:i) == '"') then
+                in_quotes = .not. in_quotes
+            end if
+
+            if (.not. in_quotes) then
+                if (cleaned_line(i:i) == ' ' .or. cleaned_line(i:i) == ',' .or. &
+                    cleaned_line(i:i) == ':' .or. cleaned_line(i:i) == '"') then
+                    end_pos = i - 1
+                    exit
+                end if
+            end if
+        end do
+
+        if (end_pos == 0) then
+            ! Alias extends to end of line
+            end_pos = len_trim(cleaned_line)
+        end if
+
+        ! Clean up the alias name - ensure to trim any whitespace
         if (allocated(node%alias_name)) deallocate(node%alias_name)
-        allocate(character(len=end_pos-2) :: node%alias_name)
-        node%alias_name = cleaned_line(alias_pos+1:alias_pos+end_pos-2)
+        allocate(character(len=end_pos-alias_pos) :: node%alias_name)
+        node%alias_name = trim(adjustl(cleaned_line(alias_pos+1:end_pos)))
         node%is_alias = .true.
 
+        ! Remove alias from cleaned line
         cleaned_line = trim(cleaned_line(:alias_pos-1)) // ' ' // &
-                     trim(cleaned_line(alias_pos+end_pos:))
-        call debug_print(DEBUG_INFO, "Found alias reference: "//trim(node%alias_name))
+                     trim(cleaned_line(end_pos+1:))
+
+        write(debug_msg, '(A,A)') "Found alias reference: '", trim(node%alias_name) // "'"
+        call debug_print(DEBUG_INFO, debug_msg)
     endif
 
     ! Check for merge key (<<)
@@ -2044,64 +2300,119 @@ end subroutine parse_mapping
     cleaned_line = trim(adjustl(cleaned_line))
   end function process_anchor_alias
 
-  !> Find a node with a specific anchor name
-  !!
-  !! @param[in] root Root node to start search from
-  !! @param[in] anchor_name Name of anchor to find
-  !! @return Pointer to node with matching anchor
-  recursive function find_anchor_node(root, anchor_name) result(found)
-    type(yaml_node), pointer :: root, found
-    character(len=*), intent(in) :: anchor_name
-    type(yaml_node), pointer :: current
-
-    nullify(found)
-    if (.not. associated(root)) return
-
-    current => root
-    do while (associated(current))
-        ! Check if current node has matching anchor
-        if (allocated(current%anchor) .and. .not. current%is_alias) then
-            if (trim(current%anchor) == trim(anchor_name)) then
-                found => current
-                return
-            endif
-        endif
-
-        ! Check children recursively
-        if (associated(current%children)) then
-            found => find_anchor_node(current%children, anchor_name)
-            if (associated(found)) return
-        endif
-
-        current => current%next
-    end do
-  end function find_anchor_node
-
   !> Resolve all alias references in the document
   !!
   !! @param[inout] root Root node of document
   recursive subroutine resolve_aliases(root)
     type(yaml_node), pointer, intent(inout) :: root
-    type(yaml_node), pointer :: current, anchor_node
+    type(yaml_node), pointer :: current, anchor_node, seq_node, last_node
     character(len=256) :: debug_msg
+    character(len=:), allocatable :: clean_alias_name
+    logical :: is_sequence_anchor
+    integer :: i, alloc_stat
+    character(len=:), allocatable :: seq_value
 
     if (.not. associated(root)) return
 
     current => root
     do while (associated(current))
         if (current%is_alias .and. allocated(current%alias_name)) then
-            ! Find referenced anchor
-            anchor_node => find_anchor_node(root, current%alias_name)
+            ! Clean up alias name - remove any potential trailing characters
+            clean_alias_name = trim(adjustl(current%alias_name))
+
+            write(debug_msg, '(A,A,A)') "Resolving alias: '", trim(clean_alias_name), "'"
+            call debug_print(DEBUG_INFO, debug_msg)
+
+            anchor_node => find_anchor_node(root, clean_alias_name)
             if (associated(anchor_node)) then
-                ! Copy values from anchor node
+                ! Check if this is a sequence anchor before anything else
+                is_sequence_anchor = anchor_node%is_sequence .or. check_sequence_node(anchor_node)
+                if (is_sequence_anchor) then
+                    write(debug_msg, '(A,A,A)') "Anchor '", trim(clean_alias_name), "' is a sequence"
+                    call debug_print(DEBUG_INFO, debug_msg)
+
+                    ! Mark the current node as sequence explicitly
+                    current%is_sequence = .true.
+
+                    ! Check if the source sequence anchor has sequence items defined in the YAML
+                    if (allocated(anchor_node%value)) then
+                        write(debug_msg, '(A,A,A)') "Sequence anchor has value: '", trim(anchor_node%value), "'"
+                        call debug_print(DEBUG_INFO, debug_msg)
+
+                        ! Handle flow sequence values if present - parse [item1, item2, item3]
+                        if (index(anchor_node%value, '[') > 0 .and. index(anchor_node%value, ']') > 0) then
+                            call parse_flow_form(anchor_node%value, anchor_node)
+                            write(debug_msg, '(A,L1)') "Parsed flow sequence, has children: ", associated(anchor_node%children)
+                            call debug_print(DEBUG_INFO, debug_msg)
+                        endif
+                    endif
+                endif
+
+                ! Copy values from anchor node to alias node
                 call copy_node_value(anchor_node, current)
-                write(debug_msg, '(A,A,A)') "Resolved alias ", &
-                    trim(current%alias_name), " to anchor node"
-                call debug_print(DEBUG_INFO, trim(debug_msg))
+
+                ! Copy type information from anchor to alias
+                call copy_anchor_type_to_alias(current, anchor_node)
+
+                ! For sequence nodes, ensure sequence flags are set correctly and handle special cases
+                if (is_sequence_anchor) then
+                    current%is_sequence = .true.
+
+                    ! Handle special case for anchored sequences without explicit children
+                    if (.not. associated(current%children) .and. allocated(current%value)) then
+                        ! Try to parse the sequence values from the value field if it's a flow sequence
+                        if (index(current%value, '[') > 0) then
+                            call parse_flow_form(current%value, current)
+                        else if (allocated(anchor_node%value) .and. len_trim(anchor_node%value) > 0) then
+                            ! For other cases, copy the anchor's value and parse it
+                            call parse_flow_form(anchor_node%value, current)
+                        end if
+                    end if
+
+                    ! Special handling for anchors defined on parent key of sequence items
+                    ! This is for cases like "colors: &color_list\n  - red\n  - blue\n  - green"
+                    if (.not. associated(current%children) .and. associated(anchor_node%children)) then
+                        ! If the anchor has sequence children but the alias doesn't, ensure children are copied
+                        write(debug_msg, '(A)') "Copying sequence children from anchor to alias"
+                        call debug_print(DEBUG_INFO, debug_msg)
+
+                        ! Try again to copy children
+                        call copy_node_value(anchor_node, current)
+                    end if
+
+                    ! Make sure all children have sequence flags set properly
+                    if (associated(current%children)) then
+                        seq_node => current%children
+                        do while (associated(seq_node))
+                            seq_node%is_sequence = .true.
+                            seq_node => seq_node%next
+                        end do
+                    end if
+                end if
+
+                write(debug_msg, '(A,A,A,A,A)') "Resolved alias '", &
+                    trim(clean_alias_name), "' to anchor node '", &
+                    trim(anchor_node%anchor), "'"
+                call debug_print(DEBUG_INFO, debug_msg)
+
+                ! Debug information for sequence aliases
+                if (is_sequence_anchor) then
+                    write(debug_msg, '(A,L1,A,L1)') "Sequence alias - src has children: ", &
+                        associated(anchor_node%children), &
+                        ", dst has children: ", associated(current%children)
+                    call debug_print(DEBUG_INFO, debug_msg)
+                endif
             else
-                write(debug_msg, '(A,A)') "Warning: Unresolved alias reference: ", &
-                    trim(current%alias_name)
-                call debug_print(DEBUG_ERROR, trim(debug_msg))
+                write(debug_msg, '(A,A,A)') "Warning: Unresolved alias reference: '", &
+                    trim(clean_alias_name), "'"
+                call debug_print(DEBUG_ERROR, debug_msg)
+
+                write(debug_msg, '(A)') "Available anchors:"
+                call debug_print(DEBUG_ERROR, debug_msg)
+                call print_available_anchors(root)
+
+                ! Continue processing despite unresolved alias - will be null
+                current%is_null = .true.
             endif
         endif
 
@@ -2114,6 +2425,20 @@ end subroutine parse_mapping
     end do
   end subroutine resolve_aliases
 
+  !> Add helper subroutine to mark all children as sequence members
+  !!
+  !! @param[inout] node First child node to mark
+  subroutine mark_sequence_children(node)
+    type(yaml_node), pointer, intent(inout) :: node
+    type(yaml_node), pointer :: current
+
+    current => node
+    do while (associated(current))
+      current%is_sequence = .true.
+      current => current%next
+    end do
+  end subroutine mark_sequence_children
+
   !> Copy values from source node to target node
   !!
   !! @param[in] src Source node to copy from
@@ -2121,8 +2446,14 @@ end subroutine parse_mapping
   subroutine copy_node_value(src, dst)
     type(yaml_node), pointer, intent(in) :: src
     type(yaml_node), pointer, intent(inout) :: dst
+    type(yaml_node), pointer :: src_child, dst_child, current, last
+    integer :: alloc_stat
+    character(len=256) :: debug_msg
 
     if (.not. associated(src) .or. .not. associated(dst)) return
+
+    write(debug_msg, '(A)') "Copying values from anchor node to alias node"
+    call debug_print(DEBUG_INFO, debug_msg)
 
     ! Copy basic values
     dst%value = src%value
@@ -2135,19 +2466,108 @@ end subroutine parse_mapping
 
     ! Link to anchor target for future reference
     dst%anchor_target => src
+
+    ! Copy children for sequences - this is critical for sequence aliases
+    if (associated(src%children)) then
+      ! Clear any existing children in the destination
+      if (associated(dst%children)) then
+        ! Free existing children chain
+        current => dst%children
+        do while (associated(current))
+          dst_child => current
+          current => current%next
+          deallocate(dst_child)
+        end do
+        nullify(dst%children)
+      endif
+
+      ! Copy each child from source to destination
+      src_child => src%children
+      nullify(last)
+
+      do while (associated(src_child))
+        ! Allocate new child node
+        allocate(dst_child, stat=alloc_stat)
+        if (alloc_stat /= 0) then
+          write(debug_msg, '(A)') "Failed to allocate child node during anchor resolution"
+          call debug_print(DEBUG_ERROR, debug_msg)
+          return
+        endif
+
+        ! Initialize new child
+        call initialize_node(dst_child)
+        dst_child%key = src_child%key
+        dst_child%value = src_child%value
+        dst_child%indent = src_child%indent
+        dst_child%line_num = src_child%line_num
+        dst_child%is_sequence = src_child%is_sequence
+        dst_child%is_null = src_child%is_null
+        dst_child%is_boolean = src_child%is_boolean
+        dst_child%is_integer = src_child%is_integer
+        dst_child%is_float = src_child%is_float
+        dst_child%parent => dst
+
+        ! Link into children chain
+        if (.not. associated(dst%children)) then
+          dst%children => dst_child
+        else
+          last%next => dst_child
+        endif
+        last => dst_child
+
+        ! Move to next source child
+        src_child => src_child%next
+      end do
+
+      ! If any children were copied, make sure the sequence flags are set properly
+      if (associated(dst%children)) then
+        write(debug_msg, '(A)') "Setting sequence flags for alias children"
+        call debug_print(DEBUG_INFO, debug_msg)
+
+        ! Mark both parent and children as sequence if source is a sequence
+        if (src%is_sequence) then
+          dst%is_sequence = .true.
+          current => dst%children
+          do while (associated(current))
+            current%is_sequence = .true.
+            current => current%next
+          end do
+        endif
+      endif
+    endif
+
+    write(debug_msg, '(A,L1,A,L1)') "Copy complete - dst is_sequence: ", dst%is_sequence, &
+                                   " dst has children: ", associated(dst%children)
+    call debug_print(DEBUG_INFO, debug_msg)
   end subroutine copy_node_value
 
   !> Add helper function to check if a node is a sequence container
   function is_sequence_container(node) result(is_container)
     type(yaml_node), pointer, intent(in) :: node
     logical :: is_container
+    character(len=256) :: debug_msg
 
     is_container = .false.
     if (.not. associated(node)) return
 
+    ! Check explicit sequence flag first
     if (node%is_sequence) then
         is_container = .true.
+        write(debug_msg, '(A,A)') "Node ", trim(node%key) // " is marked as sequence"
+        call debug_print(DEBUG_INFO, debug_msg)
         return
+    endif
+
+    ! Check if it's an anchored sequence
+    if (allocated(node%anchor) .and. len_trim(node%anchor) > 0) then
+        ! If it's an anchor, check if its value has sequence indicators like empty or "["
+        if (len_trim(node%value) == 0 .or. index(node%value, '[') > 0) then
+            is_container = .true.
+            node%is_sequence = .true.  ! Mark node as sequence
+            write(debug_msg, '(A,A,A)') "Anchored node ", trim(node%key), " appears to be a sequence"
+            call debug_print(DEBUG_INFO, debug_msg)
+            return
+        endif
     endif
 
     ! Check if node has sequence children
@@ -2155,8 +2575,80 @@ end subroutine parse_mapping
         if (node%children%is_sequence) then
             is_container = .true.
             node%is_sequence = .true.  ! Mark parent as container
+            write(debug_msg, '(A,A,A)') "Node ", trim(node%key), " has sequence children"
+            call debug_print(DEBUG_INFO, debug_msg)
         endif
     endif
   end function is_sequence_container
+
+  !> Find a node with a specific anchor name
+  !!
+  !! @param[in] root Root node to start search from
+  !! @param[in] anchor_name Name of anchor to find
+  !! @return Pointer to node with matching anchor
+  recursive function find_anchor_node(root, anchor_name) result(found)
+    type(yaml_node), pointer :: root, found
+    character(len=*), intent(in) :: anchor_name
+    type(yaml_node), pointer :: current
+    character(len=256) :: debug_msg
+
+    nullify(found)
+    if (.not. associated(root)) return
+
+    ! Loop through this level of nodes
+    current => root
+    do while (associated(current))
+      ! Check if this node has the anchor we're looking for
+      if (allocated(current%anchor)) then
+        write(debug_msg, '(A,A,A,A)') "Checking anchor '", trim(current%anchor), &
+                                     "' against requested '", trim(anchor_name), "'"
+        call debug_print(DEBUG_INFO, debug_msg)
+
+        ! Compare anchor name to requested name
+        if (trim(adjustl(current%anchor)) == trim(adjustl(anchor_name))) then
+          found => current
+          write(debug_msg, '(A,A,A)') "Found anchor '", trim(anchor_name), "'"
+          call debug_print(DEBUG_INFO, debug_msg)
+          return
+        endif
+      endif
+
+      ! If no match at this level, check children
+      if (associated(current%children)) then
+        found => find_anchor_node(current%children, anchor_name)
+        if (associated(found)) return
+      endif
+
+      ! Move to next sibling
+      current => current%next
+    end do
+  end function find_anchor_node
+
+  !> Print all available anchors in the document for debugging
+  !!
+  !! @param[in] root Root node of document
+  recursive subroutine print_available_anchors(root)
+    type(yaml_node), pointer, intent(in) :: root
+    type(yaml_node), pointer :: current
+    character(len=256) :: debug_msg
+
+    if (.not. associated(root)) return
+
+    current => root
+    do while (associated(current))
+        if (allocated(current%anchor)) then
+            write(debug_msg, '(A,A,A,A,A,I0)') "  - '", trim(current%anchor), &
+                "' at key: '", trim(current%key), "', line: ", current%line_num
+            call debug_print(DEBUG_ERROR, debug_msg)
+        endif
+
+        ! Check children
+        if (associated(current%children)) then
+            call print_available_anchors(current%children)
+        endif
+
+        current => current%next
+    end do
+  end subroutine print_available_anchors
 
 end module yaml_parser
