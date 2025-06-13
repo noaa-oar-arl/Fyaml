@@ -1,0 +1,194 @@
+# Example YAML file for testing FYAML functionality
+# This file demonstrates various YAML features supported by FYAML
+
+# Basic scalar values
+basic_config:
+  application_name: "FYAML Test Application"
+  version: "1.0.0"
+  debug_mode: true
+  max_iterations: 1000
+  convergence_threshold: 1.0e-6
+
+# Arrays and sequences
+data_arrays:
+  # Inline array syntax
+  numbers: [1, 2, 3, 4, 5]
+  fractions: [0.1, 0.2, 0.3, 0.4, 0.5]
+
+  # Multi-line array syntax
+  species_list:
+    - NO2
+    - O3
+    - NO
+    - CO
+    - SO2
+    - NH3
+    - HNO3
+
+  # Mixed types (if supported)
+  mixed_data: [1, "two", 3.0, true, null]
+
+# Nested mappings
+simulation_parameters:
+  grid_configuration:
+    horizontal:
+      nx: 100
+      ny: 100
+      dx: 1000.0  # meters
+      dy: 1000.0  # meters
+    vertical:
+      nz: 50
+      dz: 100.0   # meters
+      top_pressure: 50.0  # hPa
+
+  time_configuration:
+    start_date: "2023-01-01"
+    end_date: "2023-01-02"
+    timestep: 3600.0    # seconds
+    output_frequency: 3600  # seconds
+
+  physics_options:
+    enable_chemistry: true
+    enable_aerosols: false
+    enable_clouds: true
+    radiation_scheme: "RRTMG"
+
+# Anchor and alias examples
+defaults: &default_settings
+  timeout: 30
+  retries: 3
+  log_level: "INFO"
+  enable_ssl: true
+
+# Using the anchor
+production_config:
+  <<: *default_settings
+  workers: 10
+  debug: false
+  database_url: "postgresql://prod-server/database"
+
+development_config:
+  <<: *default_settings
+  workers: 1
+  debug: true
+  database_url: "postgresql://localhost/test_database"
+  log_level: "DEBUG"  # Override the default
+
+# Complex nested structures with arrays of objects
+emission_sources:
+  - source_id: "power_plant_001"
+    location:
+      latitude: 40.7128
+      longitude: -74.0060
+      elevation: 50.0
+    stack_parameters:
+      height: 120.0
+      diameter: 4.5
+      temperature: 400.0
+      exit_velocity: 15.0
+    emission_rates:
+      NO2: 1500.0    # kg/hr
+      SO2: 2000.0    # kg/hr
+      CO: 500.0      # kg/hr
+      PM25: 100.0    # kg/hr
+    operating_schedule:
+      weekdays: [6, 22]  # hours of operation
+      weekends: [8, 18]
+
+  - source_id: "highway_segment_001"
+    location:
+      start_latitude: 40.7000
+      start_longitude: -74.0000
+      end_latitude: 40.7200
+      end_longitude: -74.0100
+    traffic_data:
+      annual_average_daily_traffic: 50000
+      heavy_duty_fraction: 0.15
+      speed_limit: 65  # mph
+    emission_factors:  # g/mile
+      NOx: 0.54
+      CO: 8.45
+      VOC: 0.68
+      PM25: 0.025
+
+# Multi-line strings
+documentation:
+  description: |
+    This is a multi-line description that preserves
+    line breaks and formatting. It's useful for
+    documentation and longer text fields.
+
+    This paragraph demonstrates how the literal
+    block scalar (|) works in YAML.
+
+  folded_description: >
+    This is a folded multi-line string that will
+    be converted to a single line with spaces
+    replacing the line breaks. This is good for
+    long paragraphs that should flow together.
+
+# Special characters and edge cases
+edge_cases:
+  empty_string: ""
+  null_value: null
+  zero_integer: 0
+  zero_float: 0.0
+  negative_number: -42
+  scientific_notation: 1.23e-10
+  boolean_variations:
+    true_values: [true, True, TRUE, yes, Yes, YES]
+    false_values: [false, False, FALSE, no, No, NO]
+
+  quoted_strings:
+    single_quoted: 'This is a single-quoted string'
+    double_quoted: "This is a double-quoted string"
+    with_escapes: "Line 1\nLine 2\tTabbed text"
+    with_quotes: 'She said "Hello World!"'
+
+# Realistic atmospheric chemistry configuration
+chemistry_mechanism:
+  mechanism_name: "CB6r3"
+  species_groups:
+    - group_name: "inorganic"
+      species:
+        - name: "NO"
+          molecular_weight: 30.01
+          initial_concentration: 10.0  # ppb
+        - name: "NO2"
+          molecular_weight: 46.01
+          initial_concentration: 20.0  # ppb
+        - name: "O3"
+          molecular_weight: 48.00
+          initial_concentration: 50.0  # ppb
+
+    - group_name: "organic"
+      species:
+        - name: "FORM"
+          molecular_weight: 30.03
+          initial_concentration: 5.0   # ppb
+        - name: "ALD2"
+          molecular_weight: 44.05
+          initial_concentration: 2.0   # ppb
+
+  reactions:
+    - reaction_id: "R001"
+      equation: "NO2 + hv → NO + O"
+      rate_type: "photolysis"
+      rate_constant: 8.2e-3  # 1/s
+
+    - reaction_id: "R002"
+      equation: "O3 + NO → NO2 + O2"
+      rate_type: "arrhenius"
+      arrhenius_parameters:
+        A: 3.0e-12    # cm3/molec/s
+        Ea: 1500.0    # K
+        temperature_exponent: 0.0
+
+# Simple chemistry configuration for the example
+chemistry:
+  species:
+    - NO2
+    - O3
+    - NO
+    - CO
+    - SO2

@@ -34,6 +34,8 @@ jobs:
 
       - name: Test
         run: ctest --test-dir $BUILD_DIR/tests/ --output-on-failure
+        env:
+          FYAML_TEST_DATA_DIR: ${{ github.workspace }}/test_data
 
   lint:
     runs-on: ubuntu-latest

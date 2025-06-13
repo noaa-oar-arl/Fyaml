@@ -1,43 +1,76 @@
-set(_srcs
-    test_utils.F90)
+# CMakeLists.txt for FYAML tests
 
-add_compile_options(${_fyaml_compiler_options})
+# Test configuration
+set(FYAML_TEST_DATA_DIR "${CMAKE_SOURCE_DIR}/test_data")
 
-add_compile_definitions(SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+# First create the test utilities library
+add_library(test_utils STATIC test_utils.f90)
+target_link_libraries(test_utils FYAML::fyaml)
+target_include_directories(test_utils PRIVATE ${CMAKE_BINARY_DIR}/include)
+target_compile_options(test_utils PRIVATE ${_fyaml_compiler_options})
 
-# Set up module and include directories
-set(TEST_MODULE_DIR ${CMAKE_CURRENT_BINARY_DIR}/modules)
-file(MAKE_DIRECTORY ${TEST_MODULE_DIR})
+# Create test executables and register them with CTest
+function(add_fyaml_test test_name source_file)
+    add_executable(${test_name} ${source_file})
+    target_link_libraries(${test_name} FYAML::fyaml test_utils)
+    target_include_directories(${test_name} PRIVATE ${CMAKE_BINARY_DIR}/include)
 
-enable_testing()
+    # Set compiler options for tests
+    target_compile_options(${test_name} PRIVATE ${_fyaml_compiler_options})
 
-# Build test_utils library first
-add_library(test_utils OBJECT ${_srcs})
-target_link_libraries(test_utils PUBLIC fyaml)  # Changed to PUBLIC
-target_include_directories(test_utils PUBLIC
-    $<BUILD_INTERFACE:${TEST_MODULE_DIR}>
-    $<TARGET_PROPERTY:fyaml,Fortran_MODULE_DIRECTORY>)  # Get fyaml module dir
-set_target_properties(test_utils PROPERTIES
-    Fortran_MODULE_DIRECTORY ${TEST_MODULE_DIR})
+    # Register test with CTest
+    add_test(NAME ${test_name} COMMAND ${test_name})
 
-foreach(test IN ITEMS
-    test_basic_loading test_basic_types test_sequences
-    test_nested_access test_get_value test_get_values
-    test_multiple_docs test_root_keys test_anchors_aliases)
-    # Add executable
-    add_executable(${test} ${test}_main.F90)
-    # Link with test_utils and fyaml
-    target_link_libraries(${test} PRIVATE test_utils)  # fyaml comes transitively
-    # Set include paths for modules
-    target_include_directories(${test} PRIVATE
-        ${CMAKE_BINARY_DIR}/modules
-        ${TEST_MODULE_DIR})
-    set_target_properties(${test} PROPERTIES
-        Fortran_MODULE_DIRECTORY ${TEST_MODULE_DIR})
-    # Add dependencies
-    add_dependencies(${test} test_utils)
-    # Add test
-    add_test(
-        NAME ${test}
-        COMMAND ${test})
-endforeach()
+    # Set test environment to include data directory
+    set_tests_properties(${test_name} PROPERTIES
+        ENVIRONMENT "FYAML_TEST_DATA_DIR=${FYAML_TEST_DATA_DIR}"
+    )
+endfunction()
+
+# Basic functionality tests
+add_fyaml_test(test_basic_types test_basic_types.f90)
+add_fyaml_test(test_arrays test_arrays.f90)
+add_fyaml_test(test_strings test_strings.f90)
+add_fyaml_test(test_booleans test_booleans.f90)
+
+# File parsing tests
+add_fyaml_test(test_file_parsing test_file_parsing.f90)
+add_fyaml_test(test_categories test_categories.f90)
+add_fyaml_test(test_anchors test_anchors.f90)
+
+# Advanced functionality tests
+add_fyaml_test(test_species_parsing test_species_parsing.f90)
+add_fyaml_test(test_config_merging test_config_merging.f90)
+add_fyaml_test(test_config_printing test_config_printing.f90)
+
+# Utility function tests
+add_fyaml_test(test_string_utils test_string_utils.f90)
+add_fyaml_test(test_error_handling test_error_handling.f90)
+
+# Performance tests
+add_fyaml_test(test_large_file test_large_file.f90)
+add_fyaml_test(test_sorting test_sorting.f90)
+
+# Integration test
+add_fyaml_test(test_integration test_integration.f90)
+
+# API coverage test
+add_fyaml_test(test_api_functions test_api_functions.f90)
+
+# Edge cases and error path tests
+add_fyaml_test(test_edge_cases test_edge_cases.f90)
+
+# Comprehensive array tests
+add_fyaml_test(test_comprehensive_arrays test_comprehensive_arrays.f90)
+
+# Custom test target to run all tests
+add_custom_target(run_tests
+    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+    DEPENDS test_basic_types test_arrays test_strings test_booleans
+            test_file_parsing test_categories test_anchors
+            test_species_parsing test_config_merging test_config_printing
+            test_string_utils test_error_handling
+            test_large_file test_sorting test_integration test_api_functions
+            test_edge_cases test_comprehensive_arrays
+    COMMENT "Running FYAML test suite"
+)

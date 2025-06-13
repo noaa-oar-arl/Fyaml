@@ -1,0 +1,207 @@
+site_name: FYAML - Fortran YAML Parser
+site_description: A comprehensive Fortran library for parsing YAML files with anchor and alias support
+site_author: FYAML Development Team
+site_url: https://fyaml.readthedocs.io
+
+repo_name: fyaml/fyaml
+repo_url: https://github.com/noaa-oar-arl/fyaml
+edit_uri: edit/main/docs/
+
+copyright: Copyright &copy; 2025 FYAML Development Team
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.top
+    - search.highlight
+    - search.share
+    - toc.follow
+    - content.tabs.link
+    - content.code.copy
+    - content.code.select
+    - content.action.edit
+    - content.action.view
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+  favicon: FYAML.png
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: fyaml
+      repo: fyaml
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - mkdoxy:
+      projects:
+        fyaml:
+          src-dirs: src
+          full-doc: true
+          doxy-cfg:
+            FILE_PATTERNS: "*.f90 *.F90 *.f *.F"
+            RECURSIVE: true
+            EXTRACT_ALL: true
+            EXTRACT_PRIVATE: true
+            EXTRACT_STATIC: true
+            EXTRACT_LOCAL_CLASSES: true
+            EXTRACT_LOCAL_METHODS: true
+            EXTRACT_ANON_NSPACES: true
+            HIDE_UNDOC_MEMBERS: false
+            HIDE_UNDOC_CLASSES: false
+            GENERATE_HTML: false
+            GENERATE_XML: true
+            XML_OUTPUT: xml
+            XML_PROGRAMLISTING: true
+            CASE_SENSE_NAMES: false
+            JAVADOC_AUTOBRIEF: true
+            QT_AUTOBRIEF: true
+            MULTILINE_CPP_IS_BRIEF: true
+            OPTIMIZE_FOR_FORTRAN: true
+            OPTIMIZE_OUTPUT_FOR_C: false
+            EXTENSION_MAPPING: "f90=FortranFree F90=FortranFree f=FortranFixed F=FortranFixed"
+            ALIASES: "brief=\\brief"
+            ENABLE_PREPROCESSING: true
+            MACRO_EXPANSION: true
+            EXPAND_ONLY_PREDEF: false
+            SEARCH_INCLUDES: true
+            INCLUDE_PATH: "./src"
+            PREDEFINED: "__DOXYGEN__"
+            SKIP_FUNCTION_MACROS: true
+            SOURCE_BROWSER: true
+            INLINE_SOURCES: true
+            STRIP_CODE_COMMENTS: false
+            REFERENCED_BY_RELATION: true
+            REFERENCES_RELATION: true
+            REFERENCES_LINK_SOURCE: true
+            USE_HTAGS: false
+            VERBATIM_HEADERS: true
+            ALPHABETICAL_INDEX: true
+            COLS_IN_ALPHA_INDEX: 5
+            IGNORE_PREFIX: "fyaml_"
+            GENERATE_TREEVIEW: true
+            ENUM_VALUES_PER_LINE: 4
+            TREEVIEW_WIDTH: 250
+            EXT_LINKS_IN_WINDOW: false
+            FORMULA_FONTSIZE: 10
+            FORMULA_TRANSPARENT: true
+            USE_MATHJAX: true
+            MATHJAX_FORMAT: HTML-CSS
+            MATHJAX_RELPATH: http://cdn.mathjax.org/mathjax/latest
+            SEARCHENGINE: true
+            SERVER_BASED_SEARCH: false
+            EXTERNAL_SEARCH: false
+            SEARCHDATA_FILE: searchdata.xml
+            EXTERNAL_SEARCH_ID: ""
+            EXTRA_SEARCH_MAPPINGS: ""
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quick-start.md
+    - Examples: getting-started/examples.md
+  - User Guide:
+    - Basic Usage: user-guide/basic-usage.md
+    - Configuration Files: user-guide/configuration-files.md
+    - Data Types: user-guide/data-types.md
+    - Arrays and Lists: user-guide/arrays-lists.md
+    - Categories: user-guide/categories.md
+    - Anchors and Aliases: user-guide/anchors-aliases.md
+    - Error Handling: user-guide/error-handling.md
+  - API Reference:
+    - Overview: api/overview.md
+    - Core Module (fyaml): api/fyaml.md
+    - Types and Constants: api/types.md
+    - Utilities: api/utilities.md
+    - String Utils: api/string-utils.md
+    - Error Handling: api/error-handling.md
+    - Parser Internals: api/parser.md
+    - Generated Documentation:
+      - Modules Index: 'fyaml/modules.md'
+      - Namespaces Index: 'fyaml/namespaces.md'
+      - Files Index: 'fyaml/files.md'
+      - FYAML Core: 'fyaml/namespacefyaml.md'
+      - FYAML Types: 'fyaml/namespacefyaml__types.md'
+      - FYAML Parser: 'fyaml/namespacefyaml__parser.md'
+      - FYAML Utils: 'fyaml/namespacefyaml__utils.md'
+      - String Utils: 'fyaml/namespacefyaml__string__utils.md'
+      - Error Module: 'fyaml/namespacefyaml__error.md'
+      - Constants: 'fyaml/namespacefyaml__constants.md'
+      - Precision: 'fyaml/namespacefyaml__precision.md'
+  - Developer Guide:
+    - Architecture: developer/architecture.md
+    - Contributing: developer/contributing.md
+    - Testing: developer/testing.md
+    - Release Process: developer/release-process.md
+  - Changelog: CHANGELOG.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/fyaml/fyaml
+  version:
+    provider: mike
+    default: latest
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
