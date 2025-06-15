@@ -1,9 +1,9 @@
 site_name: FYAML - Fortran YAML Parser
 site_description: A comprehensive Fortran library for parsing YAML files with anchor and alias support
 site_author: FYAML Development Team
-site_url: https://fyaml.readthedocs.io
+site_url: https://noaa-oar-arl.github.io/fyaml/
 
-repo_name: fyaml/fyaml
+repo_name: noaa-oar-arl/fyaml
 repo_url: https://github.com/noaa-oar-arl/fyaml
 edit_uri: edit/main/docs/
 

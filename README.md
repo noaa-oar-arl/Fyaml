@@ -11,17 +11,19 @@ FYAML maintains high code quality standards:
 
 - ⚠️ **Zero Warnings**: Compiles cleanly with strict compiler flags (`-Wall -Wextra -pedantic`)
 - 🧪 **Comprehensive Testing**: 89.4% code coverage with 18 specialized test programs
-- 🔄 **Continuous Integration**: Automated testing across multiple platforms
+- 🔄 **Continuous Integration**: Automated testing across multiple platforms and compilers
 - 📊 **Performance Tested**: Handles large files and complex structures efficiently
 - 🎯 **API Complete**: All public functions thoroughly tested with edge cases
+- 🔧 **Multi-Compiler**: Tested with GCC, Intel ifx/ifort, NVIDIA HPC, and LFortran
 
 ## Features
 
-- 🚀 **Modern Fortran**: Written in standard-compliant Fortran
+- 🚀 **Modern Fortran**: Written in standard-compliant Fortran 2003+
 - 📝 **YAML Compliance**: Supports YAML 1.2 specification
 - 🔧 **Easy Integration**: Simple CMake and pkg-config support
 - 🧪 **Well Tested**: Comprehensive test suite with 89.4% overall coverage
 - ⚠️ **Warning-Free**: Zero compiler warnings with strict compilation flags
+- 🏭 **Multi-Compiler**: Supports GCC, Intel (ifx/ifort), NVIDIA HPC SDK, LFortran
 - 📚 **Documented**: Complete API documentation and user guides
 - 🔗 **Anchors & Aliases**: Full support for YAML references
 - 📊 **Arrays & Objects**: Handle complex nested data structures
@@ -69,6 +71,25 @@ program example
     call fyaml_cleanup(yml)
 end program
 ```
+
+## Compiler Support
+
+FYAML is tested and verified to work with multiple Fortran compilers:
+
+| Compiler | Vendor | Versions Tested | Status |
+|----------|---------|----------------|---------|
+| **GFortran** | GNU | 11, 12, 13, 14 | ✅ Fully Supported |
+| **ifx** | Intel | 2025.0+ | ✅ Fully Supported |
+| **ifort** | Intel (Classic) | 2021.10+ | ✅ Fully Supported |
+| **nvfortran** | NVIDIA HPC SDK | 25.1+ | ✅ Fully Supported |
+| **LFortran** | LFortran | 0.45.0+ | ✅ Fully Supported |
+
+**Cross-Platform Testing:**
+- 🐧 **Linux**: Ubuntu 24.04 (primary)
+- 🍎 **macOS**: macOS 14+ (GCC)
+- 🪟 **Windows**: Windows Server 2022 (GCC)
+
+All compilers are automatically tested in CI with both Debug and Release configurations.
 
 ## Building and Testing
 
@@ -119,13 +140,13 @@ This will create an HTML coverage report in `coverage-html/` that you can open i
 
 ### GitHub Actions
 
-The project includes automated testing and coverage reporting:
+The project includes automated testing and deployment:
 
 - **CI Workflow**: Builds and tests on multiple platforms
 - **Coverage Workflow**: Generates coverage reports and uploads them as artifacts
-- **Documentation**: Automatically builds and deploys documentation
+- **Documentation**: Automatically builds and deploys to GitHub Pages on every push to main
 
-Coverage reports are automatically generated for pull requests and can be downloaded as artifacts from the GitHub Actions page.
+Coverage reports are automatically generated for pull requests and can be downloaded as artifacts from the GitHub Actions page. Documentation is automatically published at https://noaa-oar-arl.github.io/fyaml/
 
 ## CMake Integration
 
@@ -147,10 +168,10 @@ target_include_directories(your_target PRIVATE ${FYAML_INCLUDE_DIRS})
 
 ## Documentation
 
-- 📖 **[User Guide](https://fyaml.github.io/fyaml/user-guide/)**: Complete usage examples
-- 🔧 **[API Reference](https://fyaml.github.io/fyaml/api/)**: Detailed function documentation
-- 🏗️ **[Developer Guide](https://fyaml.github.io/fyaml/developer/)**: Contributing and architecture
-- 🚀 **[Getting Started](https://fyaml.github.io/fyaml/getting-started/)**: Installation and first steps
+- 📖 **[User Guide](https://noaa-oar-arl.github.io/fyaml/user-guide/)**: Complete usage examples
+- 🔧 **[API Reference](https://noaa-oar-arl.github.io/fyaml/api/)**: Detailed function documentation
+- 🏗️ **[Developer Guide](https://noaa-oar-arl.github.io/fyaml/developer/)**: Contributing and architecture
+- 🚀 **[Getting Started](https://noaa-oar-arl.github.io/fyaml/getting-started/)**: Installation and first steps
 
 ## Examples
 

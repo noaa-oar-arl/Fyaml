@@ -1,0 +1,124 @@
+name: Question or Help
+description: Ask for help or general questions about FYAML
+title: "[QUESTION] "
+labels: ["question", "help wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your question! Before asking, please check:
+        - [Documentation](https://fyaml.readthedocs.io/)
+        - [Existing issues](https://github.com/fyaml/fyaml/issues)
+        - [Examples directory](https://github.com/fyaml/fyaml/tree/main/examples)
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+      placeholder: Please be as specific as possible about what you're trying to achieve or understand.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What category does your question fall into?
+      options:
+        - Installation and Setup
+        - Basic Usage
+        - Advanced Features
+        - Performance
+        - Integration with Other Tools
+        - Build System / CMake
+        - Error Messages
+        - Documentation
+        - Contributing
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Provide context about what you're trying to accomplish
+      placeholder: What are you trying to build or achieve? What have you tried so far?
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Code Example (if applicable)
+      description: Show us what you've tried or what you're working on
+      render: fortran
+      placeholder: |
+        program my_example
+            use fyaml
+            implicit none
+
+            ! Your code here
+
+        end program
+    validations:
+      required: false
+
+  - type: textarea
+    id: yaml-file
+    attributes:
+      label: YAML File (if applicable)
+      description: If your question involves a specific YAML file, please include it
+      render: yaml
+      placeholder: |
+        # Your YAML content here
+        key: value
+    validations:
+      required: false
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system are you using?
+      options:
+        - Ubuntu/Debian
+        - CentOS/RHEL/Fedora
+        - macOS
+        - Windows
+        - Other
+        - Not applicable
+    validations:
+      required: false
+
+  - type: input
+    id: compiler
+    attributes:
+      label: Compiler (if applicable)
+      description: What Fortran compiler are you using?
+      placeholder: e.g., gfortran 11.2, ifort 2021.4
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: Additional Information
+      description: Any other information that might be helpful
+      placeholder: Error messages, documentation you've read, similar libraries you've used, etc.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues for similar questions
+          required: true
+        - label: I have checked the documentation
+          required: true
+        - label: I have provided enough context for others to understand my question
+          required: true

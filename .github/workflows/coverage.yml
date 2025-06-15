@@ -7,6 +7,10 @@ on:
     branches: [ main ]
   workflow_dispatch:  # Allow manual triggering
 
+permissions:
+  contents: read
+  actions: write  # For uploading artifacts
+
 jobs:
   coverage:
     runs-on: ubuntu-latest
@@ -19,7 +23,7 @@ jobs:
       uses: fortran-lang/setup-fortran@v1
       with:
         compiler: gcc
-        version: 12
+        version: 13
 
     - name: Configure with coverage
       run: |

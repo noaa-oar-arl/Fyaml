@@ -124,6 +124,48 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel" AND CMAKE_BUILD_TYPE MATCHES "D
     0
     -diag-disable
     6379,10448)
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "IntelLLVM" AND CMAKE_BUILD_TYPE MATCHES "Debug")
+  # Intel ifx compiler (oneAPI)
+  list(
+    APPEND
+    _fyaml_compiler_options
+    -O0
+    -warn
+    all
+    -check
+    all
+    -implicitnone
+    -fpe0
+    -traceback)
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC" AND CMAKE_BUILD_TYPE MATCHES "Debug")
+  # NVIDIA HPC SDK (nvfortran)
+  list(
+    APPEND
+    _fyaml_compiler_options
+    -O0
+    -Minform=warn
+    -Mchkptr
+    -Mchkstk
+    -traceback)
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "LFortran" AND CMAKE_BUILD_TYPE MATCHES "Debug")
+  # LFortran compiler
+  list(
+    APPEND
+    _fyaml_compiler_options
+    --show-stacktrace)
+endif()
+
+# Add release flags for better optimization
+if(CMAKE_BUILD_TYPE MATCHES "Release")
+  if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+    list(APPEND _fyaml_compiler_options -O3 -ffast-math)
+  elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
+    list(APPEND _fyaml_compiler_options -O3 -xHost)
+  elseif(CMAKE_Fortran_COMPILER_ID MATCHES "IntelLLVM")
+    list(APPEND _fyaml_compiler_options -O3 -xHost)
+  elseif(CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC")
+    list(APPEND _fyaml_compiler_options -O3 -fast)
+  endif()
 endif()
 
 # Set the Fortran standard

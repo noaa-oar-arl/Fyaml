@@ -1,0 +1,114 @@
+name: Feature Request
+description: Suggest an idea for FYAML
+title: "[FEATURE] "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! Please provide as much detail as possible to help us understand your request.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a problem? Please describe.
+      placeholder: A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like
+      placeholder: A clear and concise description of what you want to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Describe any alternative solutions or features you've considered
+      placeholder: A clear and concise description of any alternative solutions or features you've considered.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact
+      description: How would this feature impact users?
+      options:
+        - Major - Breaking change or significant new functionality
+        - Minor - Small enhancement or convenience feature
+        - Patch - Bug fix or very small improvement
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What category does this feature fall into?
+      options:
+        - API Enhancement
+        - Performance Improvement
+        - Documentation
+        - Testing
+        - Build System
+        - Error Handling
+        - New Data Type Support
+        - YAML Standard Compliance
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Describe your specific use case for this feature
+      placeholder: How would you use this feature? What problem does it solve for you?
+    validations:
+      required: true
+
+  - type: textarea
+    id: code-example
+    attributes:
+      label: Example Usage
+      description: If applicable, provide an example of how you'd like to use this feature
+      render: fortran
+      placeholder: |
+        program example_usage
+            use fyaml
+            implicit none
+
+            ! Example of how the new feature would be used
+
+        end program
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context, screenshots, or examples about the feature request here.
+      placeholder: Any additional information that might be helpful...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate
+          required: true
+        - label: This feature would be useful to other FYAML users, not just my specific use case
+          required: true
+        - label: I am willing to help implement this feature or provide feedback during development
+          required: false
