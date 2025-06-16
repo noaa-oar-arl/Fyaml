@@ -21,6 +21,7 @@ FYAML maintains high code quality standards:
 - 🚀 **Modern Fortran**: Written in standard-compliant Fortran 2003+
 - 📝 **YAML Compliance**: Supports YAML 1.2 specification
 - 🔧 **Easy Integration**: Simple CMake and pkg-config support
+- 📦 **Package Manager Ready**: Spack package available for HPC environments
 - 🧪 **Well Tested**: Comprehensive test suite with 89.4% overall coverage
 - ⚠️ **Warning-Free**: Zero compiler warnings with strict compilation flags
 - 🏭 **Multi-Compiler**: Supports GCC, Intel (ifx/ifort), NVIDIA HPC SDK, LFortran
@@ -34,6 +35,8 @@ FYAML maintains high code quality standards:
 
 ### Installation
 
+#### From Source
+
 ```bash
 git clone https://github.com/fyaml/fyaml.git
 cd fyaml
@@ -41,6 +44,29 @@ mkdir build && cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local
 make install
 ```
+
+#### Using Spack
+
+[Spack](https://spack.io/) is the preferred method for HPC and scientific computing environments:
+
+```bash
+# Basic installation
+spack install fyaml
+
+# With variants
+spack install fyaml +tests +shared
+
+# Load into environment
+spack load fyaml
+```
+
+See [SPACK_SETUP.md](SPACK_SETUP.md) for detailed Spack installation instructions.
+
+#### Package Managers
+
+- **Spack**: `spack install fyaml` (recommended for HPC)
+- **Source**: CMake-based build system
+- **Future**: Additional package managers coming soon
 
 ### Basic Usage
 
@@ -172,6 +198,7 @@ target_include_directories(your_target PRIVATE ${FYAML_INCLUDE_DIRS})
 - 🔧 **[API Reference](https://noaa-oar-arl.github.io/fyaml/api/)**: Detailed function documentation
 - 🏗️ **[Developer Guide](https://noaa-oar-arl.github.io/fyaml/developer/)**: Contributing and architecture
 - 🚀 **[Getting Started](https://noaa-oar-arl.github.io/fyaml/getting-started/)**: Installation and first steps
+- 📦 **[Spack Installation](SPACK_SETUP.md)**: HPC package manager integration
 
 ## Examples
 

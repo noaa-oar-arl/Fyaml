@@ -13,10 +13,15 @@ project(
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 include(CMakePrintHelpers)
-include(CTest)
 
-# Enable testing with CTest
-enable_testing()
+# Set testing to OFF by default (users can enable with -DBUILD_TESTING=ON)
+option(BUILD_TESTING "Build the testing tree" OFF)
+
+# Include CTest only if testing is enabled
+if(BUILD_TESTING)
+    include(CTest)
+    enable_testing()
+endif()
 
 # Set build type to Debug if not specified
 if(NOT CMAKE_BUILD_TYPE)
