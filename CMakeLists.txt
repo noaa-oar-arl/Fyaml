@@ -69,6 +69,7 @@ if(FYAML_ENABLE_COVERAGE)
     else()
         message(WARNING "Code coverage only supported with GCC compiler")
     endif()
+
 endif()
 
 # First ensure we're setting platform-specific flags
@@ -250,3 +251,4 @@ message(STATUS "  Install prefix: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "  Library directory: ${CMAKE_INSTALL_FULL_LIBDIR}")
 message(STATUS "  Include directory: ${CMAKE_INSTALL_FULL_INCLUDEDIR}")
 message(STATUS "  CMake config directory: ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/FYAML")
+
