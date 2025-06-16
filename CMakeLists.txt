@@ -250,5 +250,3 @@ message(STATUS "  Install prefix: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "  Library directory: ${CMAKE_INSTALL_FULL_LIBDIR}")
 message(STATUS "  Include directory: ${CMAKE_INSTALL_FULL_INCLUDEDIR}")
 message(STATUS "  CMake config directory: ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/FYAML")
-
-
