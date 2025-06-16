@@ -119,7 +119,9 @@ All compilers are automatically tested in CI with both Debug and Release configu
 
 ## Building and Testing
 
-### Standard Build
+### Standard Build (Library Only)
+
+By default, FYAML builds only the library without tests, making it suitable for production use and package installation:
 
 ```bash
 mkdir build && cd build
@@ -129,8 +131,20 @@ make
 
 ### With Tests
 
+To build and run the comprehensive test suite:
+
 ```bash
-cmake .. -DFYAML_BUILD_TESTS=ON
+cmake .. -DBUILD_TESTING=ON
+make
+ctest --output-on-failure
+```
+
+### Legacy Test Option
+
+For compatibility with older scripts, you can also use:
+
+```bash
+cmake .. -DFYAML_BUILD_TESTS=ON  # Legacy alias for BUILD_TESTING
 make
 ctest --output-on-failure
 ```
@@ -168,9 +182,11 @@ This will create an HTML coverage report in `coverage-html/` that you can open i
 
 The project includes automated testing and deployment:
 
-- **CI Workflow**: Builds and tests on multiple platforms
+- **CI Workflow**: Automatically builds with tests enabled (`-DBUILD_TESTING=ON`) and tests on multiple platforms and compilers
 - **Coverage Workflow**: Generates coverage reports and uploads them as artifacts
 - **Documentation**: Automatically builds and deploys to GitHub Pages on every push to main
+
+**Note**: While tests are disabled by default for end-user builds, they are automatically enabled in all CI/CD workflows to ensure code quality and compatibility across different platforms and compilers.
 
 Coverage reports are automatically generated for pull requests and can be downloaded as artifacts from the GitHub Actions page. Documentation is automatically published at https://noaa-oar-arl.github.io/fyaml/
 

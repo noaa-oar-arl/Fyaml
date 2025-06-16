@@ -10,12 +10,12 @@ echo "Testing FYAML Spack installation..."
 if [ -z "$FYAML_ROOT" ]; then
     echo "Warning: FYAML_ROOT not set. Try 'spack load fyaml' first."
     echo "Attempting to find FYAML installation..."
-    
+
     # Try to find fyaml via spack
     if command -v spack >/dev/null 2>&1; then
         FYAML_ROOT=$(spack location -i fyaml 2>/dev/null || echo "")
     fi
-    
+
     if [ -z "$FYAML_ROOT" ]; then
         echo "Error: Cannot locate FYAML installation"
         exit 1
@@ -56,7 +56,7 @@ fi
 echo "Checking for pkg-config..."
 if [ -f "$FYAML_ROOT/lib/pkgconfig/fyaml.pc" ]; then
     echo "✓ pkg-config file found"
-    
+
     # Test pkg-config
     if PKG_CONFIG_PATH="$FYAML_ROOT/lib/pkgconfig:$PKG_CONFIG_PATH" pkg-config --exists fyaml; then
         echo "✓ pkg-config test passed"
@@ -74,34 +74,34 @@ cat > test_fyaml.f90 << 'EOF'
 program test_fyaml
     use fyaml
     implicit none
-    
+
     type(fyaml_t) :: yml
     integer :: test_int, rc
-    
+
     write(*,*) 'Testing FYAML basic functionality...'
-    
+
     ! Add a simple value
     call fyaml_add(yml, "test_key", 42, "Test integer", rc)
     if (rc /= fyaml_Success) then
         write(*,*) 'Error adding value'
         stop 1
     end if
-    
+
     ! Get the value back
     call fyaml_get(yml, "test_key", test_int, rc)
     if (rc /= fyaml_Success) then
         write(*,*) 'Error getting value'
         stop 1
     end if
-    
+
     if (test_int /= 42) then
         write(*,*) 'Error: Expected 42, got ', test_int
         stop 1
     end if
-    
+
     write(*,*) 'FYAML test passed successfully!'
     write(*,*) 'Retrieved value:', test_int
-    
+
     call fyaml_cleanup(yml)
 end program
 EOF
