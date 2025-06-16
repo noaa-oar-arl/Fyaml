@@ -4,7 +4,7 @@
 set(FYAML_TEST_DATA_DIR "${CMAKE_SOURCE_DIR}/test_data")
 
 # First create the test utilities library
-add_library(test_utils STATIC test_utils.f90)
+add_library(test_utils STATIC test_utils.F90)
 target_link_libraries(test_utils FYAML::fyaml)
 target_include_directories(test_utils PRIVATE ${CMAKE_BINARY_DIR}/include)
 target_compile_options(test_utils PRIVATE ${_fyaml_compiler_options})

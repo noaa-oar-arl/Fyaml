@@ -8,7 +8,7 @@ set(FYAML_SOURCES
     fyaml_error.f90
     fyaml_string_utils.f90
     fyaml_utils.f90
-    fyaml.f90
+    fyaml.F90
 )
 
 # Create the FYAML library

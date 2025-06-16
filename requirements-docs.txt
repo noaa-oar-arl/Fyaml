@@ -1,1 +1,19 @@
-# Documentation build requirements for FYAML# Used by Read the Docs and GitHub Actions# MkDocs and thememkdocs>=1.5.0mkdocs-material>=9.4.0# MkDocs pluginsmkdocs-git-revision-date-localized-plugin>=1.2.0mkdocs-git-committers-plugin-2>=1.2.0mkdocs-minify-plugin>=0.7.0mkdocs-redirects>=1.2.0# Doxygen integration for Fortran documentationmkdoxy>=1.2.0# Additional dependenciesmarkdown>=3.5.0pymdown-extensions>=10.3.0
+# Documentation build requirements for FYAML
+# Used by Read the Docs and GitHub Actions
+
+# MkDocs and theme
+mkdocs>=1.5.0
+mkdocs-material>=9.4.0
+
+# MkDocs plugins
+mkdocs-git-revision-date-localized-plugin>=1.2.0
+mkdocs-git-committers-plugin-2>=1.2.0
+mkdocs-minify-plugin>=0.7.0
+mkdocs-redirects>=1.2.0
+
+# Doxygen integration for Fortran documentation
+mkdoxy>=1.2.0
+
+# Additional dependencies
+markdown>=3.5.0
+pymdown-extensions>=10.3.0
