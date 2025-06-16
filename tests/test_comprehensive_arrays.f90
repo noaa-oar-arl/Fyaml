@@ -6,14 +6,13 @@ program test_comprehensive_arrays
     use test_utils
     implicit none
 
-    integer :: RC
-
     write(*, '(A)') "Starting comprehensive array tests..."
 
     call test_various_array_sizes()
     call test_edge_case_arrays()
     call test_multidimensional_like_arrays()
     call test_array_operations_comprehensive()
+    call test_array_boundary_conditions()
 
     write(*, '(A)') "Comprehensive array tests completed successfully!"
 
