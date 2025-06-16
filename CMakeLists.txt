@@ -69,4 +69,186 @@ if(FYAML_ENABLE_COVERAGE)
     else()
         message(WARNING "Code coverage only supported with GCC compiler")
     endif()
+
 endif()
+
+# First ensure we're setting platform-specific flags
+if(APPLE)
+    # Get MacOS SDK path
+    execute_process(
+        COMMAND xcrun --show-sdk-path
+        OUTPUT_VARIABLE SDKROOT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    # Add MacOS specific compiler and linker flags
+    list(APPEND _fyaml_compiler_options
+        "-L${SDKROOT}/usr/lib"
+        "-L/usr/local/lib"
+        "-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+        "-isysroot ${SDKROOT}"
+    )
+
+    # Set linker flags for macOS
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-no_compact_unwind -L${SDKROOT}/usr/lib")
+
+    # Additional system paths
+    include_directories(
+        "${SDKROOT}/usr/include"
+        "/usr/local/include"
+    )
+endif()
+
+# Add debug flags for Fortran
+if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU" AND CMAKE_BUILD_TYPE MATCHES "Debug")
+  list(
+    APPEND
+    _fyaml_compiler_options
+    -Og
+    # -Bstatic
+    -Wall
+    -Wextra
+    -pedantic
+    -fcheck=all
+    -ffpe-trap=invalid,zero,overflow
+    -fimplicit-none
+    -fbacktrace
+    -fmax-errors=0)
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel" AND CMAKE_BUILD_TYPE MATCHES "Debug")
+  list(
+    APPEND
+    _fyaml_compiler_options
+    -O0
+    -warn
+    all
+    -check
+    all
+    -implicitnone
+    -fpe0
+    -traceback
+    -error-limit
+    0
+    -diag-disable
+    6379,10448)
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "IntelLLVM" AND CMAKE_BUILD_TYPE MATCHES "Debug")
+  # Intel ifx compiler (oneAPI)
+  list(
+    APPEND
+    _fyaml_compiler_options
+    -O0
+    -warn
+    all
+    -check
+    all
+    -implicitnone
+    -fpe0
+    -traceback)
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC" AND CMAKE_BUILD_TYPE MATCHES "Debug")
+  # NVIDIA HPC SDK (nvfortran)
+  list(
+    APPEND
+    _fyaml_compiler_options
+    -O0
+    -Minform=warn
+    -Mchkptr
+    -Mchkstk
+    -traceback)
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "LFortran" AND CMAKE_BUILD_TYPE MATCHES "Debug")
+  # LFortran compiler
+  list(
+    APPEND
+    _fyaml_compiler_options
+    --show-stacktrace)
+endif()
+
+# Add release flags for better optimization
+if(CMAKE_BUILD_TYPE MATCHES "Release")
+  if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+    list(APPEND _fyaml_compiler_options -O3 -ffast-math)
+  elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
+    list(APPEND _fyaml_compiler_options -O3 -xHost)
+  elseif(CMAKE_Fortran_COMPILER_ID MATCHES "IntelLLVM")
+    list(APPEND _fyaml_compiler_options -O3 -xHost)
+  elseif(CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC")
+    list(APPEND _fyaml_compiler_options -O3 -fast)
+  endif()
+endif()
+
+# Set the Fortran standard
+set(CMAKE_Fortran_STANDARD 2003)
+set(CMAKE_Fortran_STANDARD_REQUIRED ON)
+
+# Add the source files from the src directory
+add_subdirectory(src)
+
+# Add tests if testing is enabled
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
+
+# Installation and packaging configuration
+# Set installation directories
+set(CMAKE_INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/FYAML)
+
+# Create package config files
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FYAMLConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/FYAMLConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_CONFIGDIR}
+    PATH_VARS CMAKE_INSTALL_INCLUDEDIR CMAKE_INSTALL_LIBDIR
+)
+
+# Create version file
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/FYAMLConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+# Install config files
+install(
+    FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/FYAMLConfig.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/FYAMLConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_CONFIGDIR}
+)
+
+# Export targets
+install(
+    EXPORT FYAMLTargets
+    FILE FYAMLTargets.cmake
+    NAMESPACE FYAML::
+    DESTINATION ${CMAKE_INSTALL_CONFIGDIR}
+)
+
+# Export targets for build tree
+export(
+    EXPORT FYAMLTargets
+    FILE ${CMAKE_CURRENT_BINARY_DIR}/FYAMLTargets.cmake
+    NAMESPACE FYAML::
+)
+
+# Create pkg-config file
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/fyaml.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/fyaml.pc
+    @ONLY
+)
+
+# Install pkg-config file
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/fyaml.pc
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+)
+
+# Register package in user's package registry
+export(PACKAGE FYAML)
+
+# Print installation summary
+message(STATUS "FYAML installation configuration:")
+message(STATUS "  Version: ${PROJECT_VERSION}")
+message(STATUS "  Install prefix: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "  Library directory: ${CMAKE_INSTALL_FULL_LIBDIR}")
+message(STATUS "  Include directory: ${CMAKE_INSTALL_FULL_INCLUDEDIR}")
+message(STATUS "  CMake config directory: ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/FYAML")
+

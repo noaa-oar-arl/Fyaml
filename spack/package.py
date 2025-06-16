@@ -8,10 +8,10 @@ from spack.package import *
 
 class Fyaml(CMakePackage):
     """FYAML - A comprehensive Fortran library for parsing YAML files.
-    
-    FYAML provides an easy-to-use interface for reading YAML files in Fortran 
-    applications, supporting all major YAML features including nested structures, 
-    arrays, anchors, and aliases. The library is designed for modern Fortran 
+
+    FYAML provides an easy-to-use interface for reading YAML files in Fortran
+    applications, supporting all major YAML features including nested structures,
+    arrays, anchors, and aliases. The library is designed for modern Fortran
     applications in scientific computing and HPC environments.
     """
 
@@ -64,7 +64,7 @@ class Fyaml(CMakePackage):
         fyaml_lib = find_libraries("libfyaml", root=self.prefix, shared=True, recursive=True)
         if not fyaml_lib:
             fyaml_lib = find_libraries("libfyaml", root=self.prefix, shared=False, recursive=True)
-        
+
         if not fyaml_lib:
             raise InstallError("FYAML library not found after installation")
 
@@ -73,7 +73,7 @@ class Fyaml(CMakePackage):
         if not mod_files:
             raise InstallError("FYAML Fortran module files not found after installation")
 
-    @property 
+    @property
     def headers(self):
         """Return list of header files to install."""
         return find_headers("*.mod", self.prefix.include, recursive=False)
