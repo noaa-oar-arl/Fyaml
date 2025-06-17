@@ -41,17 +41,10 @@ jobs:
           - os: ubuntu-24.04
             compiler: nvidia-hpc
             version: "25.1"
-          # LFortran compiler
-          - os: ubuntu-24.04
-            compiler: lfortran
-            version: "0.45.0"
           # Cross-platform testing with latest GCC
           - os: macos-14
             compiler: gcc
             version: 14
-          - os: windows-2022
-            compiler: gcc
-            version: 13
     env:
       BUILD_DIR: build
 

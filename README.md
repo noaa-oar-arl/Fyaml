@@ -102,20 +102,20 @@ end program
 
 FYAML is tested and verified to work with multiple Fortran compilers:
 
-| Compiler | Vendor | Versions Tested | Status |
-|----------|---------|----------------|---------|
-| **GFortran** | GNU | 11, 12, 13, 14 | ✅ Fully Supported |
-| **ifx** | Intel | 2025.0+ | ✅ Fully Supported |
-| **ifort** | Intel (Classic) | 2021.10+ | ✅ Fully Supported |
-| **nvfortran** | NVIDIA HPC SDK | 25.1+ | ✅ Fully Supported |
-| **LFortran** | LFortran | 0.45.0+ | ✅ Fully Supported |
+| Compiler | Vendor | Versions Tested | CI Status |
+|----------|---------|----------------|-----------|
+| **GFortran** | GNU | 11, 12, 13, 14 | ✅ Fully Tested |
+| **ifx** | Intel | 2025.0+ | ✅ Fully Tested |
+| **ifort** | Intel (Classic) | 2021.10+ | ✅ Fully Tested |
+| **nvfortran** | NVIDIA HPC SDK | 25.1+ | ✅ Fully Tested |
+| **LFortran** | LFortran | 0.45.0+ | ⚠️ Manual Testing |
 
 **Cross-Platform Testing:**
-- 🐧 **Linux**: Ubuntu 24.04 (primary)
-- 🍎 **macOS**: macOS 14+ (GCC)
-- 🪟 **Windows**: Windows Server 2022 (GCC)
+- 🐧 **Linux**: Ubuntu 24.04 (primary CI platform)
+- 🍎 **macOS**: macOS 14+ (GCC) - CI tested
+- 🪟 **Windows**: Windows Server 2022 (GCC) - Manual testing
 
-All compilers are automatically tested in CI with both Debug and Release configurations.
+Primary compilers (GCC, Intel, NVIDIA HPC) are automatically tested in CI with both Debug and Release configurations.
 
 ## Building and Testing
 
