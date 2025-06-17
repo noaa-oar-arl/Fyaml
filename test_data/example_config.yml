@@ -13,7 +13,7 @@ basic_config:
 data_arrays:
   # Inline array syntax
   numbers: [1, 2, 3, 4, 5]
-  fractions: [0.1, 0.2, 0.3, 0.4, 0.5]
+  fractions: [0.10, 0.20, 0.30, 0.40, 0.50]
 
   # Multi-line array syntax
   species_list:

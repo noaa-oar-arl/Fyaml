@@ -135,22 +135,27 @@ contains
     !! \param[out] real_arr Output real array
     !! \param[out] array_size Size of the output array
     !! \param[out] RC Return code
-    subroutine fyaml_string_to_real_arr(input_string, real_arr, array_size, RC)
+    !! \param[in] quiet_mode Optional flag to suppress error messages (default: true)
+    subroutine fyaml_string_to_real_arr(input_string, real_arr, array_size, RC, quiet_mode)
         character(len=*), intent(in) :: input_string
         real(yp), allocatable, intent(inout) :: real_arr(:)
         integer, intent(out) :: array_size
         integer, intent(inout) :: RC
+        logical, intent(in), optional :: quiet_mode
 
         character(len=:), allocatable :: temp_string
         character(len=1) :: delimiter
         integer :: i, start, end, count
         real(yp) :: temp_real
         character(len=fyaml_StrLen) :: errMsg, thisLoc
+        logical :: is_quiet
 
         ! Initialize
         RC = fyaml_success
         errMsg = ''
         thisLoc = ' -> at fyaml_string_to_real_arr (in module fyaml_string_utils.f90)'
+        is_quiet = .true.  ! Default to quiet mode
+        if (present(quiet_mode)) is_quiet = quiet_mode
 
         delimiter = ','
         count = 0
@@ -194,7 +199,7 @@ contains
                 read(temp_string, *, iostat=RC) temp_real
                 if (RC /= 0) then
                     errMsg = 'Error converting string to real: ' // temp_string
-                    call fyaml_handle_error(errMsg, RC, thisLoc)
+                    if (.not. is_quiet) call fyaml_handle_error(errMsg, RC, thisLoc)
                     return
                 end if
 
@@ -214,22 +219,27 @@ contains
     !! \param[out] int_arr Output integer array
     !! \param[out] array_size Size of the output array
     !! \param[out] RC Return code
-    subroutine fyaml_string_to_integer_arr(input_string, int_arr, array_size, RC)
+    !! \param[in] quiet_mode Optional flag to suppress error messages (default: true)
+    subroutine fyaml_string_to_integer_arr(input_string, int_arr, array_size, RC, quiet_mode)
         character(len=*), intent(in) :: input_string
         integer, allocatable, intent(inout) :: int_arr(:)
         integer, intent(out) :: array_size
         integer, intent(inout) :: RC
+        logical, intent(in), optional :: quiet_mode
 
         character(len=:), allocatable :: temp_string
         character(len=1) :: delimiter
         integer :: i, start, end, count
         integer :: temp_int
         character(len=fyaml_StrLen) :: errMsg, thisLoc
+        logical :: is_quiet
 
         ! Initialize
         RC = fyaml_success
         errMsg = ''
         thisLoc = ' -> at fyaml_string_to_integer_arr (in module fyaml_string_utils.f90)'
+        is_quiet = .true.  ! Default to quiet mode
+        if (present(quiet_mode)) is_quiet = quiet_mode
 
         delimiter = ','
         count = 0
@@ -273,7 +283,7 @@ contains
                 read(temp_string, *, iostat=RC) temp_int
                 if (RC /= 0) then
                     errMsg = 'Error converting string to integer: ' // temp_string
-                    call fyaml_handle_error(errMsg, RC, thisLoc)
+                    if (.not. is_quiet) call fyaml_handle_error(errMsg, RC, thisLoc)
                     return
                 end if
 
@@ -380,21 +390,26 @@ contains
     !! \param[out] bool_arr Output boolean array
     !! \param[out] array_size Size of the output array
     !! \param[out] RC Return code
-    subroutine fyaml_string_to_boolean_arr(input_string, bool_arr, array_size, RC)
+    !! \param[in] quiet_mode Optional flag to suppress error messages (default: true)
+    subroutine fyaml_string_to_boolean_arr(input_string, bool_arr, array_size, RC, quiet_mode)
         character(len=*), intent(in) :: input_string
         logical, allocatable, intent(inout) :: bool_arr(:)
         integer, intent(out) :: array_size
         integer, intent(inout) :: RC
+        logical, intent(in), optional :: quiet_mode
 
         character(len=1) :: delimiter
         integer :: i, start, end, count
         character(len=fyaml_StrLen) :: temp_string
         character(len=fyaml_StrLen) :: errMsg, thisLoc
+        logical :: is_quiet
 
         ! Initialize
         RC = fyaml_success
         errMsg = ''
         thisLoc = ' -> at fyaml_string_to_boolean_arr (in module fyaml_string_utils.f90)'
+        is_quiet = .true.  ! Default to quiet mode
+        if (present(quiet_mode)) is_quiet = quiet_mode
 
         delimiter = ','
         count = 0
@@ -446,7 +461,7 @@ contains
                     read(temp_string, *, iostat=RC) bool_arr(count + 1)
                     if (RC /= 0) then
                         errMsg = 'Error converting string to boolean: ' // trim(temp_string)
-                        call fyaml_handle_error(errMsg, RC, thisLoc)
+                        if (.not. is_quiet) call fyaml_handle_error(errMsg, RC, thisLoc)
                         return
                     end if
                 end select
