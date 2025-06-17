@@ -145,5 +145,5 @@ See the [Contributing](../developer/contributing.md) guide for more information 
 
 For more details, see the generated API documentation for the parser modules:
 
-- [FYAML Parser Module](../fyaml/namespacefyaml__parser.md)
 - [Parser Types and Constants](../api/types.md)
+- [Core FYAML Module](../fyaml/namespacefyaml.md)

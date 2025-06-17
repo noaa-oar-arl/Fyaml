@@ -58,6 +58,8 @@ markdown_extensions:
       smart_enable: all
   - pymdownx.caret
   - pymdownx.details
+  # Note: pymdownx.emoji removed due to compatibility issues with pymdownx-extensions >=10.3
+  # Emoji support is not critical for technical documentation
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
@@ -174,7 +176,6 @@ nav:
       - Files Index: 'fyaml/files.md'
       - FYAML Core: 'fyaml/namespacefyaml.md'
       - FYAML Types: 'fyaml/namespacefyaml__types.md'
-      - FYAML Parser: 'fyaml/namespacefyaml__parser.md'
       - FYAML Utils: 'fyaml/namespacefyaml__utils.md'
       - String Utils: 'fyaml/namespacefyaml__string__utils.md'
       - Error Module: 'fyaml/namespacefyaml__error.md'

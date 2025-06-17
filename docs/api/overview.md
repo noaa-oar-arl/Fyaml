@@ -190,7 +190,6 @@ The following pages are automatically generated from source code comments using 
 - **[Files Index](../fyaml/files.md)** - Source file documentation
 - **[FYAML Core](../fyaml/namespacefyaml.md)** - Main fyaml module
 - **[FYAML Types](../fyaml/namespacefyaml__types.md)** - Type definitions
-- **[FYAML Parser](../fyaml/namespacefyaml__parser.md)** - Parser implementation
 - **[FYAML Utils](../fyaml/namespacefyaml__utils.md)** - Utility functions
 - **[String Utils](../fyaml/namespacefyaml__string__utils.md)** - String processing
 - **[Error Module](../fyaml/namespacefyaml__error.md)** - Error handling
