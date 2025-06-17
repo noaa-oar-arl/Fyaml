@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Thanks for your question! Before asking, please check:
-        - [Documentation](https://fyaml.readthedocs.io/)
+        - [Documentation](https://noaa-oar-arl.github.io/fyaml/)
         - [Existing issues](https://github.com/fyaml/fyaml/issues)
         - [Examples directory](https://github.com/fyaml/fyaml/tree/main/examples)
 
