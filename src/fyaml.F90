@@ -1,1357 +1,1779 @@
-!> A modern Fortran module for parsing YAML files
+!> \file fyaml.f90
+!! \brief Main public interface for FYAML library
 !!
-!! This module provides functionality to read and parse YAML files into Fortran
-!! data structures. It supports nested dictionaries, sequences, and various data types.
+!! This module provides the main public interface for the FYAML library,
+!! exposing all the functionality needed by users while maintaining
+!! a clean and organized API.
 !!
-!! Example:
-!! ```fortran
-!! type(fyaml_doc) :: doc
-!! call doc%load("config.yaml")
-!! value = doc%get("config%nested%key")
-!! ```
-!!
-!! @note Supports strings, integers, reals, booleans, nulls, and sequences
-!! @version 1.0.0
-!! @see yaml_parser
-!! @see yaml_types
+!! \author FYAML Development Team
+!! \date 2025
+!! \version 1.0
+
 module fyaml
-    use yaml_parser, only: yaml_node, check_sequence_node, parse_yaml, debug_print, DEBUG_INFO  ! Add DEBUG_INFO to imports
-    use yaml_types
-    use, intrinsic :: iso_fortran_env, only: error_unit
+    ! Import all required modules
+    use fyaml_precision, only: yp
+    use fyaml_constants
+    use fyaml_types, only: fyaml_t, fyaml_var_t
+    use fyaml_error, only: fyaml_handle_error
+    use fyaml_string_utils
+    use fyaml_utils
+
     implicit none
-
     private
-    public :: fyaml_doc, yaml_value, yaml_dict, yaml_pair, error_unit
-    public :: split_key, count_children, get_child_keys, get_root_keys  ! Add count_children, get_child_keys, and get_root_keys to public list
 
-    ! Add interface declaration for nested value getters
-    interface get_nested_value
-        module procedure get_value_nested
-        module procedure get_doc_nested
-    end interface
+    ! Re-export precision
+    public :: yp
 
-    ! Add interface declaration for safe_allocate_string
-    interface
-        subroutine safe_allocate_string(str, length, status)
-            character(len=:), allocatable, intent(out) :: str
-            integer, intent(in) :: length
-            integer, intent(out) :: status
-        end subroutine safe_allocate_string
-    end interface
+    ! Re-export constants
+    public :: fyaml_Success, fyaml_Failure
+    public :: fyaml_MaxArr, fyaml_MaxStack, fyaml_NamLen, fyaml_StrLen
+    public :: fyaml_num_types, fyaml_integer_type, fyaml_real_type
+    public :: fyaml_string_type, fyaml_bool_type, fyaml_unknown_type
 
-    ! Add new interface declaration for count_children
-    interface count_children
-        module procedure count_node_children
-        module procedure count_value_children
-    end interface
+    ! Re-export types
+    public :: fyaml_t
 
-    ! Add interface for get_child_keys
-    interface get_child_keys
-        module procedure get_node_child_keys
-        module procedure get_value_child_keys
-    end interface
+    ! High-level interface procedures
+    public :: fyaml_init, fyaml_species_init, fyaml_emis_init
+    public :: fyaml_merge, fyaml_cleanup, fyaml_print
+    public :: fyaml_check, fyaml_get_size, fyaml_get_type
+    public :: fyaml_find_depth, fyaml_find_next_higher, fyaml_split_category
 
-    ! Add private declarations here
-    private :: get_doc_nested
-    private :: get_nested_str
-    private :: get_nested_int
-    private :: get_nested_real
-    private :: get_nested_bool  ! Add boolean getter
-    private :: get_value_nested
-    private :: find_child_by_key
-    private :: check_sequence_impl ! New private implementation
-    private :: safe_allocate_string
-    private :: determine_value_type ! New private subroutine
-    private :: get_sequence_values  ! Add private declaration
-    private :: get_sequence_integers ! Add private declaration
-    private :: get_sequence_reals    ! Add private declaration
-    private :: get_sequence_bools    ! Add private declaration
-    private :: get_sequence_size  ! Add to private declarations
+    ! YAML parsing functions (from utils module)
+    public :: fyaml_parse_file, fyaml_parse_line, fyaml_parse_species_file
+    public :: fyaml_get_var_index, fyaml_sort_variables
 
-    !> Value container type supporting multiple YAML data types
-    !!
-    !! Wraps a yaml_node pointer and provides type-safe access methods
-    type :: yaml_value
-        type(yaml_node), pointer :: node => null()  !< Direct reference to yaml_parser node
-    contains
-        procedure :: get => get_value_nested     !< Get value using dot notation path (rename to avoid conflict)
-        procedure :: get_str => get_string_value    !< Get string value
-        procedure :: get_int => get_integer_value   !< Get integer value
-        procedure :: get_real => get_real_value     !< Get real value
-        procedure :: get_bool => get_boolean_value  !< Get boolean value
-        procedure :: is_null => check_null          !< Check if value is null
-        procedure :: is_sequence => check_sequence_impl  !< Check if value is sequence
-        procedure :: child_keys => get_value_child_keys  ! Add method to type
-        procedure :: child_at => get_child_at_index  ! Add new method
-        procedure :: get_sequence => get_sequence_values       ! String sequence (default)
-        procedure :: get_sequence_int => get_sequence_integers ! Integer sequence
-        procedure :: get_sequence_real => get_sequence_reals   ! Real sequence
-        procedure :: get_sequence_bool => get_sequence_bools   ! Boolean sequence
-        procedure :: size => get_sequence_size  ! Add size method
-    end type yaml_value
+    ! Configuration management functions
+    public :: fyaml_merge_configs, fyaml_print_config
 
-    !> Dictionary key-value pair type
-    !!
-    !! Represents a single key-value entry in a YAML dictionary
-    type :: yaml_pair
-        character(len=:), allocatable :: key     !< Dictionary key
-        type(yaml_value) :: value               !< Value container
-        type(yaml_dict), pointer :: nested => null() !< Nested dictionary
-        type(yaml_pair), pointer :: next => null()   !< Next pair in linked list
-        integer :: indent_level = 0              !< Indentation level (0 for root)
-    end type yaml_pair
+    ! Species parsing interface (overloaded)
+    interface fyaml_parse_species_file
+        module procedure fyaml_parse_species_file_full
+        module procedure fyaml_parse_species_file_simple
+    end interface fyaml_parse_species_file
 
-    !> Dictionary container type
-    !!
-    !! Manages a collection of key-value pairs in a linked list structure
-    type :: yaml_dict
-        type(yaml_pair), pointer :: first => null() !< First key-value pair
-        integer :: count = 0                        !< Number of entries
-    contains
-        procedure :: get => get_value    !< Get value by key
-        procedure :: set => set_value    !< Set value for key
-        procedure :: keys => get_keys    !< Get all keys
-    end type yaml_dict
+    ! Legacy interface for backwards compatibility
+    public :: fyaml_read_file
 
-    !> Main document type for YAML parsing
-    !!
-    !! Represents a complete YAML document with support for multiple documents
-    type :: fyaml_doc
-        type(yaml_dict), allocatable :: docs(:)  !< Array of documents
-        integer :: n_docs = 0                    !< Number of documents
-    contains
-        procedure :: load => load_yaml_doc       !< Load YAML from file
-        procedure :: get => get_doc_nested       !< Get nested value using % delimiter
-        procedure :: get_str => get_nested_str   !< Get string value using % path
-        procedure :: get_int => get_nested_int   !< Get integer value using % path
-        procedure :: get_real => get_nested_real !< Get real value using % path
-        procedure :: get_bool => get_nested_bool !< Get boolean value using % path
-        procedure :: get_doc => get_document     !< Get specific document
-        procedure :: get_default_doc => get_default_doc !< Get value from default document (first document)
-        procedure :: root_keys => get_root_keys !< Get all root level keys
-    end type fyaml_doc
+    ! Variable access interfaces
+    public :: fyaml_add, fyaml_get, fyaml_add_get, fyaml_update
+
+    ! Internal functions used by fyaml_utils (required for linking)
+    public :: fyaml_add_variable_to_store, fyaml_prepare_store_var
+
+    ! String utility functions
+    public :: fyaml_string_to_real_arr, fyaml_string_to_integer_arr
+    public :: fyaml_string_to_string_arr, fyaml_string_to_boolean_arr
+    public :: fyaml_first_char_pos, fyaml_trim_comment
+
+    ! Generic interfaces for type-safe variable operations
+    interface fyaml_add
+        module procedure add_real, add_real_array
+        module procedure add_int, add_int_array
+        module procedure add_string, add_string_array
+        module procedure add_bool, add_bool_array
+    end interface fyaml_add
+
+    interface fyaml_get
+        module procedure get_real, get_real_array
+        module procedure get_int, get_int_array
+        module procedure get_bool, get_bool_array
+        module procedure get_string, get_string_array
+    end interface fyaml_get
+
+    interface fyaml_add_get
+        module procedure add_get_real, add_get_real_array
+        module procedure add_get_int, add_get_int_array
+        module procedure add_get_bool, add_get_bool_array
+        module procedure add_get_string, add_get_string_array
+    end interface fyaml_add_get
+
+    interface fyaml_update
+        module procedure update_real, update_real_array
+        module procedure update_int, update_int_array
+        module procedure update_bool, update_bool_array
+        module procedure update_string, update_string_array
+    end interface fyaml_update
 
 contains
-    !> Load YAML document from file
+
+    !> \brief Initialize FYAML from a file
     !!
-    !! @param[in,out] this     The document instance
-    !! @param[in]     filename Path to YAML file
-    !! @param[out]    success  Optional success indicator
-    subroutine load_yaml_doc(this, filename, success)
-        class(fyaml_doc), intent(inout) :: this
-        character(len=*), intent(in) :: filename
-        logical, intent(out), optional :: success
-        type(yaml_document), allocatable :: parsed_docs(:)
-        logical :: ok, file_exists
-        integer :: rc, ios, i
-        integer :: unit_num
-        character(len=1024) :: buffer
+    !! \param[in] fileName Name of YAML file to read
+    !! \param[inout] yml Main configuration object
+    !! \param[inout] yml_anchored Anchored variables object (optional)
+    !! \param[out] RC Return code
+    subroutine fyaml_init(fileName, yml, yml_anchored, RC)
+        character(len=*), intent(in)    :: fileName
+        type(fyaml_t),   intent(inout) :: yml
+        type(fyaml_t),   intent(inout), optional :: yml_anchored
+        integer,          intent(out)   :: RC
 
-        ok = .false.
+        type(fyaml_t) :: yml_anchored_local
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
 
-        ! Clean up any existing documents
-        if (allocated(this%docs)) deallocate(this%docs)
-        this%n_docs = 0
+        ! Initialize
+        RC = fyaml_success
+        errMsg = ''
+        thisLoc = ' -> at fyaml_init (in module fyaml.f90)'
 
-        ! Check if file exists first
-        inquire(file=filename, exist=file_exists)
-        if (.not. file_exists) then
-            write(error_unit,*) 'YAML file not found:', trim(filename)
-            if (present(success)) success = .false.
+        ! Use provided anchored object or local one
+        if (present(yml_anchored)) then
+            call fyaml_parse_file(fileName, yml, yml_anchored, RC)
+        else
+            call fyaml_parse_file(fileName, yml, yml_anchored_local, RC)
+        end if
+
+        ! Handle errors
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in fyaml_parse_file!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
             return
-        endif
+        end if
 
-        ! Open file with error checking
-        open(newunit=unit_num, file=filename, status='old', action='read', iostat=ios, iomsg=buffer)
-        if (ios /= 0) then
-            write(error_unit,*) 'Error opening file:', trim(filename), ' - ', trim(buffer)
-            if (present(success)) success = .false.
+        ! Sort the variable names for faster search
+        call fyaml_sort_variables(yml)
+
+    end subroutine fyaml_init
+
+    !> \brief Initialize FYAML species configuration
+    !!
+    !! \param[in] fileName Name of YAML file to read
+    !! \param[inout] yml Main configuration object
+    !! \param[inout] yml_anchored Anchored variables object
+    !! \param[inout] species_names Array of species names
+    !! \param[out] RC Return code
+    subroutine fyaml_species_init(fileName, yml, yml_anchored, species_names, RC)
+        character(len=*), intent(in)    :: fileName
+        type(fyaml_t),   intent(inout) :: yml
+        type(fyaml_t),   intent(inout) :: yml_anchored
+        character(len=*), allocatable, intent(inout) :: species_names(:)
+        integer,          intent(out)   :: RC
+
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        errMsg = ''
+        thisLoc = ' -> at fyaml_species_init (in module fyaml.f90)'
+
+        ! Parse species file
+        call fyaml_parse_species_file_full(fileName, yml, yml_anchored, species_names, RC)
+
+        ! Handle errors
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in fyaml_parse_species_file!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
             return
-        endif
+        end if
 
-        ! Test read first line to verify file is readable
-        read(unit_num, '(A)', iostat=ios, end=100) buffer
-        if (ios /= 0) then
-            write(error_unit,*) 'Error reading file:', trim(filename)
-            if (present(success)) success = .false.
-            close(unit_num)
+    end subroutine fyaml_species_init
+
+    !> \brief Initialize FYAML emissions configuration
+    !!
+    !! \param[in] fileName Name of YAML file to read
+    !! \param[inout] yml Main configuration object
+    !! \param[inout] yml_anchored Anchored variables object
+    !! \param[inout] EmisState Emissions state object
+    !! \param[out] RC Return code
+    subroutine fyaml_emis_init(fileName, yml, yml_anchored, EmisState, RC)
+        character(len=*), intent(in)    :: fileName
+        type(fyaml_t),   intent(inout) :: yml
+        type(fyaml_t),   intent(inout) :: yml_anchored
+        class(*),         intent(inout) :: EmisState
+        integer,          intent(out)   :: RC
+
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        errMsg = ''
+        thisLoc = ' -> at fyaml_emis_init (in module fyaml.f90)'
+
+        ! Parse emissions file (using standard YAML parser)
+        call fyaml_parse_file(fileName, yml, yml_anchored, RC)
+
+        ! Handle errors
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in fyaml_parse_file!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
             return
-        endif
-        rewind(unit_num)
+        end if
 
-        ! Parse YAML with error handling
-        call parse_yaml(filename, parsed_docs, rc)
-        close(unit_num)
+    end subroutine fyaml_emis_init
 
-        if (rc /= 0) then
-            write(error_unit,*) 'Error parsing YAML:', trim(filename)
-            if (present(success)) success = .false.
-            return
-        endif
+    !> \brief Merge two FYAML configurations
+    !!
+    !! \param[in] yml1 First configuration
+    !! \param[in] yml2 Second configuration
+    !! \param[out] yml Merged configuration
+    !! \param[out] RC Return code
+    subroutine fyaml_merge(yml1, yml2, yml, RC)
+        type(fyaml_t), intent(in)  :: yml1, yml2
+        type(fyaml_t), intent(out) :: yml
+        integer,       intent(out) :: RC
 
-        if (.not. allocated(parsed_docs)) then
-            write(error_unit,*) 'No documents parsed from file:', trim(filename)
-            if (present(success)) success = .false.
-            return
-        endif
+        call fyaml_merge_configs(yml1, yml2, yml, RC)
 
-        ! Store number of documents and allocate docs array
-        this%n_docs = size(parsed_docs)
-        allocate(this%docs(this%n_docs), stat=ios)
-        if (ios /= 0) then
-            write(error_unit,*) 'Error allocating document array'
-            if (present(success)) success = .false.
-            if (allocated(parsed_docs)) deallocate(parsed_docs)
-            return
-        endif
+    end subroutine fyaml_merge
 
-        ! Convert each document with error checking
-        do i = 1, this%n_docs
-            if (associated(parsed_docs(i)%root)) then
-                call convert_node_to_dict(parsed_docs(i)%root, this%docs(i))
-                ok = .true.
-            else
-                write(error_unit,*) 'Warning: Document', i, 'has no root node'
-            endif
+    !> \brief Print FYAML configuration
+    !!
+    !! \param[inout] yml Configuration object
+    !! \param[out] RC Return code
+    !! \param[in] fileName Optional output file name
+    !! \param[in] searchKeys Optional search keys
+    subroutine fyaml_print(yml, RC, fileName, searchKeys)
+        type(fyaml_t),   intent(inout) :: yml
+        integer,          intent(out)   :: RC
+        character(len=*), optional, intent(in) :: fileName
+        character(len=*), optional, intent(in) :: searchKeys(:)
+
+        call fyaml_print_config(yml, fileName, searchKeys, RC)
+
+    end subroutine fyaml_print
+
+    !> \brief Check if variable exists
+    !!
+    !! \param[in] yml Configuration object
+    !! \param[in] var_name Variable name
+    !! \param[out] exists Whether variable exists
+    subroutine fyaml_check(yml, var_name, exists)
+        type(fyaml_t), intent(in) :: yml
+        character(len=*), intent(in) :: var_name
+        logical, intent(out) :: exists
+
+        integer :: ix
+        call fyaml_get_var_index(yml, var_name, ix)
+        exists = (ix > 0)
+
+    end subroutine fyaml_check
+
+    !> \brief Get size of array variable
+    !!
+    !! \param[in] yml Configuration object
+    !! \param[in] var_name Variable name
+    !! \param[out] var_size Size of variable
+    !! \param[out] RC Return code
+    subroutine fyaml_get_size(yml, var_name, var_size, RC)
+        type(fyaml_t), intent(in) :: yml
+        character(len=*), intent(in) :: var_name
+        integer, intent(out) :: var_size
+        integer, intent(out) :: RC
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        var_size = 0
+        errMsg = ''
+        thisLoc = ' -> at fyaml_get_size (in module fyaml.f90)'
+
+        call fyaml_get_var_index(yml, var_name, ix)
+        if (ix > 0) then
+            var_size = yml%vars(ix)%var_size
+        else
+            errMsg = 'Variable not found: ' // trim(var_name)
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+        end if
+
+    end subroutine fyaml_get_size
+
+    !> \brief Get type of variable
+    !!
+    !! \param[in] yml Configuration object
+    !! \param[in] var_name Variable name
+    !! \param[out] var_type Type of variable
+    !! \param[out] RC Return code
+    subroutine fyaml_get_type(yml, var_name, var_type, RC)
+        type(fyaml_t), intent(in) :: yml
+        character(len=*), intent(in) :: var_name
+        integer, intent(out) :: var_type
+        integer, intent(out) :: RC
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        var_type = fyaml_unknown_type
+        errMsg = ''
+        thisLoc = ' -> at fyaml_get_type (in module fyaml.f90)'
+
+        call fyaml_get_var_index(yml, var_name, ix)
+        if (ix > 0) then
+            var_type = yml%vars(ix)%var_type
+        else
+            errMsg = 'Variable not found: ' // trim(var_name)
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+        end if
+
+    end subroutine fyaml_get_type
+
+    !> \brief Find depth of variable in hierarchy
+    !!
+    !! \param[in] var_name Variable name
+    !! \param[out] depth Depth level
+    subroutine fyaml_find_depth(var_name, depth)
+        character(len=*), intent(in) :: var_name
+        integer, intent(out) :: depth
+
+        integer :: i, sep_count
+
+        sep_count = 0
+        do i = 1, len_trim(var_name)
+            if (var_name(i:i) == fyaml_category_separator) then
+                sep_count = sep_count + 1
+            end if
         end do
+        depth = sep_count
 
-        if (allocated(parsed_docs)) deallocate(parsed_docs)
-        if (present(success)) success = ok
-        return
+    end subroutine fyaml_find_depth
 
-100     continue
-        ! Handle empty file
-        write(error_unit,*) 'Empty or invalid YAML file:', trim(filename)
-        if (present(success)) success = .false.
-        close(unit_num)
-        return
-    end subroutine load_yaml_doc
-
-    !> Convert a yaml_node to yaml_value
+    !> \brief Find next higher level variable
     !!
-    !! @param[in] node Source YAML node
-    !! @return Value container wrapping the node
-    function node_to_value(node) result(val)
-        type(yaml_node), pointer, intent(in) :: node
-        type(yaml_value) :: val
+    !! \param[in] var_name Variable name
+    !! \param[out] parent_name Parent variable name
+    subroutine fyaml_find_next_higher(var_name, parent_name)
+        character(len=*), intent(in) :: var_name
+        character(len=*), intent(out) :: parent_name
 
-        if (.not. associated(node)) then
-            val%node => null()
-            return
-        endif
+        integer :: last_sep
 
-        val%node => node
-    end function
-
-    !> Get string value from yaml_value
-    !!
-    !! @param[in] self Value container instance
-    !! @return String value or empty string if invalid
-    function get_string_value(self) result(str_val)
-        class(yaml_value), intent(inout) :: self  ! Changed from intent(in) to intent(inout)
-        character(len=:), allocatable :: str_val
-        logical :: was_string
-
-        if (.not. associated(self%node)) then
-            str_val = ''
-            write(error_unit,*) "DEBUG: Node not associated for string value"
-            return
-        endif
-
-        ! Store if it was already marked as string
-        was_string = self%node%is_string
-
-        ! Force type determination if not already done
-        call determine_value_type(self%node)
-
-        ! If it wasn't originally a string but became one, or was one already
-        if (self%node%is_string .or. was_string) then
-            str_val = trim(self%node%value)
-            write(error_unit,*) "DEBUG: Retrieved string value:", trim(str_val)
+        last_sep = index(var_name, fyaml_category_separator, back=.true.)
+        if (last_sep > 0) then
+            parent_name = var_name(1:last_sep-1)
         else
-            str_val = ''
-            write(error_unit,*) "DEBUG: Node is not a string type. Type flags:", &
-                              " is_string=", self%node%is_string, &
-                              " is_integer=", self%node%is_integer, &
-                              " is_float=", self%node%is_float, &
-                              " is_boolean=", self%node%is_boolean
-        endif
-    end function
+            parent_name = ""
+        end if
 
-    !> Get integer value from yaml_value
+    end subroutine fyaml_find_next_higher
+
+    !> \brief Split category from variable name
     !!
-    !! @param[in] self Value container instance
-    !! @return Integer value or 0 if invalid
-    function get_integer_value(self) result(int_val)
-        class(yaml_value), intent(inout) :: self  ! Changed from intent(in) to intent(inout)
-        integer :: int_val
-        integer :: ios
+    !! \param[in] full_name Full variable name with category
+    !! \param[out] category Category part
+    !! \param[out] var_name Variable name part
+    subroutine fyaml_split_category(full_name, category, var_name)
+        character(len=*), intent(in) :: full_name
+        character(len=*), intent(out) :: category
+        character(len=*), intent(out) :: var_name
 
-        int_val = 0
-        if (.not. associated(self%node)) then
-            write(error_unit,*) "DEBUG: Node not associated for integer value"
+        integer :: last_sep
+
+        last_sep = index(full_name, fyaml_category_separator, back=.true.)
+        if (last_sep > 0) then
+            category = full_name(1:last_sep-1)
+            var_name = full_name(last_sep+1:)
+        else
+            category = ""
+            var_name = full_name
+        end if
+
+    end subroutine fyaml_split_category
+
+    ! Implementation stubs for variable operations
+    ! These would need to be implemented with proper type checking and data handling
+
+    !> \brief Add a real scalar variable
+    subroutine add_real(yml, var_name, real_data, comment, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        real(yp), intent(in) :: real_data
+        character(len=*), intent(in) :: comment
+        integer, intent(out) :: RC
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        errMsg = ''
+        thisLoc = '-> at add_real (in module fyaml.f90)'
+
+        call fyaml_prepare_store_var(yml, var_name, fyaml_real_type, 1, comment, ix, RC)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_prepare_store_var"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
             return
         endif
 
-        ! Force type determination if not already done
-        if (.not. self%node%is_integer) then
-            call determine_value_type(self%node)
+        if (yml%vars(ix)%stored_data /= unstored_data_string) then
+            call fyaml_read_variable(yml%vars(ix), RC)
+            if (RC /= fyaml_Success) then
+                errMsg = 'Error encountered in "fyaml_read_variable"!'
+                call fyaml_handle_error(errMsg, RC, thisLoc)
+                return
+            endif
+        else
+            yml%vars(ix)%real_data(1) = real_data
+        endif
+    end subroutine add_real
+
+    !> \brief Add a real array variable
+    subroutine add_real_array(yml, var_name, real_data, comment, RC, dynamic_size)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        real(yp), intent(in) :: real_data(:)
+        character(len=*), intent(in) :: comment
+        integer, intent(out) :: RC
+        logical, optional, intent(in) :: dynamic_size
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        errMsg = ''
+        thisLoc = '-> at add_real_array (in module fyaml.f90)'
+
+        call fyaml_prepare_store_var(yml, var_name, fyaml_real_type, size(real_data), &
+                                    comment, ix, RC, dynamic_size)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_prepare_store_var"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
         endif
 
-        if (self%node%is_integer) then
-            read(self%node%value, *, iostat=ios) int_val
-            if (ios /= 0) then
-                write(error_unit,*) "DEBUG: Failed to convert value to integer:", trim(self%node%value)
-                int_val = 0
+        if (yml%vars(ix)%stored_data /= unstored_data_string) then
+            call fyaml_read_variable(yml%vars(ix), RC)
+            if (RC /= fyaml_Success) then
+                errMsg = 'Error encountered in "fyaml_read_variable"!'
+                call fyaml_handle_error(errMsg, RC, thisLoc)
+                return
+            endif
+        else
+            yml%vars(ix)%real_data = real_data
+        endif
+    end subroutine add_real_array
+
+    !> \brief Add an integer scalar variable
+    subroutine add_int(yml, var_name, int_data, comment, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        integer, intent(in) :: int_data
+        character(len=*), intent(in) :: comment
+        integer, intent(out) :: RC
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        errMsg = ''
+        thisLoc = '-> at add_int (in module fyaml.f90)'
+
+        call fyaml_prepare_store_var(yml, var_name, fyaml_integer_type, 1, comment, ix, RC)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_prepare_store_var"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+        endif
+
+        if (yml%vars(ix)%stored_data /= unstored_data_string) then
+            call fyaml_read_variable(yml%vars(ix), RC)
+            if (RC /= fyaml_Success) then
+                errMsg = 'Error encountered in "fyaml_read_variable"!'
+                call fyaml_handle_error(errMsg, RC, thisLoc)
+                return
+            endif
+        else
+            yml%vars(ix)%int_data(1) = int_data
+        endif
+    end subroutine add_int
+
+    !> \brief Add an integer array variable
+    subroutine add_int_array(yml, var_name, int_data, comment, RC, dynamic_size)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        integer, intent(in) :: int_data(:)
+        character(len=*), intent(in) :: comment
+        integer, intent(out) :: RC
+        logical, optional, intent(in) :: dynamic_size
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        errMsg = ''
+        thisLoc = '-> at add_int_array (in module fyaml.f90)'
+
+        call fyaml_prepare_store_var(yml, var_name, fyaml_integer_type, size(int_data), &
+                                    comment, ix, RC, dynamic_size)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_prepare_store_var"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+        endif
+
+        if (yml%vars(ix)%stored_data /= unstored_data_string) then
+            call fyaml_read_variable(yml%vars(ix), RC)
+            if (RC /= fyaml_Success) then
+                errMsg = 'Error encountered in "fyaml_read_variable"!'
+                call fyaml_handle_error(errMsg, RC, thisLoc)
+                return
+            endif
+        else
+            yml%vars(ix)%int_data = int_data
+        endif
+    end subroutine add_int_array
+
+    !> \brief Add a string variable
+    subroutine add_string(yml, var_name, string_data, comment, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        character(len=*), intent(in) :: string_data
+        character(len=*), intent(in) :: comment
+        integer, intent(out) :: RC
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        errMsg = ''
+        thisLoc = '-> at add_string (in module fyaml.f90)'
+
+        call fyaml_prepare_store_var(yml, var_name, fyaml_string_type, 1, comment, ix, RC)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_prepare_store_var"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+        endif
+
+        if (yml%vars(ix)%stored_data /= unstored_data_string) then
+            call fyaml_read_variable(yml%vars(ix), RC)
+            if (RC /= fyaml_Success) then
+                errMsg = 'Error encountered in "fyaml_read_variable"!'
+                call fyaml_handle_error(errMsg, RC, thisLoc)
+                return
+            endif
+        else
+            yml%vars(ix)%char_data(1) = string_data
+        endif
+    end subroutine add_string
+
+    !> \brief Add a string array variable
+    subroutine add_string_array(yml, var_name, string_data, comment, RC, dynamic_size)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        character(len=*), intent(in) :: string_data(:)
+        character(len=*), intent(in) :: comment
+        integer, intent(out) :: RC
+        logical, optional, intent(in) :: dynamic_size
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        errMsg = ''
+        thisLoc = '-> at add_string_array (in module fyaml.f90)'
+
+        call fyaml_prepare_store_var(yml, var_name, fyaml_string_type, size(string_data), &
+                                    comment, ix, RC, dynamic_size)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_prepare_store_var"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+        endif
+
+        if (yml%vars(ix)%stored_data /= unstored_data_string) then
+            call fyaml_read_variable(yml%vars(ix), RC)
+            if (RC /= fyaml_Success) then
+                errMsg = 'Error encountered in "fyaml_read_variable"!'
+                call fyaml_handle_error(errMsg, RC, thisLoc)
+                return
+            endif
+        else
+            yml%vars(ix)%char_data = string_data
+        endif
+    end subroutine add_string_array
+
+    !> \brief Add a boolean variable
+    subroutine add_bool(yml, var_name, bool_data, comment, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        logical, intent(in) :: bool_data
+        character(len=*), intent(in) :: comment
+        integer, intent(out) :: RC
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        errMsg = ''
+        thisLoc = '-> at add_bool (in module fyaml.f90)'
+
+        call fyaml_prepare_store_var(yml, var_name, fyaml_bool_type, 1, comment, ix, RC)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_prepare_store_var"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+        endif
+
+        if (yml%vars(ix)%stored_data /= unstored_data_string) then
+            call fyaml_read_variable(yml%vars(ix), RC)
+            if (RC /= fyaml_Success) then
+                errMsg = 'Error encountered in "fyaml_read_variable"!'
+                call fyaml_handle_error(errMsg, RC, thisLoc)
+                return
+            endif
+        else
+            yml%vars(ix)%bool_data(1) = bool_data
+        endif
+    end subroutine add_bool
+
+    !> \brief Add a boolean array variable
+    subroutine add_bool_array(yml, var_name, bool_data, comment, RC, dynamic_size)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        logical, intent(in) :: bool_data(:)
+        character(len=*), intent(in) :: comment
+        integer, intent(out) :: RC
+        logical, optional, intent(in) :: dynamic_size
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        errMsg = ''
+        thisLoc = '-> at add_bool_array (in module fyaml.f90)'
+
+        call fyaml_prepare_store_var(yml, var_name, fyaml_bool_type, size(bool_data), &
+                                    comment, ix, RC, dynamic_size)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_prepare_store_var"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+        endif
+
+        if (yml%vars(ix)%stored_data /= unstored_data_string) then
+            call fyaml_read_variable(yml%vars(ix), RC)
+            if (RC /= fyaml_Success) then
+                errMsg = 'Error encountered in "fyaml_read_variable"!'
+                call fyaml_handle_error(errMsg, RC, thisLoc)
+                return
+            endif
+        else
+            yml%vars(ix)%bool_data = bool_data
+        endif
+    end subroutine add_bool_array
+
+    ! Complete implementations for get operations
+    subroutine get_real(yml, var_name, real_data, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        real(yp), intent(out) :: real_data
+        integer, intent(out) :: RC
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        real_data = 0.0_yp
+        errMsg = ''
+        thisLoc = ' -> at get_real (in module fyaml.f90)'
+
+        call fyaml_prepare_get_var(yml, var_name, fyaml_real_type, 1, ix, RC)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_prepare_get_var"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+        endif
+
+        real_data = yml%vars(ix)%real_data(1)
+    end subroutine get_real
+
+    subroutine get_real_array(yml, var_name, real_data, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        real(yp), intent(out) :: real_data(:)
+        integer, intent(out) :: RC
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        real_data = 0.0_yp
+        errMsg = ''
+        thisLoc = ' -> at get_real_array (in module fyaml.f90)'
+
+        call fyaml_prepare_get_var(yml, var_name, fyaml_real_type, size(real_data), ix, RC)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_prepare_get_var"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+        endif
+
+        real_data(1:yml%vars(ix)%var_size) = yml%vars(ix)%real_data(1:yml%vars(ix)%var_size)
+    end subroutine get_real_array
+
+    subroutine get_int(yml, var_name, int_data, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        integer, intent(out) :: int_data
+        integer, intent(out) :: RC
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        int_data = 0
+        errMsg = ''
+        thisLoc = ' -> at get_int (in module fyaml.f90)'
+
+        call fyaml_prepare_get_var(yml, var_name, fyaml_integer_type, 1, ix, RC)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_prepare_get_var"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+        endif
+
+        int_data = yml%vars(ix)%int_data(1)
+    end subroutine get_int
+
+    subroutine get_int_array(yml, var_name, int_data, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        integer, intent(out) :: int_data(:)
+        integer, intent(out) :: RC
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        int_data = 0
+        errMsg = ''
+        thisLoc = ' -> at get_int_array (in module fyaml.f90)'
+
+        call fyaml_prepare_get_var(yml, var_name, fyaml_integer_type, size(int_data), ix, RC)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_prepare_get_var"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+        endif
+
+        int_data(1:yml%vars(ix)%var_size) = yml%vars(ix)%int_data(1:yml%vars(ix)%var_size)
+    end subroutine get_int_array
+
+    subroutine get_string(yml, var_name, string_data, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        character(len=*), intent(out) :: string_data
+        integer, intent(out) :: RC
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        string_data = ""
+        errMsg = ''
+        thisLoc = ' -> at get_string (in module fyaml.f90)'
+
+        call fyaml_prepare_get_var(yml, var_name, fyaml_string_type, 1, ix, RC)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_prepare_get_var"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+        endif
+
+        string_data = yml%vars(ix)%char_data(1)
+    end subroutine get_string
+
+    subroutine get_string_array(yml, var_name, string_data, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        character(len=*), intent(out) :: string_data(:)
+        integer, intent(out) :: RC
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        string_data = ""
+        errMsg = ''
+        thisLoc = ' -> at get_string_array (in module fyaml.f90)'
+
+        call fyaml_prepare_get_var(yml, var_name, fyaml_string_type, size(string_data), ix, RC)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_prepare_get_var"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+        endif
+
+        string_data(1:yml%vars(ix)%var_size) = yml%vars(ix)%char_data(1:yml%vars(ix)%var_size)
+    end subroutine get_string_array
+
+    subroutine get_bool(yml, var_name, bool_data, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        logical, intent(out) :: bool_data
+        integer, intent(out) :: RC
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        bool_data = .false.
+        errMsg = ''
+        thisLoc = ' -> at get_bool (in module fyaml.f90)'
+
+        call fyaml_prepare_get_var(yml, var_name, fyaml_bool_type, 1, ix, RC)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_prepare_get_var"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+        endif
+
+        bool_data = yml%vars(ix)%bool_data(1)
+    end subroutine get_bool
+
+    subroutine get_bool_array(yml, var_name, bool_data, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        logical, intent(out) :: bool_data(:)
+        integer, intent(out) :: RC
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        bool_data = .false.
+        errMsg = ''
+        thisLoc = ' -> at get_bool_array (in module fyaml.f90)'
+
+        call fyaml_prepare_get_var(yml, var_name, fyaml_bool_type, size(bool_data), ix, RC)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_prepare_get_var"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+        endif
+
+        bool_data(1:yml%vars(ix)%var_size) = yml%vars(ix)%bool_data(1:yml%vars(ix)%var_size)
+    end subroutine get_bool_array
+
+    ! Complete implementations for add_get operations
+    subroutine add_get_real(yml, var_name, real_data, default_val, comment, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        real(yp), intent(inout) :: real_data
+        real(yp), intent(in) :: default_val
+        character(len=*), intent(in) :: comment
+        integer, intent(out) :: RC
+
+        integer :: ix
+
+        ! Try to get the variable first
+        call fyaml_get_var_index(yml, var_name, ix)
+
+        if (ix > 0) then
+            ! Variable exists, get its value
+            call get_real(yml, var_name, real_data, RC)
+        else
+            ! Variable doesn't exist, add it with default value
+            real_data = default_val
+            call add_real(yml, var_name, real_data, comment, RC)
+        endif
+    end subroutine add_get_real
+
+    subroutine add_get_real_array(yml, var_name, real_data, comment, RC, dynamic_size)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        real(yp), intent(inout) :: real_data(:)
+        character(len=*), intent(in) :: comment
+        integer, intent(out) :: RC
+        logical, optional, intent(in) :: dynamic_size
+
+        integer :: ix
+
+        ! Try to get the variable first
+        call fyaml_get_var_index(yml, var_name, ix)
+
+        if (ix > 0) then
+            ! Variable exists, get its value
+            call get_real_array(yml, var_name, real_data, RC)
+        else
+            ! Variable doesn't exist, add it with current array values
+            call add_real_array(yml, var_name, real_data, comment, RC, dynamic_size)
+        endif
+    end subroutine add_get_real_array
+
+    subroutine add_get_int(yml, var_name, int_data, default_val, comment, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        integer, intent(inout) :: int_data
+        integer, intent(in) :: default_val
+        character(len=*), intent(in) :: comment
+        integer, intent(out) :: RC
+
+        integer :: ix
+
+        ! Try to get the variable first
+        call fyaml_get_var_index(yml, var_name, ix)
+
+        if (ix > 0) then
+            ! Variable exists, get its value
+            call get_int(yml, var_name, int_data, RC)
+        else
+            ! Variable doesn't exist, add it with default value
+            int_data = default_val
+            call add_int(yml, var_name, int_data, comment, RC)
+        endif
+    end subroutine add_get_int
+
+    subroutine add_get_int_array(yml, var_name, int_data, comment, RC, dynamic_size)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        integer, intent(inout) :: int_data(:)
+        character(len=*), intent(in) :: comment
+        integer, intent(out) :: RC
+        logical, optional, intent(in) :: dynamic_size
+
+        integer :: ix
+
+        ! Try to get the variable first
+        call fyaml_get_var_index(yml, var_name, ix)
+
+        if (ix > 0) then
+            ! Variable exists, get its value
+            call get_int_array(yml, var_name, int_data, RC)
+        else
+            ! Variable doesn't exist, add it with current array values
+            call add_int_array(yml, var_name, int_data, comment, RC, dynamic_size)
+        endif
+    end subroutine add_get_int_array
+
+    subroutine add_get_string(yml, var_name, string_data, default_val, comment, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        character(len=*), intent(inout) :: string_data
+        character(len=*), intent(in) :: default_val
+        character(len=*), intent(in) :: comment
+        integer, intent(out) :: RC
+
+        integer :: ix
+
+        ! Try to get the variable first
+        call fyaml_get_var_index(yml, var_name, ix)
+
+        if (ix > 0) then
+            ! Variable exists, get its value
+            call get_string(yml, var_name, string_data, RC)
+        else
+            ! Variable doesn't exist, add it with default value
+            string_data = default_val
+            call add_string(yml, var_name, string_data, comment, RC)
+        endif
+    end subroutine add_get_string
+
+    subroutine add_get_string_array(yml, var_name, string_data, comment, RC, dynamic_size)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        character(len=*), intent(inout) :: string_data(:)
+        character(len=*), intent(in) :: comment
+        integer, intent(out) :: RC
+        logical, optional, intent(in) :: dynamic_size
+
+        integer :: ix
+
+        ! Try to get the variable first
+        call fyaml_get_var_index(yml, var_name, ix)
+
+        if (ix > 0) then
+            ! Variable exists, get its value
+            call get_string_array(yml, var_name, string_data, RC)
+        else
+            ! Variable doesn't exist, add it with current array values
+            call add_string_array(yml, var_name, string_data, comment, RC, dynamic_size)
+        endif
+    end subroutine add_get_string_array
+
+    subroutine add_get_bool(yml, var_name, bool_data, default_val, comment, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        logical, intent(inout) :: bool_data
+        logical, intent(in) :: default_val
+        character(len=*), intent(in) :: comment
+        integer, intent(out) :: RC
+
+        integer :: ix
+
+        ! Try to get the variable first
+        call fyaml_get_var_index(yml, var_name, ix)
+
+        if (ix > 0) then
+            ! Variable exists, get its value
+            call get_bool(yml, var_name, bool_data, RC)
+        else
+            ! Variable doesn't exist, add it with default value
+            bool_data = default_val
+            call add_bool(yml, var_name, bool_data, comment, RC)
+        endif
+    end subroutine add_get_bool
+
+    subroutine add_get_bool_array(yml, var_name, bool_data, comment, RC, dynamic_size)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        logical, intent(inout) :: bool_data(:)
+        character(len=*), intent(in) :: comment
+        integer, intent(out) :: RC
+        logical, optional, intent(in) :: dynamic_size
+
+        integer :: ix
+
+        ! Try to get the variable first
+        call fyaml_get_var_index(yml, var_name, ix)
+
+        if (ix > 0) then
+            ! Variable exists, get its value
+            call get_bool_array(yml, var_name, bool_data, RC)
+        else
+            ! Variable doesn't exist, add it with current array values
+            call add_bool_array(yml, var_name, bool_data, comment, RC, dynamic_size)
+        endif
+    end subroutine add_get_bool_array
+
+    ! Complete implementations for update operations
+    subroutine update_real(yml, var_name, real_data)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        real(yp), intent(inout) :: real_data
+
+        integer :: ix
+
+        call fyaml_get_var_index(yml, var_name, ix)
+        if (ix > 0) then
+            yml%vars(ix)%real_data(1) = real_data
+            real_data = yml%vars(ix)%real_data(1)
+        endif
+    end subroutine update_real
+
+    subroutine update_real_array(yml, var_name, real_data)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        real(yp), intent(inout) :: real_data(:)
+
+        integer :: ix
+
+        call fyaml_get_var_index(yml, var_name, ix)
+        if (ix > 0) then
+            yml%vars(ix)%real_data = real_data
+            real_data = yml%vars(ix)%real_data
+        endif
+    end subroutine update_real_array
+
+    subroutine update_int(yml, var_name, int_data)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        integer, intent(inout) :: int_data
+
+        integer :: ix
+
+        call fyaml_get_var_index(yml, var_name, ix)
+        if (ix > 0) then
+            yml%vars(ix)%int_data(1) = int_data
+            int_data = yml%vars(ix)%int_data(1)
+        endif
+    end subroutine update_int
+
+    subroutine update_int_array(yml, var_name, int_data)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        integer, intent(inout) :: int_data(:)
+
+        integer :: ix
+
+        call fyaml_get_var_index(yml, var_name, ix)
+        if (ix > 0) then
+            yml%vars(ix)%int_data = int_data
+            int_data = yml%vars(ix)%int_data
+        endif
+    end subroutine update_int_array
+
+    subroutine update_string(yml, var_name, string_data)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        character(len=*), intent(inout) :: string_data
+
+        integer :: ix
+
+        call fyaml_get_var_index(yml, var_name, ix)
+        if (ix > 0) then
+            yml%vars(ix)%char_data(1) = string_data
+            string_data = yml%vars(ix)%char_data(1)
+        endif
+    end subroutine update_string
+
+    subroutine update_string_array(yml, var_name, string_data)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        character(len=*), intent(inout) :: string_data(:)
+
+        integer :: ix
+
+        call fyaml_get_var_index(yml, var_name, ix)
+        if (ix > 0) then
+            yml%vars(ix)%char_data = string_data
+            string_data = yml%vars(ix)%char_data
+        endif
+    end subroutine update_string_array
+
+    subroutine update_bool(yml, var_name, bool_data)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        logical, intent(inout) :: bool_data
+
+        integer :: ix
+
+        call fyaml_get_var_index(yml, var_name, ix)
+        if (ix > 0) then
+            yml%vars(ix)%bool_data(1) = bool_data
+            bool_data = yml%vars(ix)%bool_data(1)
+        endif
+    end subroutine update_bool
+
+    subroutine update_bool_array(yml, var_name, bool_data)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        logical, intent(inout) :: bool_data(:)
+
+        integer :: ix
+
+        call fyaml_get_var_index(yml, var_name, ix)
+        if (ix > 0) then
+            yml%vars(ix)%bool_data = bool_data
+            bool_data = yml%vars(ix)%bool_data
+        endif
+    end subroutine update_bool_array
+
+    !=================================================================================
+    !========================== PRIVATE HELPER FUNCTIONS =============================
+    !=================================================================================
+
+    !> \brief Prepare variable storage
+    !!
+    !! Helper routine to prepare variable storage in the configuration object
+    !!
+    !! \param[inout] yml Configuration object
+    !! \param[in] var_name Variable name
+    !! \param[in] var_type Variable type
+    !! \param[in] var_size Variable size
+    !! \param[in] description Variable description
+    !! \param[out] ix Variable index
+    !! \param[out] RC Return code
+    !! \param[in] dynamic_size Optional flag for dynamic sizing
+    subroutine fyaml_prepare_store_var(yml, var_name, var_type, var_size, description, ix, RC, dynamic_size)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        integer, intent(in) :: var_type
+        integer, intent(in) :: var_size
+        character(len=*), intent(in) :: description
+        integer, intent(out) :: ix
+        integer, intent(out) :: RC
+        logical, optional, intent(in) :: dynamic_size
+
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_Success
+        errMsg = ''
+        thisLoc = ' -> at fyaml_prepare_store_var (in module fyaml.f90)'
+
+        ! Check if variable already exists
+        call fyaml_get_var_index(yml, var_name, ix)
+
+        if (ix == -1) then ! Create a new variable
+            call fyaml_ensure_free_storage(yml)
+            yml%sorted = .false.
+            ix = yml%num_vars + 1
+            yml%num_vars = yml%num_vars + 1
+            yml%vars(ix)%used = .false.
+            yml%vars(ix)%stored_data = unstored_data_string
+        else
+            ! Only allowed when the variable is not yet created
+            if (yml%vars(ix)%var_type /= fyaml_unknown_type) then
+                errMsg = "Variable " // trim(var_name) // " already exists"
+                call fyaml_handle_error(errMsg, RC, thisLoc)
+                return
+            endif
+        endif
+
+        yml%vars(ix)%var_name = var_name
+        yml%vars(ix)%description = description
+        yml%vars(ix)%var_type = var_type
+        yml%vars(ix)%var_size = var_size
+
+        if (present(dynamic_size)) then
+            yml%vars(ix)%dynamic_size = dynamic_size
+        else
+            yml%vars(ix)%dynamic_size = .false.
+        endif
+
+        select case (var_type)
+        case (fyaml_INTEGER_type)
+            allocate(yml%vars(ix)%int_data(var_size))
+        case (fyaml_real_type)
+            allocate(yml%vars(ix)%real_data(var_size))
+        case (fyaml_string_type)
+            allocate(yml%vars(ix)%char_data(var_size))
+        case (fyaml_bool_type)
+            allocate(yml%vars(ix)%bool_data(var_size))
+        end select
+
+    end subroutine fyaml_prepare_store_var
+
+    !> \brief Prepare variable for getting data
+    !!
+    !! Helper routine to prepare variable for data retrieval
+    !!
+    !! \param[inout] yml Configuration object
+    !! \param[in] var_name Variable name
+    !! \param[in] var_type Expected variable type
+    !! \param[in] var_size Expected variable size
+    !! \param[out] ix Variable index
+    !! \param[out] RC Return code
+    subroutine fyaml_prepare_get_var(yml, var_name, var_type, var_size, ix, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: var_name
+        integer, intent(in) :: var_type
+        integer, intent(in) :: var_size
+        integer, intent(out) :: ix
+        integer, intent(out) :: RC
+
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        errMsg = ""
+        thisLoc = " -> at fyaml_prepare_get_var (in module fyaml.f90)"
+
+        ! Get the variable index from the name
+        call fyaml_get_var_index(yml, var_name, ix)
+
+        if (ix == fyaml_Failure) then
+            ! Couldn't find variable, exit with error
+            errMsg = "fyaml_get: variable " // trim(var_name) // " not found!"
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+
+        else if (yml%vars(ix)%var_type /= var_type) then
+            ! Variable is different type than expected: exit with error
+            write(errMsg, "(a)") &
+                 "Variable " // trim(var_name) // " has different type (" // &
+                 trim(fyaml_type_names(yml%vars(ix)%var_type)) // &
+                 ") than requested (" // &
+                 trim(fyaml_type_names(var_type)) // ")"
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+
+        else if (var_size < yml%vars(ix)%var_size) then
+            ! Variable has different size than requested: exit w/ error
+            write(errMsg, "(a,i0,a,i0,a)") &
+                 "Variable " // trim(var_name) // " has different size (", &
+                 yml%vars(ix)%var_size, ") than requested (", var_size, ")"
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+
+        else
+            ! All good, variable will be used
+            yml%vars(ix)%used = .true.
+        endif
+
+    end subroutine fyaml_prepare_get_var
+
+    !> \brief Ensure free storage is available
+    !!
+    !! Ensures that enough storage is allocated for the configuration type.
+    !! If not, the new size will be twice as much as the current size.
+    !!
+    !! \param[inout] yml Configuration object
+    subroutine fyaml_ensure_free_storage(yml)
+        type(fyaml_t), intent(inout) :: yml
+
+        type(fyaml_var_t), allocatable :: yml_copy(:)
+        integer :: cur_size, new_size
+        integer, parameter :: min_dyn_size = 100
+
+        if (allocated(yml%vars)) then
+            cur_size = size(yml%vars)
+
+            if (cur_size < yml%num_vars + 1) then
+                new_size = 2 * cur_size
+                allocate(yml_copy(cur_size))
+                yml_copy = yml%vars
+                deallocate(yml%vars)
+                allocate(yml%vars(new_size))
+                yml%vars(1:cur_size) = yml_copy
+                deallocate(yml_copy)
+            endif
+        else
+            allocate(yml%vars(min_dyn_size))
+        endif
+
+    end subroutine fyaml_ensure_free_storage
+
+    !> \brief Read variable from stored data
+    !!
+    !! Reads variable data from stored string representation
+    !!
+    !! \param[inout] var Variable to read
+    !! \param[out] RC Return code
+    subroutine fyaml_read_variable(var, RC)
+        type(fyaml_var_t), intent(inout) :: var
+        integer, intent(out) :: RC
+
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        errMsg = ''
+        thisLoc = ' -> at fyaml_read_variable (in module fyaml.f90)'
+
+        ! Process based on variable type
+        select case (var%var_type)
+        case (fyaml_real_type)
+            if (var%var_size == 1) then
+                read(var%stored_data, *, iostat=RC) var%real_data(1)
             else
-                write(error_unit,*) "DEBUG: Successfully converted to integer:", int_val
-            endif
-        else
-            write(error_unit,*) "DEBUG: Node is not an integer type. Value:", trim(self%node%value)
-        endif
-    end function
-
-    !> Get real value from yaml_value
-    !!
-    !! @param[in] self Value container instance
-    !! @return Real value or 0.0 if invalid
-    function get_real_value(self) result(real_val)
-        class(yaml_value), intent(inout) :: self
-        real :: real_val
-
-        real_val = 0.0
-        if (associated(self%node) .and. self%node%is_float) then
-            read(self%node%value, *) real_val
-        endif
-    end function
-
-    !> Get boolean value from yaml_value
-    !!
-    !! @param[in] self Value container instance
-    !! @return Boolean value or false if invalid
-    function get_boolean_value(self) result(bool_val)
-        class(yaml_value), intent(inout) :: self
-        logical :: bool_val
-
-        bool_val = .false.
-        if (associated(self%node) .and. self%node%is_boolean) then
-            bool_val = (trim(self%node%value) == 'true')
-        endif
-    end function
-
-    !> Check if value is null
-    !!
-    !! @param[in] self Value container instance
-    !! @return True if value is null
-    function check_null(self) result(is_null)
-        class(yaml_value), intent(in) :: self
-        logical :: is_null
-
-        is_null = .not. associated(self%node) .or. self%node%is_null
-    end function
-
-    !> Check if value is a sequence
-    !!
-    !! @param[in] self Value container instance
-    !! @return True if value is a sequence
-    function check_sequence_impl(self) result(is_seq)
-        class(yaml_value), intent(in) :: self
-        logical :: is_seq
-
-        is_seq = .false.
-        if (associated(self%node)) then
-            is_seq = check_sequence_node(self%node)
-        endif
-    end function check_sequence_impl
-
-    !> Print yaml_node children keys
-    !!
-    !! @param[in] node Node to print
-    !! @param[in] prefix Optional indentation prefix
-    subroutine print_node_children(node, prefix)
-        type(yaml_node), pointer, intent(in) :: node
-        character(len=*), intent(in), optional :: prefix
-        type(yaml_node), pointer :: current
-        character(len=:), allocatable :: indent
-
-        if (.not. associated(node)) then
-            write(error_unit,*) "No node to print children"
-            return
-        endif
-
-        indent = ""
-        if (present(prefix)) indent = prefix
-
-        write(error_unit,*) trim(indent)//"Node key:", trim(node%key)
-        write(error_unit,*) trim(indent)//"Node value:", trim(node%value)
-        write(error_unit,*) trim(indent)//"Has children:", associated(node%children)
-
-        if (associated(node%children)) then
-            write(error_unit,*) trim(indent)//"Children:"
-            current => node%children
-            do while (associated(current))
-                write(error_unit,*) trim(indent)//"  -", trim(current%key), &
-                                  " (value:", trim(current%value), ")", &
-                                  " has_children:", associated(current%children)
-                current => current%next
-            end do
-        endif
-    end subroutine print_node_children
-
-    !> Convert YAML node structure to dictionary
-    !!
-    !! @param[in] node Source node to convert
-    !! @param[inout] dict Target dictionary
-    recursive subroutine convert_node_to_dict(node, dict)
-        type(yaml_node), pointer, intent(in) :: node
-        type(yaml_dict), intent(inout) :: dict
-        type(yaml_pair), pointer :: new_pair, last_pair, root_pair, current_node
-        type(yaml_node), pointer :: current
-        character(len=256) :: debug_msg
-        logical :: is_root_level
-        integer :: alloc_stat
-
-        if (.not. associated(node)) then
-            write(error_unit,*) "WARNING: Empty node passed to convert_node_to_dict"
-            return
-        endif
-
-        current => node
-        nullify(last_pair)
-        nullify(root_pair)
-
-        do while (associated(current))
-            ! Check if this is a root-level node (no parent)
-            is_root_level = (.not. associated(current%parent))
-            if (is_root_level) then
-                current%is_root = .true.  ! Changed from is_root_key to is_root
+                call fyaml_string_to_real_arr(var%stored_data, var%real_data, var%var_size, RC)
             endif
 
-            ! Fix the format specifier to match the arguments
-            write(debug_msg, '(A,A,A,I0,A,L1,A,I0)') "Converting node: ", &
-                                             trim(current%value), &
-                                             " at line ", current%line_num, &
-                                             " root: ", is_root_level, &
-                                             " indent: ", current%indent
+        case (fyaml_integer_type)
+            if (var%var_size == 1) then
+                read(var%stored_data, *, iostat=RC) var%int_data(1)
+            else
+                call fyaml_string_to_integer_arr(var%stored_data, var%int_data, var%var_size, RC)
+            endif
 
-            call debug_print(DEBUG_INFO, debug_msg)
+        case (fyaml_string_type)
+            if (var%var_size == 1) then
+                var%char_data(1) = trim(var%stored_data)
+            else
+                call fyaml_string_to_string_arr(var%stored_data, var%char_data, var%var_size, RC)
+            endif
 
-            ! Create new pair
-            allocate(new_pair, stat=alloc_stat)
-            if (alloc_stat /= 0) then
-                write(error_unit,*) "ERROR: Failed to allocate new pair"
+        case (fyaml_bool_type)
+            if (var%var_size == 1) then
+                read(var%stored_data, *, iostat=RC) var%bool_data(1)
+            else
+                call fyaml_string_to_boolean_arr(var%stored_data, var%bool_data, var%var_size, RC)
+            endif
+
+        case default
+            RC = fyaml_failure
+        end select
+
+        if (RC /= fyaml_success) then
+            errMsg = 'Error reading variable data from: ' // trim(var%stored_data)
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+        endif
+
+    end subroutine fyaml_read_variable
+
+    !> \brief Simple YAML file parser
+    !!
+    !! \param[in] fileName Name of YAML file to read
+    !! \param[inout] yml Main configuration object
+    !> \brief Bridge function for utils module to add variables during parsing
+    !!
+    !! This function is called by the fyaml_utils module during parsing to
+    !! add variables to the configuration object.
+    !!
+    !! \param[inout] yml Configuration object
+    !! \param[in] append Whether to append to existing variable
+    !! \param[in] set_by How the variable was set
+    !! \param[in] line_arg Input line containing the value
+    !! \param[in] anchor_ptr_arg Anchor pointer if any
+    !! \param[in] anchor_tgt_arg Anchor target if any
+    !! \param[in] category_arg Category name
+    !! \param[in] var_name_arg Variable name
+    !! \param[out] RC Return code
+    subroutine fyaml_add_variable_to_store(yml, append, set_by, line_arg, anchor_ptr_arg, &
+                                          anchor_tgt_arg, category_arg, var_name_arg, RC)
+        type(fyaml_t), intent(inout) :: yml
+        logical, intent(in) :: append
+        integer, intent(in) :: set_by
+        character(len=*), intent(in) :: line_arg, anchor_ptr_arg, anchor_tgt_arg
+        character(len=*), intent(in) :: category_arg, var_name_arg
+        integer, intent(out) :: RC
+
+        integer :: ix
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+
+        ! Initialize
+        RC = fyaml_success
+        errMsg = ''
+        thisLoc = ' -> at fyaml_add_variable_to_store (in module fyaml.f90)'
+
+        ! Find variable corresponding to name in file
+        call fyaml_get_var_index(yml, var_name_arg, ix)
+
+        if (ix <= 0) then
+            ! Variable is not already present in the yml object
+            ! Prepare to store the data as a string
+            call fyaml_prepare_store_var(yml, trim(var_name_arg), fyaml_unknown_type, &
+                                        1, "Not yet created", ix, RC, .false.)
+
+            if (RC /= fyaml_Success) then
+                errMsg = 'Error encountered in "fyaml_prepare_store_var"!'
+                call fyaml_handle_error(errMsg, RC, thisLoc)
                 return
             endif
 
-            ! Initialize new pair
-            new_pair%key = trim(adjustl(current%key))
-            nullify(new_pair%next)
-            new_pair%value%node => current
-            new_pair%indent_level = current%indent  ! Changed from indent_level to indent
-
-            ! Handle nested structures
-            if (associated(current%children)) then
-                write(debug_msg, '(A,A,A,L1,A,I0)') "Creating nested dictionary for: ", &
-                                             trim(current%key), &
-                                             " (root level: ", is_root_level, &
-                                             " indent: ", current%indent  ! Changed from indent_level to indent
-
-                call debug_print(DEBUG_INFO, debug_msg)
-
-                ! Create nested dictionary
-                allocate(new_pair%nested, stat=alloc_stat)
-                if (alloc_stat /= 0) then
-                    write(error_unit,*) "ERROR: Failed to allocate nested dictionary"
-                    deallocate(new_pair)
-                    return
-                endif
-
-                ! Initialize nested dictionary
-                new_pair%nested%first => null()
-                new_pair%nested%count = 0
-
-                ! Convert children
-                call convert_node_to_dict(current%children, new_pair%nested)
-            endif
-
-            ! Link into dictionary based on root level status
-            if (is_root_level) then
-                ! For root-level nodes, start new chain
-                if (.not. associated(dict%first)) then
-                    dict%first => new_pair
-                    root_pair => new_pair
-                else
-                    ! Link at root level
-                    if (associated(root_pair)) then
-                        root_pair%next => new_pair
-                        root_pair => new_pair
-                    else
-                        ! Find end of root chain
-                        root_pair => dict%first
-                        do while (associated(root_pair%next))
-                            root_pair => root_pair%next
-                        end do
-                        root_pair%next => new_pair
-                        root_pair => new_pair
-                    endif
-                endif
-                write(debug_msg, '(A,A)') "Added root level node: ", trim(new_pair%key)
-                call debug_print(DEBUG_INFO, debug_msg)
+            ! Store the value of the mapping in the "stored_data" field
+            yml%vars(ix)%stored_data = trim(line_arg)
+        else
+            ! Variable is already present in the yml object
+            if (append) then
+                ! Append data to data that is already present
+                yml%vars(ix)%stored_data = trim(yml%vars(ix)%stored_data) // trim(line_arg)
             else
-                ! For non-root nodes, maintain existing hierarchy
-                if (.not. associated(last_pair)) then
-                    ! Find correct parent based on hierarchy
-                    if (associated(current%parent)) then
-                        ! Follow parent's hierarchy
-                        last_pair => dict%first
-                        do while (associated(last_pair))
-                            if (associated(last_pair%value%node, current%parent)) then
-                                if (.not. associated(last_pair%nested)) then
-                                    allocate(last_pair%nested)
-                                    last_pair%nested%first => new_pair
-                                else
-                                    ! Find end of nested chain
-                                    current_node => last_pair%nested%first
-                                    if (associated(current_node)) then
-                                        do while (associated(current_node%next))
-                                            current_node => current_node%next
-                                        end do
-                                        current_node%next => new_pair
-                                    else
-                                        last_pair%nested%first => new_pair
-                                    endif
-                                endif
-                                exit
-                            endif
-                            last_pair => last_pair%next
-                        end do
-                    endif
-                else
-                    last_pair%next => new_pair
-                endif
+                ! Or store overwrite existing data
+                yml%vars(ix)%stored_data = line_arg
             endif
 
-            ! Update tracking for next iteration
-            if (.not. is_root_level) then
-                last_pair => new_pair
-            endif
-            dict%count = dict%count + 1
-
-            ! Move to next node
-            current => current%next
-        end do
-
-    end subroutine convert_node_to_dict
-
-    !> Set value for a given key in dictionary
-    !!
-    !! @param[in,out] this  The dictionary instance
-    !! @param[in]     key   Key to set
-    !! @param[in]     value Value to associate with key
-    subroutine set_value(this, key, value)
-        class(yaml_dict), intent(inout) :: this
-        character(len=*), intent(in) :: key
-        type(yaml_value), intent(in) :: value
-        type(yaml_pair), pointer :: current, new_pair
-
-        ! Check if key exists
-        current => this%first
-        do while (associated(current))
-            if (current%key == key) then
-                ! Update existing value
-                current%value = value
-                return
-            endif
-            current => current%next
-        end do
-
-        ! Key doesn't exist, create new pair
-        allocate(new_pair)
-        new_pair%key = key
-        new_pair%value = value
-
-        ! Add to beginning of list
-        new_pair%next => this%first
-        this%first => new_pair
-        this%count = this%count + 1
-    end subroutine set_value
-
-    !> Get value associated with key from dictionary
-    !!
-    !! @param[in] this Dictionary instance
-    !! @param[in] key Key to lookup
-    !! @return Value associated with key
-    function get_value(this, key) result(val)
-        class(yaml_dict), intent(inout) :: this  ! Changed from intent(in) to intent(inout)
-        character(len=*), intent(in) :: key
-        type(yaml_value) :: val
-        type(yaml_pair), pointer :: current
-        character(len=:), allocatable, dimension(:) :: key_parts
-        character(len=:), allocatable :: remaining_path
-        integer :: i, path_start
-
-        write(error_unit,*) "DEBUG: Dictionary get_value for key:", trim(key)
-        val%node => null()
-
-        ! Split key into parts
-        key_parts = split_key(key)
-        write(error_unit,*) "DEBUG: Looking for key part:", trim(key_parts(1))
-
-        ! Start with first level search
-        current => this%first
-        do while (associated(current))
-            write(error_unit,*) "DEBUG: Checking pair with key:", trim(current%key), &
-                              " against target:", trim(key_parts(1))
-
-            ! Do exact string comparison after trimming and adjusting
-            if (trim(adjustl(current%key)) == trim(adjustl(key_parts(1)))) then
-                write(error_unit,*) "DEBUG: Found first level match for:", trim(key_parts(1))
-
-                if (size(key_parts) == 1) then
-                    ! Direct match at this level
-                    val%node => current%value%node
-                    ! Ensure type is determined for direct matches
-                    call determine_value_type(val%node)
-                    write(error_unit,*) "DEBUG: Found direct match at first level"
-                    write(error_unit,*) "DEBUG: Node has children:", associated(val%node%children)
-                    write(error_unit,*) "DEBUG: Node value:", trim(val%node%value)
-                    write(error_unit,*) "DEBUG: Is integer:", val%node%is_integer
-                    return
-                else
-                    ! For nested access
-                    val%node => current%value%node
-                    write(error_unit,*) "DEBUG: Node children status:", associated(val%node%children)
-
-                    if (.not. associated(val%node%children)) then
-                        write(error_unit,*) "DEBUG: No children available for nested access"
-                        val%node => null()
-                    else
-                        ! Get remaining path
-                        path_start = len_trim(key_parts(1)) + 2
-                        remaining_path = trim(key(path_start:))
-                        write(error_unit,*) "DEBUG: Continuing with nested path:", trim(remaining_path)
-                        val = val%get(remaining_path)
-                    endif
+            ! If type is known, read in values
+            if (yml%vars(ix)%var_type /= fyaml_unknown_type) then
+                call fyaml_read_variable(yml%vars(ix), RC)
+                if (RC /= fyaml_Success) then
+                    errMsg = 'Error encountered in "fyaml_read_variable"!'
+                    call fyaml_handle_error(errMsg, RC, thisLoc)
                     return
                 endif
             endif
-
-            write(error_unit,*) "DEBUG: Moving to next pair"
-            current => current%next
-        end do
-
-        write(error_unit,*) "DEBUG: Key not found in dictionary:", trim(key_parts(1))
-        val%node => null()
-    end function get_value
-
-    !> Get all keys in dictionary
-    !!
-    !! @param[in]  this Dictionary instance
-    !! @return     Array of all keys
-    function get_keys(this) result(keys)
-        class(yaml_dict), intent(in) :: this
-        character(len=:), allocatable, dimension(:) :: keys
-        type(yaml_pair), pointer :: current
-        integer :: i
-
-        if (this%count > 0) then
-            allocate(character(len=32) :: keys(this%count))
-            keys = ""
-            current => this%first
-            i = 1
-            do while (associated(current))
-                keys(i) = current%key
-                i = i + 1
-                current => current%next
-            end do
-        else
-            allocate(character(len=0) :: keys(0))
         endif
-    end function get_keys
 
-    !> Get nested value for yaml_value type
+        ! Store other fields of this variable
+        yml%vars(ix)%anchor_tgt = anchor_tgt_arg
+        yml%vars(ix)%anchor_ptr = anchor_ptr_arg
+        yml%vars(ix)%category = category_arg
+        yml%vars(ix)%set_by = set_by
+
+    end subroutine fyaml_add_variable_to_store
+
+    !> \brief Parse a species YAML file and extract species names (full interface)
     !!
-    !! @param[in] self Value container instance
-    !! @param[in] key Nested key path with % delimiters
-    !! @return Value at nested path
-    recursive function get_value_nested(self, key) result(val)
-        class(yaml_value), intent(inout) :: self
-        character(len=*), intent(in) :: key
-        type(yaml_value) :: val, temp_val
-        character(len=:), allocatable, dimension(:) :: key_parts
-        character(len=:), allocatable :: remaining_path
-        type(yaml_node), pointer :: current
-        integer :: i
+    !! \param[in] fileName Name of YAML file to read
+    !! \param[inout] yml Main configuration object
+    !! \param[inout] yml_anchored Anchored variables object
+    !! \param[inout] species_names Array of species names to be allocated and filled
+    !! \param[out] RC Return code
+    subroutine fyaml_parse_species_file_full(fileName, yml, yml_anchored, species_names, RC)
+        character(len=*), intent(in) :: fileName
+        type(fyaml_t), intent(inout) :: yml
+        type(fyaml_t), intent(inout) :: yml_anchored
+        character(len=*), allocatable, intent(inout) :: species_names(:)
+        integer, intent(out) :: RC
 
-        write(error_unit,*) "DEBUG: Starting get_value_nested for key:", trim(key)
-        val%node => null()
+        character(len=fyaml_NamLen) :: current
+        integer :: i, n
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
 
-        if (.not. associated(self%node)) then
-            write(error_unit,*) "DEBUG: Initial node is not associated"
+        ! Initialize
+        RC = fyaml_success
+        errMsg = ''
+        thisLoc = ' -> at fyaml_parse_species_file (in module fyaml.f90)'
+
+        ! First parse the file using standard parser
+        call fyaml_parse_file(fileName, yml, yml_anchored, RC)
+        if (RC /= fyaml_Success) then
+            errMsg = 'Error encountered in "fyaml_parse_file"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
             return
         endif
 
-        ! Split key into parts
-        key_parts = split_key(key)
-        write(error_unit,*) "DEBUG: Looking for first key part:", trim(key_parts(1))
-
-        ! Handle direct children mode for better traversal
-        current => self%node
-        if (associated(current%children)) then
-            current => current%children
-        else
-            write(error_unit,*) "DEBUG: Node has no children"
-            return
-        endif
-
-        ! Search through children at this level
-        do while (associated(current))
-            write(error_unit,*) "DEBUG: Checking node key:", trim(current%key), &
-                               " against target:", trim(key_parts(1))
-
-            if (trim(adjustl(current%key)) == trim(adjustl(key_parts(1)))) then
-                write(error_unit,*) "DEBUG: Found match for:", trim(key_parts(1))
-
-                if (size(key_parts) == 1) then
-                    ! Found final target
-                    val%node => current
-                    call determine_value_type(val%node)
-                    write(error_unit,*) "DEBUG: Final target found with value:", trim(val%node%value)
-                    return
-                else
-                    ! Need to traverse deeper
-                    temp_val%node => current
-                    write(error_unit,*) "DEBUG: Going deeper with node:", trim(current%key)
-
-                    ! Build remaining path
-                    remaining_path = ""
-                    do i = 2, size(key_parts)
-                        if (i > 2) remaining_path = trim(remaining_path) // "%"
-                        remaining_path = trim(remaining_path) // trim(key_parts(i))
-                    end do
-                    write(error_unit,*) "DEBUG: Continuing with remaining path:", trim(remaining_path)
-                    val = temp_val%get(remaining_path)
-                    return
-                endif
-            endif
-            current => current%next
-        end do
-
-        write(error_unit,*) "DEBUG: Key not found:", trim(key_parts(1))
-    end function get_value_nested
-
-    !> Get nested value for fyaml_doc type
-    !!
-    !! @param[in] self Document instance
-    !! @param[in] path Nested path with % delimiters
-    !! @param[in] doc_index Optional document index
-    !! @return Value at nested path
-    recursive function get_doc_nested(self, path, doc_index) result(val)
-        class(fyaml_doc), intent(inout) :: self  ! Changed from intent(in) to intent(inout)
-        character(len=*), intent(in) :: path
-        integer, intent(in), optional :: doc_index
-        type(yaml_value) :: val
-        integer :: doc_idx
-
-        doc_idx = 1  ! Default to first document
-        if (present(doc_index)) doc_idx = doc_index
-
-        if (doc_idx < 1 .or. doc_idx > self%n_docs) then
-            val%node => null()
-            return
-        endif
-
-        val = self%docs(doc_idx)%get(path)
-    end function get_doc_nested
-
-    !> Get nested string value
-    !!
-    !! @param[in] self Document instance
-    !! @param[in] path Nested path with % delimiters
-    !! @param[in] doc_index Optional document index
-    !! @return String value at nested path
-    function get_nested_str(self, path, doc_index) result(val)
-        class(fyaml_doc), intent(inout) :: self  ! Changed from intent(in) to intent(inout)
-        character(len=*), intent(in) :: path
-        integer, intent(in), optional :: doc_index
-        character(len=:), allocatable :: val
-        type(yaml_value) :: temp
-
-        write(error_unit,*) "DEBUG: Getting nested string for path:", trim(path)
-
-        temp = self%get(path, doc_index)
-        if (associated(temp%node)) then
-            ! Force type determination
-            call determine_value_type(temp%node)
-
-            ! Mark as string if not already typed
-            if (.not. (temp%node%is_integer .or. temp%node%is_float .or. &
-                      temp%node%is_boolean .or. temp%node%is_null)) then
-                temp%node%is_string = .true.
-            endif
-
-            write(error_unit,*) "DEBUG: Found node value:", trim(temp%node%value)
-            write(error_unit,*) "DEBUG: Node type flags - string:", temp%node%is_string, &
-                              " int:", temp%node%is_integer, &
-                              " float:", temp%node%is_float, &
-                              " bool:", temp%node%is_boolean
-
-            ! Get string value
-            val = trim(temp%node%value)
-            write(error_unit,*) "DEBUG: Returning string value:", trim(val)
-        else
-            write(error_unit,*) "DEBUG: Node not found for path:", trim(path)
-            val = ''
-        endif
-    end function get_nested_str
-
-    !> Get nested integer value
-    !!
-    !! @param[in] self Document instance
-    !! @param[in] path Nested path with % delimiters
-    !! @param[in] doc_index Optional document index
-    !! @return Integer value at nested path
-    function get_nested_int(self, path, doc_index) result(val)
-        class(fyaml_doc), intent(inout) :: self  ! Changed from intent(in) to intent(inout)
-        character(len=*), intent(in) :: path
-        integer, intent(in), optional :: doc_index
-        integer :: val
-        type(yaml_value) :: temp
-
-        write(error_unit,*) "DEBUG: Getting nested integer for path:", trim(path)
-        temp = self%get(path, doc_index)
-        if (associated(temp%node)) then
-            ! Force type determination
-            call determine_value_type(temp%node)
-            val = temp%get_int()
-            write(error_unit,*) "DEBUG: Found integer value:", val
-        else
-            write(error_unit,*) "DEBUG: Node not found, returning 0"
-            val = 0
-        endif
-    end function get_nested_int
-
-    !> Get nested real value
-    !!
-    !! @param[in] self Document instance
-    !! @param[in] path Nested path with % delimiters
-    !! @param[in] doc_index Optional document index
-    !! @return Real value at nested path
-    function get_nested_real(self, path, doc_index) result(val)
-        class(fyaml_doc), intent(inout) :: self  ! Changed from intent(in) to intent(inout)
-        character(len=*), intent(in) :: path
-        integer, intent(in), optional :: doc_index
-        real :: val
-        type(yaml_value) :: temp
-
-        temp = self%get(path, doc_index)
-        if (associated(temp%node)) then
-            val = temp%get_real()
-        else
-            val = 0.0
-        endif
-    end function get_nested_real
-
-    !> Get nested boolean value
-    !!
-    !! @param[in] self Document instance
-    !! @param[in] path Nested path with % delimiters
-    !! @param[in] doc_index Optional document index
-    !! @return Boolean value at nested path
-    function get_nested_bool(self, path, doc_index) result(val)
-        class(fyaml_doc), intent(inout) :: self  ! Changed from intent(in) to intent(inout)
-        character(len=*), intent(in) :: path
-        integer, intent(in), optional :: doc_index
-        logical :: val
-        type(yaml_value) :: temp
-
-        temp = self%get(path, doc_index)
-        if (associated(temp%node)) then
-            val = temp%get_bool()
-        else
-            val = .false.
-        endif
-    end function get_nested_bool
-
-    !> Get specific document by index
-    !!
-    !! @param[in] this Document collection
-    !! @param[in] doc_index Index of document to get
-    !! @return Document at specified index
-    function get_document(this, doc_index) result(val)
-        class(fyaml_doc), intent(in) :: this
-        integer, intent(in) :: doc_index
-        type(yaml_dict) :: val  ! Changed from pointer to regular type
-
-        if (doc_index > 0 .and. doc_index <= this%n_docs) then
-            val = this%docs(doc_index)  ! Regular assignment instead of pointer assignment
-        endif
-    end function get_document
-
-    !> Get value from default document (first document)
-    !!
-    !! @param[in] this Document collection
-    !! @return First document in collection
-    function get_default_doc(this) result(val)
-        class(fyaml_doc), intent(in) :: this
-        type(yaml_dict) :: val
-
-        if (this%n_docs > 0) then
-            val = this%docs(1)
-        endif
-    end function get_default_doc
-
-    !> Find child node by key
-    !!
-    !! @param[in] node Parent node to search
-    !! @param[in] search_key Key to find
-    !! @return Value container for found child
-    function find_child_by_key(node, search_key) result(found_val)
-        type(yaml_node), pointer, intent(in) :: node
-        character(len=*), intent(in) :: search_key
-        type(yaml_value) :: found_val
-        type(yaml_node), pointer :: current
-
-        write(error_unit,*) "DEBUG: Searching for child with key:", trim(search_key)
-        found_val%node => null()
-
-        ! Search only immediate children
-        if (associated(node%children)) then
-            current => node%children
-            do while (associated(current))
-                write(error_unit,*) "DEBUG: Checking child node:", trim(current%key)
-                if (trim(adjustl(current%key)) == trim(adjustl(search_key))) then
-                    write(error_unit,*) "DEBUG: Found matching child node"
-                    found_val%node => current
-                    ! Preserve sequence flags
-                    if (current%is_sequence .and. associated(current%children)) then
-                        current%children%is_sequence = .true.
-                    endif
-                    return
-                endif
-                current => current%next
-            end do
-        endif
-        write(error_unit,*) "DEBUG: Child not found"
-    end function find_child_by_key
-
-    !> Split a path by % delimiter
-    !!
-    !! @param[in] path Path string to split
-    !! @return Array of path segments
-    function split_key(path) result(parts)
-        character(len=*), intent(in) :: path
-        character(len=:), allocatable, dimension(:) :: parts
-        integer :: n_parts, i, prev_pos, pos
-
-        ! Count parts
-        n_parts = 1
-        do i = 1, len_trim(path)
-            if (path(i:i) == '%') n_parts = n_parts + 1
-        end do
-
-        ! Allocate parts array
-        allocate(character(len=32) :: parts(n_parts))
-
-        ! Split string
-        prev_pos = 1
-        i = 1
-        do
-            pos = index(path(prev_pos:), '%')
-            if (pos == 0) then
-                parts(i) = trim(adjustl(path(prev_pos:)))
-                exit
-            endif
-            parts(i) = trim(adjustl(path(prev_pos:prev_pos+pos-2)))
-            prev_pos = prev_pos + pos
-            i = i + 1
-        end do
-
-        ! Clean up each part
-        do i = 1, n_parts
-            parts(i) = trim(adjustl(parts(i)))
-        end do
-    end function split_key
-
-    !> Determine the type of a node's value
-    !!
-    !! @param[inout] node Node to analyze
-    subroutine determine_value_type(node)
-        type(yaml_node), pointer, intent(inout) :: node
-        integer :: int_val, ios
-        real :: real_val
-        character(len=:), allocatable :: cleaned_value
-
-        ! Reset type flags
-        if (.not. associated(node)) then
-            write(error_unit,*) "DEBUG: Cannot determine type for null node"
-            return
-        endif
-
-        node%is_integer = .false.
-        node%is_float = .false.
-        node%is_boolean = .false.
-        node%is_string = .false.
-        node%is_null = .false.
-
-        ! Clean the value
-        cleaned_value = trim(adjustl(node%value))
-
-        if (len_trim(cleaned_value) == 0 .or. cleaned_value == '~') then
-            node%is_null = .true.
-            write(error_unit,*) "DEBUG: Value determined as null"
-            return
-        endif
-
-        ! Try integer first
-        read(cleaned_value, *, iostat=ios) int_val
-        if (ios == 0 .and. index(cleaned_value, '.') == 0 .and. &
-            index(cleaned_value, 'e') == 0 .and. index(cleaned_value, 'E') == 0) then
-            node%is_integer = .true.
-            write(error_unit,*) "DEBUG: Value determined as integer:", int_val
-            return
-        endif
-
-        ! Try real
-        read(cleaned_value, *, iostat=ios) real_val
-        if (ios == 0) then
-            node%is_float = .true.
-            write(error_unit,*) "DEBUG: Value determined as real:", real_val
-            return
-        endif
-
-        ! Check boolean
-        if (cleaned_value == 'true' .or. cleaned_value == 'false') then
-            node%is_boolean = .true.
-            write(error_unit,*) "DEBUG: Value determined as boolean:", trim(cleaned_value)
-            return
-        endif
-
-        ! Default to string
-        node%is_string = .true.
-        write(error_unit,*) "DEBUG: Value determined as string:", trim(cleaned_value)
-    end subroutine determine_value_type
-
-    !> Count direct children of a yaml_node
-    !!
-    !! @param[in] node Node to count children for
-    !! @return Number of direct children
-    function count_node_children(node) result(count)
-        type(yaml_node), pointer, intent(in) :: node
-        integer :: count
-        type(yaml_node), pointer :: current
-
-        count = 0
-        if (.not. associated(node)) return
-        if (.not. associated(node%children)) return
-
-        current => node%children
-        do while (associated(current))
-            count = count + 1
-            current => current%next
-        end do
-    end function count_node_children
-
-    !> Count direct children of a yaml_value
-    !!
-    !! @param[in] val Value to count children for
-    !! @return Number of direct children
-    function count_value_children(val) result(count)
-        type(yaml_value), intent(in) :: val
-        integer :: count
-
-        if (.not. associated(val%node)) then
-            count = 0
-            return
-        endif
-
-        count = count_node_children(val%node)
-    end function count_value_children
-
-    !> Get all child keys of a yaml_node
-    !!
-    !! @param[in] node Node to get children from
-    !! @return Array of child key names
-    function get_node_child_keys(node) result(keys)
-        type(yaml_node), pointer, intent(in) :: node
-        character(len=:), allocatable, dimension(:) :: keys
-        type(yaml_node), pointer :: current
-        integer :: count, i
-
-        ! Initialize with empty array
-        allocate(character(len=0) :: keys(0))
-
-        ! Early return checks
-        if (.not. associated(node)) return
-        if (.not. associated(node%children)) return
-
-        ! Count children first
-        count = count_node_children(node)
-
-        ! Allocate array for keys
-        if (allocated(keys)) deallocate(keys)
-        allocate(character(len=32) :: keys(count))
-
-        ! Fill array with child keys
-        current => node%children
-        i = 1
-        do while (associated(current))
-            keys(i) = trim(adjustl(current%key))
-            i = i + 1
-            current => current%next
-        end do
-    end function get_node_child_keys
-
-    !> Get all child keys of a yaml_value
-    !!
-    !! @param[in] val Value to get children from
-    !! @return Array of child key names
-    function get_value_child_keys(val) result(keys)
-        class(yaml_value), intent(in) :: val
-        character(len=:), allocatable, dimension(:) :: keys
-
-        if (.not. associated(val%node)) then
-            allocate(character(len=0) :: keys(0))
-            return
-        endif
-
-        keys = get_node_child_keys(val%node)
-    end function get_value_child_keys
-
-    !> Get child value at specified index
-    !!
-    !! @param[in] self Value container instance
-    !! @param[in] idx Index of child to retrieve (1-based)
-    !! @return Value container for child at index or null if invalid
-    function get_child_at_index(self, idx) result(val)
-        class(yaml_value), intent(in) :: self
-        integer, intent(in) :: idx
-        type(yaml_value) :: val
-        type(yaml_node), pointer :: current
-        integer :: current_idx
-
-        ! Initialize result
-        val%node => null()
-
-        ! Check for valid node and children
-        if (.not. associated(self%node)) return
-        if (.not. associated(self%node%children)) return
-        if (idx < 1) return
-
-        ! Traverse to desired index
-        current => self%node%children
-        current_idx = 1
-
-        do while (associated(current))
-            if (current_idx == idx) then
-                val%node => current
-                return
-            endif
-            current => current%next
-            current_idx = current_idx + 1
-        end do
-    end function get_child_at_index
-
-    !> Get sequence values as an array of strings
-    !!
-    !! @param[in] self Value container instance
-    !! @return Array of sequence values as strings
-    function get_sequence_values(self) result(values)
-        class(yaml_value), intent(in) :: self
-        character(len=:), allocatable, dimension(:) :: values
-        type(yaml_node), pointer :: current
-        integer :: count, i
-
-        ! Initialize with empty array
-        allocate(character(len=0) :: values(0))
-
-        ! Early return checks
-        if (.not. associated(self%node)) return
-        if (.not. associated(self%node%children)) return
-        if (.not. self%is_sequence()) return
-
-        ! Count items first
-        count = count_node_children(self%node)
-        if (count == 0) return
-
-        ! Allocate array for values
-        if (allocated(values)) deallocate(values)
-        allocate(character(len=32) :: values(count))
-
-        ! Fill array with values
-        current => self%node%children
-        i = 1
-        do while (associated(current))
-            values(i) = trim(adjustl(current%value))
-            i = i + 1
-            current => current%next
-        end do
-    end function get_sequence_values
-
-    !> Get sequence values as integers
-    !!
-    !! @param[in] self Value container instance
-    !! @return Array of sequence values as integers
-    function get_sequence_integers(self) result(values)
-        class(yaml_value), intent(in) :: self
-        integer, allocatable, dimension(:) :: values
-        type(yaml_node), pointer :: current
-        integer :: count, i, ios
-
-        ! Initialize with empty array
-        allocate(values(0))
-
-        ! Early return checks
-        if (.not. associated(self%node)) return
-        if (.not. associated(self%node%children)) return
-        if (.not. self%is_sequence()) return
-
-        ! Count and allocate
-        count = count_node_children(self%node)
-        if (count == 0) return
-
-        if (allocated(values)) deallocate(values)
-        allocate(values(count))
-        values = 0  ! Initialize to default value
-
-        ! Fill array with integer values
-        current => self%node%children
-        i = 1
-        do while (associated(current))
-            read(current%value, *, iostat=ios) values(i)
-            if (ios /= 0) values(i) = 0  ! Set to 0 if conversion fails
-            i = i + 1
-            current => current%next
-        end do
-    end function get_sequence_integers
-
-    !> Get sequence values as reals
-    !!
-    !! @param[in] self Value container instance
-    !! @return Array of sequence values as reals
-    function get_sequence_reals(self) result(values)
-        class(yaml_value), intent(in) :: self
-        real, allocatable, dimension(:) :: values
-        type(yaml_node), pointer :: current
-        integer :: count, i, ios
-
-        ! Initialize with empty array
-        allocate(values(0))
-
-        ! Early return checks
-        if (.not. associated(self%node)) return
-        if (.not. associated(self%node%children)) return
-        if (.not. self%is_sequence()) return
-
-        ! Count and allocate
-        count = count_node_children(self%node)
-        if (count == 0) return
-
-        if (allocated(values)) deallocate(values)
-        allocate(values(count))
-        values = 0.0  ! Initialize to default value
-
-        ! Fill array with real values
-        current => self%node%children
-        i = 1
-        do while (associated(current))
-            read(current%value, *, iostat=ios) values(i)
-            if (ios /= 0) values(i) = 0.0  ! Set to 0.0 if conversion fails
-            i = i + 1
-            current => current%next
-        end do
-    end function get_sequence_reals
-
-    !> Get sequence values as logicals
-    !!
-    !! @param[in] self Value container instance
-    !! @return Array of sequence values as logicals
-    function get_sequence_bools(self) result(values)
-        class(yaml_value), intent(in) :: self
-        logical, allocatable, dimension(:) :: values
-        type(yaml_node), pointer :: current
-        integer :: count, i
-
-        ! Initialize with empty array
-        allocate(values(0))
-
-        ! Early return checks
-        if (.not. associated(self%node)) return
-        if (.not. associated(self%node%children)) return
-        if (.not. self%is_sequence()) return
-
-        ! Count and allocate
-        count = count_node_children(self%node)
-        if (count == 0) return
-
-        if (allocated(values)) deallocate(values)
-        allocate(values(count))
-        values = .false.  ! Initialize to default value
-
-        ! Fill array with boolean values
-        current => self%node%children
-        i = 1
-        do while (associated(current))
-            values(i) = (trim(adjustl(current%value)) == 'true')
-            i = i + 1
-            current => current%next
-        end do
-    end function get_sequence_bools
-
-    !> Get the size of a sequence
-    !!
-    !! @param[in] self Value container instance
-    !! @return Size of sequence or 0 if not a sequence/invalid
-    function get_sequence_size(self) result(size)
-        class(yaml_value), intent(in) :: self
-        integer :: size
-
-        size = 0
-        if (.not. associated(self%node)) return
-        if (.not. self%is_sequence()) return
-
-        size = count_node_children(self%node)
-
-    end function get_sequence_size
-
-    !> Get all root keys from the document
-    !!
-    !! @param[in] this Document instance
-    !! @return Array of root key names
-    function get_root_keys(this) result(keys)
-        class(fyaml_doc), intent(in) :: this
-        character(len=:), allocatable, dimension(:) :: keys
-        type(yaml_pair), pointer :: current
-        integer :: count, i
-
-        ! Count root level pairs
-        count = 0
-        current => this%docs(1)%first
-        do while (associated(current))
-            if (associated(current%value%node) .and. current%value%node%is_root) then ! Changed from is_root_key
-                count = count + 1
-            endif
-            current => current%next
-        end do
-
-        ! Allocate array for keys
-        if (count > 0) then
-            allocate(character(len=32) :: keys(count))
-            keys = ""
-
-            ! Fill array with root keys
-            current => this%docs(1)%first
-            i = 1
-            do while (associated(current))
-                if (associated(current%value%node) .and. current%value%node%is_root) then ! Changed from is_root_key
-                    keys(i) = current%key
+        ! Count unique categories (species)
+        i = 0
+        current = ""
+        do n = 1, yml%num_vars
+            if (len_trim(yml%vars(n)%category) > 0) then
+                if (trim(yml%vars(n)%category) /= trim(current)) then
                     i = i + 1
+                    current = trim(yml%vars(n)%category)
                 endif
-                current => current%next
-            end do
-        else
-            allocate(character(len=0) :: keys(0))
+            endif
+        enddo
+
+        ! Allocate species_names array
+        allocate(species_names(i), stat=RC)
+        if (RC /= 0) then
+            errMsg = 'Error allocating "species_names"!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
         endif
-    end function get_root_keys
+
+        ! Fill species_names array with unique categories
+        current = ""
+        i = 0
+        do n = 1, yml%num_vars
+            if (len_trim(yml%vars(n)%category) > 0) then
+                if (i == 0) then
+                    i = i + 1
+                    current = trim(yml%vars(n)%category)
+                    species_names(i) = yml%vars(n)%category
+                else if (trim(yml%vars(n)%category) /= trim(current)) then
+                    i = i + 1
+                    species_names(i) = yml%vars(n)%category
+                    current = trim(yml%vars(n)%category)
+                endif
+            endif
+        enddo
+
+    end subroutine fyaml_parse_species_file_full
+
+    !> \brief Merge two YAML configuration objects
+    !!
+    !! \param[in] yml1 First configuration object
+    !! \param[in] yml2 Second configuration object
+    !! \param[out] yml Merged configuration object
+    !! \param[out] RC Return code
+    subroutine fyaml_merge_configs(yml1, yml2, yml, RC)
+        type(fyaml_t), intent(in) :: yml1, yml2
+        type(fyaml_t), intent(out) :: yml
+        integer, intent(out) :: RC
+
+        integer :: N, M, ix, final_count
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+        logical :: found_duplicate
+
+        ! Initialize
+        RC = fyaml_success
+        errMsg = ''
+        thisLoc = ' -> at fyaml_merge_configs (in module fyaml.f90)'
+
+        ! Count unique variables (yml2 overwrites yml1)
+        final_count = yml1%num_vars
+        do N = 1, yml2%num_vars
+            found_duplicate = .false.
+            do M = 1, yml1%num_vars
+                if (trim(yml2%vars(N)%var_name) == trim(yml1%vars(M)%var_name)) then
+                    found_duplicate = .true.
+                    exit
+                endif
+            enddo
+            if (.not. found_duplicate) then
+                final_count = final_count + 1
+            endif
+        enddo
+
+        ! Initialize the merged object
+        yml%num_vars = final_count
+        yml%sorted = .false.
+
+        ! Allocate space for variables
+        allocate(yml%vars(yml%num_vars), stat=RC)
+        if (RC /= 0) then
+            errMsg = 'Error allocating merged variables array!'
+            call fyaml_handle_error(errMsg, RC, thisLoc)
+            return
+        endif
+
+        ! Add variables from first object
+        ix = 0
+        do N = 1, yml1%num_vars
+            ix = ix + 1
+            yml%vars(ix) = yml1%vars(N)
+        enddo
+
+        ! Add/overwrite variables from second object
+        do N = 1, yml2%num_vars
+            found_duplicate = .false.
+            ! Check if this variable already exists from yml1
+            do M = 1, yml1%num_vars
+                if (trim(yml2%vars(N)%var_name) == trim(yml%vars(M)%var_name)) then
+                    ! Overwrite existing variable
+                    yml%vars(M) = yml2%vars(N)
+                    found_duplicate = .true.
+                    exit
+                endif
+            enddo
+
+            ! If not a duplicate, add as new variable
+            if (.not. found_duplicate) then
+                ix = ix + 1
+                yml%vars(ix) = yml2%vars(N)
+            endif
+        enddo
+
+        ! Sort the variable names for faster search
+        call fyaml_sort_variables(yml)
+
+    end subroutine fyaml_merge_configs
+
+    !> \brief Print YAML configuration to file or stdout
+    !!
+    !! \param[inout] yml Configuration object
+    !! \param[in] fileName Optional output file name (if not provided, prints to stdout)
+    !! \param[in] searchKeys Optional array of keys to filter output
+    !! \param[out] RC Return code
+    subroutine fyaml_print_config(yml, fileName, searchKeys, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), optional, intent(in) :: fileName
+        character(len=*), optional, intent(in) :: searchKeys(:)
+        integer, intent(out) :: RC
+
+        ! Local variables
+        logical :: isFileName, isSearchKeys, printVar
+        integer :: c, c0, d, i, lun, varDepth
+        character(len=fyaml_NamLen) :: display, varName
+        character(len=fyaml_StrLen) :: errMsg, thisLoc
+        character(len=fyaml_NamLen) :: stack(fyaml_MaxStack)
+        character(len=fyaml_NamLen) :: lastStack(fyaml_MaxStack)
+        character(len=2), parameter :: fyaml_indent = "  "
+
+        ! Initialize
+        RC = fyaml_success
+        lun = 6  ! Default to stdout
+        errMsg = ''
+        thisLoc = ' -> at fyaml_print_config (in module fyaml.f90)'
+
+        ! Check if arguments are present
+        isFileName = present(fileName)
+        isSearchKeys = present(searchKeys)
+
+        ! Open output file if specified
+        if (isFileName) then
+            lun = 700
+            open(lun, file=trim(fileName), status="replace", action="write", iostat=RC)
+            if (RC /= fyaml_SUCCESS) then
+                errMsg = 'Could not open file: ' // trim(fileName)
+                call fyaml_handle_error(errMsg, RC, thisLoc)
+                return
+            endif
+            ! Write YAML header
+            write(lun, '(a)') '---'
+        endif
+
+        ! Step through YAML variables and write output
+        lastStack = ''
+        do i = 1, yml%num_vars
+            ! Initialize loop variables
+            c = 0
+            c0 = 0
+            display = ''
+            stack = ''
+            varName = yml%vars(i)%var_name
+
+            ! Check if we should print this variable
+            printVar = .true.
+            if (isSearchKeys) then
+                c = index(varName, fyaml_category_separator)
+                if (c > 0) then
+                    printVar = any(searchKeys == varName(1:c-1))
+                endif
+            endif
+
+            ! Skip if not to be printed or has undefined data
+            if (.not. printVar) cycle
+            if (adjustl(yml%vars(i)%stored_data) == unstored_data_string) cycle
+
+            ! Find variable depth and create stack
+            call fyaml_find_depth(varName, varDepth)
+
+            ! Split the variable into substrings
+            c0 = 0
+            do d = 1, varDepth-1
+                c = index(varName(c0+1:), fyaml_category_separator)
+                stack(d) = varName(c0+1:c0+c-1) // ':'
+                c0 = c0 + c
+            enddo
+            stack(d) = trim(varName(c0+1:)) // ': ' // trim(yml%vars(i)%stored_data)
+
+            ! Print only levels that haven't been printed before
+            do d = 1, varDepth
+                if (trim(stack(d)) /= trim(lastStack(d))) then
+                    display = stack(d)
+
+                    ! Handle special cases for "NO" or "no"
+                    if (d == 1) then
+                        if (display(1:3) == "NO:") display = "'NO':"
+                        if (display(1:3) == "no:") display = "'no':"
+                    endif
+
+                    ! Print with proper indentation
+                    write(lun, '(a,a)') repeat(fyaml_indent, d-1), trim(display)
+                endif
+            enddo
+
+            ! Save copy of stack for next iteration
+            lastStack = stack
+        enddo
+
+        ! Close file if opened
+        if (isFileName .and. lun == 700) then
+            close(lun, iostat=RC)
+            if (RC /= fyaml_SUCCESS) then
+                errMsg = 'Error closing YAML output file!'
+                call fyaml_handle_error(errMsg, RC, thisLoc)
+                return
+            endif
+        endif
+
+    end subroutine fyaml_print_config
+
+    !> \brief Legacy wrapper that includes anchor expansion
+    !!
+    !! This is a legacy wrapper to maintain backwards compatibility
+    !! with old code that uses fyaml_read_file. It provides full
+    !! anchor expansion functionality using fyaml_init.
+    !!
+    !! \param[inout] yml Main configuration object
+    !! \param[in] fileName Name of YAML file to read
+    !! \param[out] RC Return code
+    subroutine fyaml_read_file(yml, fileName, RC)
+        type(fyaml_t), intent(inout) :: yml
+        character(len=*), intent(in) :: fileName
+        integer, intent(out) :: RC
+
+        type(fyaml_t) :: yml_anchored
+
+        ! Call fyaml_init which includes full anchor expansion
+        call fyaml_init(fileName, yml, yml_anchored, RC)
+
+    end subroutine fyaml_read_file
+
+    !> \brief Simple species parsing interface
+    !!
+    !! This is a simplified wrapper for species parsing that matches
+    !! the expected test interface.
+    !!
+    !! \param[in] filename Name of YAML file to read
+    !! \param[out] species Array of species names
+    !! \param[out] num_species Number of species found
+    !! \param[out] RC Return code
+    subroutine fyaml_parse_species_file_simple(filename, species, num_species, RC)
+        character(len=*), intent(in) :: filename
+        character(len=*), allocatable, intent(out) :: species(:)
+        integer, intent(out) :: num_species
+        integer, intent(out) :: RC
+
+        type(fyaml_t) :: yml, yml_anchored
+
+        ! Call the full interface
+        call fyaml_parse_species_file_full(filename, yml, yml_anchored, species, RC)
+
+        if (RC == fyaml_Success) then
+            num_species = size(species)
+        else
+            num_species = 0
+        endif
+
+        ! Clean up
+        call fyaml_cleanup(yml)
+        call fyaml_cleanup(yml_anchored)
+
+    end subroutine fyaml_parse_species_file_simple
 
 end module fyaml

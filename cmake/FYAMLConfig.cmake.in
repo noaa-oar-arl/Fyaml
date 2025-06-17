@@ -1,0 +1,40 @@
+# FYAMLConfig.cmake.in - Configuration file for FYAML
+#
+# This file is configured by CMake to create FYAMLConfig.cmake
+# which can be used by other projects to find and use FYAML.
+
+@PACKAGE_INIT@
+
+# Set FYAML version
+set(FYAML_VERSION @PROJECT_VERSION@)
+
+# Check if components are requested
+set(_FYAML_SUPPORTED_COMPONENTS fyaml)
+foreach(_comp ${FYAML_FIND_COMPONENTS})
+    if(NOT _comp IN_LIST _FYAML_SUPPORTED_COMPONENTS)
+        set(FYAML_FOUND False)
+        set(FYAML_NOT_FOUND_MESSAGE "Unsupported component: ${_comp}")
+    endif()
+endforeach()
+
+# Include the targets file
+include("${CMAKE_CURRENT_LIST_DIR}/FYAMLTargets.cmake")
+
+# Set variables for compatibility
+set(FYAML_LIBRARIES FYAML::fyaml)
+set(FYAML_INCLUDE_DIRS "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
+
+# Check that the targets actually exist
+if(NOT TARGET FYAML::fyaml)
+    set(FYAML_FOUND False)
+    set(FYAML_NOT_FOUND_MESSAGE "FYAML targets not found")
+    return()
+endif()
+
+# Print found message
+if(NOT FYAML_FIND_QUIETLY)
+    message(STATUS "Found FYAML: ${FYAML_VERSION}")
+endif()
+
+# Set FOUND to TRUE
+set(FYAML_FOUND True)

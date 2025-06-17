@@ -1,0 +1,74 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fyaml"
+description = "A comprehensive Fortran library for parsing YAML files"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "FYAML Development Team", email = "fyaml@example.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Fortran",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries",
+]
+keywords = ["fortran", "yaml", "parser", "scientific-computing"]
+requires-python = ">=3.8"
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/fyaml/fyaml"
+Documentation = "https://noaa-oar-arl.github.io/fyaml"
+Repository = "https://github.com/fyaml/fyaml"
+"Bug Tracker" = "https://github.com/fyaml/fyaml/issues"
+
+[project.optional-dependencies]
+docs = [
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.4.0",
+    "mkdocs-git-revision-date-localized-plugin>=1.2.0",
+    "mkdocs-git-committers-plugin-2>=1.2.0",
+    "mkdocs-minify-plugin>=0.7.0",
+    "mkdocs-redirects>=1.2.0",
+    "mkdoxy>=1.2.0",
+    "markdown>=3.5.0",
+    "pymdown-extensions>=10.3.0",
+]
+dev = [
+    "pre-commit>=3.0.0",
+]
+
+[tool.setuptools_scm]
+write_to = "_version.py"
+
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["fyaml"]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

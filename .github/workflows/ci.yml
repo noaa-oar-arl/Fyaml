@@ -6,13 +6,45 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        gcc_version: [10, 11, 12, 13]
+        include:
+          # GCC versions on Ubuntu
+          - os: ubuntu-24.04
+            compiler: gcc
+            version: 11
+          - os: ubuntu-24.04
+            compiler: gcc
+            version: 12
+          - os: ubuntu-24.04
+            compiler: gcc
+            version: 13
+          - os: ubuntu-24.04
+            compiler: gcc
+            version: 14
+          # Intel ifx compiler (latest)
+          - os: ubuntu-24.04
+            compiler: intel
+            version: "2025.0"
+          # Intel ifort compiler (classic)
+          - os: ubuntu-24.04
+            compiler: intel-classic
+            version: "2021.10"
+          # NVIDIA HPC SDK (includes nvfortran)
+          - os: ubuntu-24.04
+            compiler: nvidia-hpc
+            version: "25.1"
+          # Cross-platform testing with latest GCC
+          - os: macos-14
+            compiler: gcc
+            version: 14
     env:
       BUILD_DIR: build
 
@@ -20,26 +52,81 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - uses: fortran-lang/setup-fortran@v1
-        name: Setup Fortran
+      - name: Setup Fortran
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
         with:
-          compiler: gcc
-          version: ${{ matrix.gcc_version }}
+          compiler: ${{ matrix.compiler }}
+          version: ${{ matrix.version }}
+
+      - name: Show compiler information
+        run: |
+          echo "Fortran compiler: ${{ steps.setup-fortran.outputs.fc }}"
+          echo "C compiler: ${{ steps.setup-fortran.outputs.cc }}"
+          echo "C++ compiler: ${{ steps.setup-fortran.outputs.cxx }}"
+          ${{ steps.setup-fortran.outputs.fc }} --version || true
+          ${{ steps.setup-fortran.outputs.cc }} --version || true
 
       - name: Configure
-        run: cmake -S . -B $BUILD_DIR
+        run: |
+          cmake -S . -B $BUILD_DIR \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_Fortran_COMPILER="${{ steps.setup-fortran.outputs.fc }}" \
+            -DCMAKE_C_COMPILER="${{ steps.setup-fortran.outputs.cc }}" \
+            -DCMAKE_CXX_COMPILER="${{ steps.setup-fortran.outputs.cxx }}" \
+            -DBUILD_TESTING=ON
 
       - name: Build
-        run: cmake --build $BUILD_DIR
+        run: cmake --build $BUILD_DIR --parallel 2
 
       - name: Test
-        run: ctest --test-dir $BUILD_DIR/tests/ --output-on-failure
+        run: ctest --test-dir $BUILD_DIR/tests/ --output-on-failure --parallel 2
+        env:
+          FYAML_TEST_DATA_DIR: ${{ github.workspace }}/test_data
 
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
       - uses: pre-commit/action@v3.0.1
+
+  warning-check:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Fortran (GCC latest)
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: gcc
+          version: 14
+
+      - name: Configure with strict warnings
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_Fortran_COMPILER="${{ steps.setup-fortran.outputs.fc }}" \
+            -DCMAKE_C_COMPILER="${{ steps.setup-fortran.outputs.cc }}" \
+            -DBUILD_TESTING=ON
+
+      - name: Build with warnings as errors
+        run: |
+          cmake --build build 2>&1 | tee build.log
+          # Check that there are no warnings in the build output
+          if grep -i "warning" build.log; then
+            echo "❌ Build contains warnings!"
+            exit 1
+          else
+            echo "✅ No warnings found in build output"
+          fi
+
+      - name: Run tests to verify functionality
+        run: ctest --test-dir build/tests/ --output-on-failure
+        env:
+          FYAML_TEST_DATA_DIR: ${{ github.workspace }}/test_data

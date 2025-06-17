@@ -1,0 +1,90 @@
+name: Code Coverage
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual triggering
+
+permissions:
+  contents: read
+  actions: write  # For uploading artifacts
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Fortran
+      uses: fortran-lang/setup-fortran@v1
+      with:
+        compiler: gcc
+        version: 13
+
+    - name: Configure with coverage
+      run: |
+        cmake -S . -B build-coverage \
+          -DFYAML_ENABLE_COVERAGE=ON \
+          -DBUILD_TESTING=ON \
+          -DCMAKE_BUILD_TYPE=Debug
+
+    - name: Build with coverage
+      run: cmake --build build-coverage --parallel 2
+
+    - name: Run tests and generate coverage
+      run: |
+        cd build-coverage
+        make coverage
+      env:
+        FYAML_TEST_DATA_DIR: ${{ github.workspace }}/test_data
+
+    - name: Generate coverage summary
+      run: |
+        cd build-coverage
+        echo "=== FYAML Coverage Report ===" > coverage_summary.txt
+        echo "" >> coverage_summary.txt
+
+        # Find all gcov files and analyze main source files
+        for gcov_file in fyaml*.gcov; do
+          if [ -f "$gcov_file" ]; then
+            filename=$(basename "$gcov_file" .gcov)
+            echo "=== $filename ===" >> coverage_summary.txt
+
+            # Extract coverage statistics from gcov output
+            if grep -q "Lines executed:" "$gcov_file"; then
+              coverage_line=$(grep "Lines executed:" "$gcov_file" | head -1)
+              echo "$coverage_line" >> coverage_summary.txt
+            fi
+            echo "" >> coverage_summary.txt
+          fi
+        done
+
+        # Display summary
+        cat coverage_summary.txt
+
+    - name: Upload coverage data
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-data
+        path: |
+          build-coverage/fyaml*.gcov
+          build-coverage/coverage_summary.txt
+        retention-days: 30
+
+    - name: Coverage summary for PR
+      if: github.event_name == 'pull_request'
+      run: |
+        cd build-coverage
+        if [ -f coverage_summary.txt ]; then
+          echo "## 📊 Code Coverage Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat coverage_summary.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📄 [Download detailed coverage files](../../../actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+        fi

@@ -36,3 +36,31 @@
 # ignore potential build directories
 build/
 doc/
+.qodo
+
+# documentation
+*.html
+*.pdf
+*.ps
+*.dvi
+*.aux
+*.log
+*.toc
+*.idx
+*.ilg
+*.ind
+*.svg
+*.eps
+*.png
+*.jpg
+*.js
+*.css
+*.xml
+*.xhtml
+*.xsd
+*.map
+*.md5
+*.xslt
+
+# Exceptions for test files
+!tests/**/*.F90
