@@ -35,8 +35,23 @@
 
 # ignore potential build directories
 build/
+build-fix/
 doc/
+site/
 .qodo
+
+# MkDocs and documentation generation
+.mkdoxy/
+**/doxygen_*
+**/xml/
+
+# Python build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+_version.py
 
 # documentation
 *.html

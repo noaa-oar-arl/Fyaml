@@ -1,6 +1,6 @@
 # FYAML - Fortran YAML Parser
 
-FYAML is a modern Fortran library designed to parse YAML (YAML Ain't Markup Language) files with full support for advanced features including:
+FYAML is a modern Fortran library designed to parse YAML (Yet Another Markup Language) files with full support for advanced features including:
 
 - **Complete YAML syntax support** - handles mappings, sequences, scalars
 - **Anchor and alias support** - full implementation of YAML merge keys (`<<: *anchor`)
