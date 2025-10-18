@@ -1,0 +1,116 @@
+name = "fyaml"
+version = "0.2.0"
+license = "LICENSE"
+
+[build]
+auto-executables = true
+auto-tests = false
+auto-examples = true
+module-naming = false
+
+[library]
+source-dir = "src"
+
+[install]
+library = true
+
+[fortran]
+implicit-typing = false
+implicit-external = false
+source-form = "free"
+
+[preprocess]
+[preprocess.cpp]
+suffixes = ["f90"]
+directories = ["tests"]
+macros = ["SOURCE_DIR='./src/'"]
+
+[[test]]
+name = "test_anchors"
+source-dir = "tests"
+main = "test_anchors.f90"
+
+[[test]]
+name = "test_api_functions"
+source-dir = "tests"
+main = "test_api_functions.f90"
+
+[[test]]
+name = "test_arrays"
+source-dir = "tests"
+main = "test_arrays.f90"
+
+[[test]]
+name = "test_basic_types"
+source-dir = "tests"
+main = "test_basic_types.f90"
+
+[[test]]
+name = "test_booleans"
+source-dir = "tests"
+main = "test_booleans.f90"
+
+[[test]]
+name = "test_categories"
+source-dir = "tests"
+main = "test_categories.f90"
+
+[[test]]
+name = "test_comprehensive_arrays"
+source-dir = "tests"
+main = "test_comprehensive_arrays.f90"
+
+[[test]]
+name = "test_config_merging"
+source-dir = "tests"
+main = "test_config_merging.f90"
+
+[[test]]
+name = "test_config_printing"
+source-dir = "tests"
+main = "test_config_printing.f90"
+
+[[test]]
+name = "test_edge_cases"
+source-dir = "tests"
+main = "test_edge_cases.f90"
+
+[[test]]
+name = "test_error_handling"
+source-dir = "tests"
+main = "test_error_handling.f90"
+
+[[test]]
+name = "test_file_parsing"
+source-dir = "tests"
+main = "test_file_parsing.f90"
+
+[[test]]
+name = "test_integration"
+source-dir = "tests"
+main = "test_integration.f90"
+
+[[test]]
+name = "test_large_file"
+source-dir = "tests"
+main = "test_large_file.f90"
+
+[[test]]
+name = "test_sorting"
+source-dir = "tests"
+main = "test_sorting.f90"
+
+[[test]]
+name = "test_species_parsing"
+source-dir = "tests"
+main = "test_species_parsing.f90"
+
+[[test]]
+name = "test_string_utils"
+source-dir = "tests"
+main = "test_string_utils.f90"
+
+[[test]]
+name = "test_strings"
+source-dir = "tests"
+main = "test_strings.f90"

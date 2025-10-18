@@ -62,6 +62,17 @@ spack load fyaml
 
 See [SPACK_SETUP.md](SPACK_SETUP.md) for detailed Spack installation instructions.
 
+#### Using `fpm`
+
+`Fyaml` can be automatically resolved and built with the [Fortran Package Manager](https://fpm.fortran-lang.org/). To use, add the following to your project's `fpm.toml`:
+
+```toml
+[dependencies]
+fyaml = { git="git@github.com:noaa-oar-arl/Fyaml.git", branch = "main" }
+```
+
+Then, `fpm build`.
+
 #### Package Managers
 
 - **Spack**: `spack install fyaml` (recommended for HPC)
